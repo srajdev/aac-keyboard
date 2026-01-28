@@ -93,4 +93,18 @@ const Predictions = {
             section.classList.remove('loading');
         }
     },
+
+    showDefaults() {
+        // Default useful phrases for quick communication
+        const defaults = {
+            phrases: [
+                'I need help please',
+                'I am feeling good',
+                'Can we talk'
+            ],
+            words: ['yes', 'no', 'please', 'thanks', 'help'],
+            letters: ['i', 'a', 'e', 'o', 'u']
+        };
+        this.update(defaults);
+    },
 };

@@ -13,10 +13,16 @@
         <!-- Header -->
         <header class="header">
             <h1>VIRAJ KEYBOARD</h1>
-            <button id="listen-toggle" class="listen-btn" aria-label="Toggle listening">
-                <span class="mic-icon">🎤</span>
-                <span class="listen-text">Listen: OFF</span>
-            </button>
+            <div class="header-controls">
+                <button id="predictions-toggle" class="toggle-btn" aria-label="Toggle predictions" onclick="App.togglePredictions()">
+                    <span class="toggle-icon">🤖</span>
+                    <span class="toggle-text">AI: OFF</span>
+                </button>
+                <button id="listen-toggle" class="toggle-btn" aria-label="Toggle listening">
+                    <span class="toggle-icon">🎤</span>
+                    <span class="toggle-text">Listen: OFF</span>
+                </button>
+            </div>
         </header>
 
         <!-- Message Area -->

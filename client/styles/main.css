@@ -44,24 +44,38 @@ body {
     color: #4cc9f0;
 }
 
-.listen-btn {
+.header-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.toggle-btn {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
+    gap: 6px;
+    padding: 10px 14px;
     background: #2d3a5a;
-    border: 2px solid #4361ee;
+    border: 2px solid #555;
     border-radius: 25px;
-    color: #ffffff;
-    font-size: 0.9rem;
+    color: #999;
+    font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
 }
 
-.listen-btn.active {
+.toggle-btn .toggle-icon,
+.toggle-btn .toggle-text {
+    pointer-events: none;
+}
+
+.toggle-btn.active {
     background: #4361ee;
     border-color: #4cc9f0;
+    color: #ffffff;
+}
+
+.toggle-btn.listening {
     animation: pulse 1.5s infinite;
 }
 

@@ -3,6 +3,8 @@
 const App = {
     predictionTimeout: null,
     lastPredictionRequest: '',
+    predictionsEnabled: false,
+    predictionsToggleBtn: null,
 
     init() {
         // Initialize all components
@@ -12,11 +14,51 @@ const App = {
         SpeakButton.init();
         ListenToggle.init();
 
+        // Set up predictions toggle (uses inline onclick in HTML for iOS compatibility)
+        this.predictionsToggleBtn = document.getElementById('predictions-toggle');
+
+        // Load saved preference (default is off)
+        const saved = StorageService.getPreferences();
+        if (saved.predictionsEnabled === true) {
+            this.predictionsEnabled = true;
+        }
+        this.updatePredictionsToggleUI();
+
         // Wire up component callbacks
         this.setupCallbacks();
 
-        // Load initial predictions
-        this.requestPredictions();
+        // Load predictions based on initial state
+        if (this.predictionsEnabled) {
+            this.requestPredictions();
+        } else {
+            Predictions.showDefaults();
+        }
+    },
+
+    togglePredictions() {
+        this.predictionsEnabled = !this.predictionsEnabled;
+        this.updatePredictionsToggleUI();
+
+        // Save preference
+        const prefs = StorageService.getPreferences();
+        prefs.predictionsEnabled = this.predictionsEnabled;
+        StorageService.savePreferences(prefs);
+
+        // Request predictions if just enabled
+        if (this.predictionsEnabled) {
+            this.requestPredictions();
+        }
+    },
+
+    updatePredictionsToggleUI() {
+        if (this.predictionsEnabled) {
+            this.predictionsToggleBtn.classList.add('active');
+            this.predictionsToggleBtn.querySelector('.toggle-text').textContent = 'AI: ON';
+        } else {
+            this.predictionsToggleBtn.classList.remove('active');
+            this.predictionsToggleBtn.querySelector('.toggle-text').textContent = 'AI: OFF';
+            Predictions.showDefaults();
+        }
     },
 
     setupCallbacks() {
@@ -65,6 +107,11 @@ const App = {
     },
 
     async requestPredictions() {
+        // Skip if predictions are disabled
+        if (!this.predictionsEnabled) {
+            return;
+        }
+
         const partialInput = MessageArea.getMessage();
         const context = ListenToggle.getContext();
 

@@ -32,7 +32,7 @@ const ListenToggle = {
         // Check if STT is supported
         if (!SpeechService.isRecognitionSupported()) {
             this.button.disabled = true;
-            this.button.querySelector('.listen-text').textContent = 'Not Supported';
+            this.button.querySelector('.toggle-text').textContent = 'Not Supported';
         }
     },
 
@@ -47,8 +47,8 @@ const ListenToggle = {
     startListening() {
         if (SpeechService.startListening()) {
             this.isListening = true;
-            this.button.classList.add('active');
-            this.button.querySelector('.listen-text').textContent = 'Listen: ON';
+            this.button.classList.add('active', 'listening');
+            this.button.querySelector('.toggle-text').textContent = 'Listen: ON';
             this.contextSection.classList.remove('collapsed');
         }
     },
@@ -56,8 +56,8 @@ const ListenToggle = {
     stopListening() {
         SpeechService.stopListening();
         this.isListening = false;
-        this.button.classList.remove('active');
-        this.button.querySelector('.listen-text').textContent = 'Listen: OFF';
+        this.button.classList.remove('active', 'listening');
+        this.button.querySelector('.toggle-text').textContent = 'Listen: OFF';
     },
 
     handleTranscript(transcript, isFinal) {
