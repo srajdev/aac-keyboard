@@ -88,6 +88,7 @@ body {
 
 .message-text {
     color: #ffffff;
+    white-space: pre-wrap;
 }
 
 .cursor {
