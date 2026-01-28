@@ -2,19 +2,20 @@
 
 const SpeakButton = {
     button: null,
+    floatingButton: null,
     getMessage: null,
 
     init() {
         this.button = document.getElementById('speak-btn');
-
-        this.button.addEventListener('click', () => {
-            this.speak();
-        });
+        this.floatingButton = document.getElementById('floating-speak-btn');
 
         // Check if TTS is supported
         if (!SpeechService.isSynthesisSupported()) {
             this.button.disabled = true;
             this.button.textContent = 'TTS Not Supported';
+            if (this.floatingButton) {
+                this.floatingButton.disabled = true;
+            }
         }
     },
 
@@ -34,6 +35,9 @@ const SpeakButton = {
 
             // Save to history
             StorageService.addToHistory(message);
+
+            // Clear message after speaking
+            MessageArea.clear();
         }
     },
 };

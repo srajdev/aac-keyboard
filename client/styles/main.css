@@ -351,6 +351,29 @@ body {
     font-style: italic;
 }
 
+/* Floating Speak Button */
+.floating-speak-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4361ee, #3a0ca3);
+    border: 3px solid #4cc9f0;
+    color: #ffffff;
+    font-size: 2rem;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(67, 97, 238, 0.4);
+    transition: transform 0.1s, box-shadow 0.1s;
+    z-index: 100;
+}
+
+.floating-speak-btn:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 10px rgba(67, 97, 238, 0.6);
+}
+
 /* Loading State */
 .loading {
     opacity: 0.6;

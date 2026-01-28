@@ -32,7 +32,7 @@
                 <span class="cursor">▌</span>
             </div>
             <div class="message-controls">
-                <button id="speak-btn" class="speak-btn" aria-label="Speak message">
+                <button id="speak-btn" class="speak-btn" aria-label="Speak message" onclick="SpeakButton.speak()">
                     🔊 SPEAK
                 </button>
                 <button id="delete-word-btn" class="control-btn" aria-label="Delete last word">
@@ -133,6 +133,11 @@
                 <p id="context-text">No conversation captured yet. Tap "Listen" to start.</p>
             </div>
         </section>
+
+        <!-- Floating Speak Button -->
+        <button id="floating-speak-btn" class="floating-speak-btn" aria-label="Speak message" onclick="SpeakButton.speak()">
+            🔊
+        </button>
     </div>
 
     <script src="/static/services/api.js"></script>
