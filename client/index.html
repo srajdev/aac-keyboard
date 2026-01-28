@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Viraj Keyboard</title>
+    <link rel="stylesheet" href="/static/styles/main.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <h1>VIRAJ KEYBOARD</h1>
+            <button id="listen-toggle" class="listen-btn" aria-label="Toggle listening">
+                <span class="mic-icon">🎤</span>
+                <span class="listen-text">Listen: OFF</span>
+            </button>
+        </header>
+
+        <!-- Message Area -->
+        <section class="message-section">
+            <div id="message-area" class="message-area">
+                <span id="message-text" class="message-text"></span>
+                <span class="cursor">▌</span>
+            </div>
+            <div class="message-controls">
+                <button id="speak-btn" class="speak-btn" aria-label="Speak message">
+                    🔊 SPEAK
+                </button>
+                <button id="delete-word-btn" class="control-btn" aria-label="Delete last word">
+                    ⌫ Delete Word
+                </button>
+                <button id="clear-btn" class="control-btn" aria-label="Clear all">
+                    Clear
+                </button>
+            </div>
+        </section>
+
+        <!-- Predictions Section -->
+        <section class="predictions-section">
+            <!-- Phrase Predictions -->
+            <div class="prediction-group">
+                <h2 class="prediction-label">💬 PHRASE PREDICTIONS</h2>
+                <div id="phrase-predictions" class="phrase-predictions">
+                    <button class="phrase-btn" data-index="0">Loading...</button>
+                    <button class="phrase-btn" data-index="1">Loading...</button>
+                    <button class="phrase-btn" data-index="2">Loading...</button>
+                </div>
+            </div>
+
+            <!-- Word Predictions -->
+            <div class="prediction-group">
+                <h2 class="prediction-label">📝 WORD PREDICTIONS</h2>
+                <div id="word-predictions" class="word-predictions">
+                    <button class="word-btn" data-index="0">...</button>
+                    <button class="word-btn" data-index="1">...</button>
+                    <button class="word-btn" data-index="2">...</button>
+                    <button class="word-btn" data-index="3">...</button>
+                    <button class="word-btn" data-index="4">...</button>
+                </div>
+            </div>
+
+            <!-- Letter Predictions -->
+            <div class="prediction-group">
+                <h2 class="prediction-label">🔤 LETTER PREDICTIONS</h2>
+                <div id="letter-predictions" class="letter-predictions">
+                    <button class="letter-btn" data-index="0">...</button>
+                    <button class="letter-btn" data-index="1">...</button>
+                    <button class="letter-btn" data-index="2">...</button>
+                    <button class="letter-btn" data-index="3">...</button>
+                    <button class="letter-btn" data-index="4">...</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Keyboard Section -->
+        <section class="keyboard-section">
+            <div id="keyboard" class="keyboard">
+                <!-- Row 1 -->
+                <div class="keyboard-row">
+                    <button class="key" data-key="q">Q</button>
+                    <button class="key" data-key="w">W</button>
+                    <button class="key" data-key="e">E</button>
+                    <button class="key" data-key="r">R</button>
+                    <button class="key" data-key="t">T</button>
+                    <button class="key" data-key="y">Y</button>
+                    <button class="key" data-key="u">U</button>
+                    <button class="key" data-key="i">I</button>
+                    <button class="key" data-key="o">O</button>
+                    <button class="key" data-key="p">P</button>
+                </div>
+                <!-- Row 2 -->
+                <div class="keyboard-row">
+                    <button class="key" data-key="a">A</button>
+                    <button class="key" data-key="s">S</button>
+                    <button class="key" data-key="d">D</button>
+                    <button class="key" data-key="f">F</button>
+                    <button class="key" data-key="g">G</button>
+                    <button class="key" data-key="h">H</button>
+                    <button class="key" data-key="j">J</button>
+                    <button class="key" data-key="k">K</button>
+                    <button class="key" data-key="l">L</button>
+                    <button class="key backspace-key" data-key="backspace">⌫</button>
+                </div>
+                <!-- Row 3 -->
+                <div class="keyboard-row">
+                    <button class="key" data-key="z">Z</button>
+                    <button class="key" data-key="x">X</button>
+                    <button class="key" data-key="c">C</button>
+                    <button class="key" data-key="v">V</button>
+                    <button class="key" data-key="b">B</button>
+                    <button class="key" data-key="n">N</button>
+                    <button class="key" data-key="m">M</button>
+                    <button class="key space-key" data-key="space">SPACE</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Context Panel (Collapsible) -->
+        <section id="context-section" class="context-section collapsed">
+            <button id="context-toggle" class="context-toggle">
+                👂 What I heard: <span id="context-indicator">(tap to expand)</span>
+            </button>
+            <div id="context-content" class="context-content">
+                <p id="context-text">No conversation captured yet. Tap "Listen" to start.</p>
+            </div>
+        </section>
+    </div>
+
+    <script src="/static/services/api.js"></script>
+    <script src="/static/services/speech.js"></script>
+    <script src="/static/services/storage.js"></script>
+    <script src="/static/components/MessageArea.js"></script>
+    <script src="/static/components/Keyboard.js"></script>
+    <script src="/static/components/Predictions.js"></script>
+    <script src="/static/components/SpeakButton.js"></script>
+    <script src="/static/components/ListenToggle.js"></script>
+    <script src="/static/app.js"></script>
+</body>
+</html>
