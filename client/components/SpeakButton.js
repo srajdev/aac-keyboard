@@ -1,5 +1,8 @@
 // SpeakButton Component - handles text-to-speech functionality
 
+// Global debounce flag (avoids 'this' binding issues with inline onclick)
+let _speakDebounce = false;
+
 const SpeakButton = {
     button: null,
     floatingButton: null,
@@ -20,15 +23,22 @@ const SpeakButton = {
     },
 
     speak() {
+        // Prevent double-firing on iOS (touch + click)
+        if (_speakDebounce) return;
+        _speakDebounce = true;
+        setTimeout(() => { _speakDebounce = false; }, 500);
+
         if (!this.getMessage) return;
 
         const message = this.getMessage();
         if (message && message.trim()) {
             // Visual feedback
-            this.button.style.transform = 'scale(0.98)';
-            setTimeout(() => {
-                this.button.style.transform = '';
-            }, 200);
+            if (this.button) {
+                this.button.style.transform = 'scale(0.98)';
+                setTimeout(() => {
+                    this.button.style.transform = '';
+                }, 200);
+            }
 
             // Speak the message
             SpeechService.speak(message);
@@ -36,8 +46,9 @@ const SpeakButton = {
             // Save to history
             StorageService.addToHistory(message);
 
-            // Clear message after speaking
-            MessageArea.clear();
+            // Clear message - directly update DOM and MessageArea state
+            MessageArea.currentMessage = '';
+            document.getElementById('message-text').textContent = '';
         }
     },
 };
