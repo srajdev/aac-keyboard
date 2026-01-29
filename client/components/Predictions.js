@@ -89,6 +89,19 @@ const Predictions = {
         const section = document.querySelector('.predictions-section');
         if (isLoading) {
             section.classList.add('loading');
+            // Show loading text
+            this.phraseButtons.forEach(btn => {
+                btn.textContent = 'Loading...';
+                btn.disabled = true;
+            });
+            this.wordButtons.forEach(btn => {
+                btn.textContent = '...';
+                btn.disabled = true;
+            });
+            this.letterButtons.forEach(btn => {
+                btn.textContent = '...';
+                btn.disabled = true;
+            });
         } else {
             section.classList.remove('loading');
         }

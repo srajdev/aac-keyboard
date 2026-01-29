@@ -375,9 +375,14 @@ body {
 }
 
 /* Loading State */
-.loading {
-    opacity: 0.6;
+.predictions-section.loading {
     pointer-events: none;
+}
+
+.predictions-section.loading .phrase-btn,
+.predictions-section.loading .word-btn,
+.predictions-section.loading .letter-btn {
+    opacity: 0.6;
 }
 
 /* Responsive adjustments for smaller tablets */
