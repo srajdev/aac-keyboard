@@ -1,11 +1,18 @@
 import json
 import re
 import time
+from datetime import datetime
+from pathlib import Path
 import anthropic
 from .prompts import SYSTEM_PROMPT, build_prediction_prompt
 
 
 client = anthropic.Anthropic()
+
+# Log file for predictions
+LOG_DIR = Path(__file__).parent.parent / "logs"
+LOG_DIR.mkdir(exist_ok=True)
+LOG_FILE = LOG_DIR / "predictions.jsonl"
 
 
 async def generate_predictions(partial_input: str, conversation_context: str) -> dict:
@@ -29,7 +36,18 @@ async def generate_predictions(partial_input: str, conversation_context: str) ->
         # Try to extract JSON from the response
         json_match = re.search(r"\{[\s\S]*\}", response_text)
         if json_match:
-            return json.loads(json_match.group())
+            result = json.loads(json_match.group())
+            # Log the prediction
+            log_entry = {
+                "timestamp": datetime.now().isoformat(),
+                "input": partial_input,
+                "context": conversation_context,
+                "response": result,
+                "latency_ms": round(elapsed_ms),
+            }
+            with open(LOG_FILE, "a") as f:
+                f.write(json.dumps(log_entry) + "\n")
+            return result
         raise ValueError("No JSON found in response")
     except (json.JSONDecodeError, ValueError) as e:
         print(f"Failed to parse Claude response: {response_text}")
