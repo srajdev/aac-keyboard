@@ -1,0 +1,193 @@
+[
+  {
+    "model": "claude-3-5-haiku-20241022",
+    "prompt": "default",
+    "max_tokens": 300,
+    "tests": [
+      {
+        "test_id": "01_starting_fresh",
+        "latency_ms": 17.584562301635742,
+        "word_accuracy": 0.0,
+        "phrase_relevance": 0.0,
+        "valid_json": false,
+        "errors": [
+          "Response is None"
+        ],
+        "response": null,
+        "usage": {}
+      },
+      {
+        "test_id": "02_basic_need",
+        "latency_ms": 0.6062984466552734,
+        "word_accuracy": 0.0,
+        "phrase_relevance": 0.0,
+        "valid_json": false,
+        "errors": [
+          "Response is None"
+        ],
+        "response": null,
+        "usage": {}
+      },
+      {
+        "test_id": "03_feeling",
+        "latency_ms": 6.572484970092773,
+        "word_accuracy": 0.0,
+        "phrase_relevance": 0.0,
+        "valid_json": false,
+        "errors": [
+          "Response is None"
+        ],
+        "response": null,
+        "usage": {}
+      },
+      {
+        "test_id": "04_want_something",
+        "latency_ms": 0.4253387451171875,
+        "word_accuracy": 0.0,
+        "phrase_relevance": 0.0,
+        "valid_json": false,
+        "errors": [
+          "Response is None"
+        ],
+        "response": null,
+        "usage": {}
+      },
+      {
+        "test_id": "05_going_somewhere",
+        "latency_ms": 0.3876686096191406,
+        "word_accuracy": 0.0,
+        "phrase_relevance": 0.0,
+        "valid_json": false,
+        "errors": [
+          "Response is None"
+        ],
+        "response": null,
+        "usage": {}
+      },
+      {
+        "test_id": "06_mid_word_ple",
+        "latency_ms": 0.3635883331298828,
+        "word_accuracy": 0.0,
+        "phrase_relevance": 0.0,
+        "valid_json": false,
+        "errors": [
+          "Response is None"
+        ],
+        "response": null,
+        "usage": {}
+      },
+      {
+        "test_id": "07_mid_word_hel",
+        "latency_ms": 6.56580924987793,
+        "word_accuracy": 0.0,
+        "phrase_relevance": 0.0,
+        "valid_json": false,
+        "errors": [
+          "Response is None"
+        ],
+        "response": null,
+        "usage": {}
+      },
+      {
+        "test_id": "08_asking_help",
+        "latency_ms": 0.4298686981201172,
+        "word_accuracy": 0.0,
+        "phrase_relevance": 0.0,
+        "valid_json": false,
+        "errors": [
+          "Response is None"
+        ],
+        "response": null,
+        "usage": {}
+      },
+      {
+        "test_id": "09_thank_you",
+        "latency_ms": 0.39958953857421875,
+        "word_accuracy": 0.0,
+        "phrase_relevance": 0.0,
+        "valid_json": false,
+        "errors": [
+          "Response is None"
+        ],
+        "response": null,
+        "usage": {}
+      },
+      {
+        "test_id": "10_yes_response",
+        "latency_ms": 0.3643035888671875,
+        "word_accuracy": 0.0,
+        "phrase_relevance": 0.0,
+        "valid_json": false,
+        "errors": [
+          "Response is None"
+        ],
+        "response": null,
+        "usage": {}
+      },
+      {
+        "test_id": "11_no_response",
+        "latency_ms": 6.463050842285156,
+        "word_accuracy": 0.0,
+        "phrase_relevance": 0.0,
+        "valid_json": false,
+        "errors": [
+          "Response is None"
+        ],
+        "response": null,
+        "usage": {}
+      },
+      {
+        "test_id": "12_question_what",
+        "latency_ms": 0.4508495330810547,
+        "word_accuracy": 0.0,
+        "phrase_relevance": 0.0,
+        "valid_json": false,
+        "errors": [
+          "Response is None"
+        ],
+        "response": null,
+        "usage": {}
+      },
+      {
+        "test_id": "13_pain_discomfort",
+        "latency_ms": 0.3902912139892578,
+        "word_accuracy": 0.0,
+        "phrase_relevance": 0.0,
+        "valid_json": false,
+        "errors": [
+          "Response is None"
+        ],
+        "response": null,
+        "usage": {}
+      },
+      {
+        "test_id": "14_hungry_thirsty",
+        "latency_ms": 0.3707408905029297,
+        "word_accuracy": 0.0,
+        "phrase_relevance": 0.0,
+        "valid_json": false,
+        "errors": [
+          "Response is None"
+        ],
+        "response": null,
+        "usage": {}
+      },
+      {
+        "test_id": "15_watching_tv",
+        "latency_ms": 0.3590583801269531,
+        "word_accuracy": 0.0,
+        "phrase_relevance": 0.0,
+        "valid_json": false,
+        "errors": [
+          "Response is None"
+        ],
+        "response": null,
+        "usage": {}
+      }
+    ],
+    "avg_latency": 2.782233556111654,
+    "avg_word_accuracy": 0.0,
+    "avg_phrase_relevance": 0.0,
+    "valid_json_pct": 0.0
+  }
+]

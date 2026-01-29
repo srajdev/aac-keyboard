@@ -1,0 +1,114 @@
+{
+  "test_cases": [
+    {
+      "id": "01_starting_fresh",
+      "description": "No input yet, common conversation starters",
+      "partial_input": "",
+      "expected_words": ["yes", "no", "help", "please", "hi"],
+      "expected_phrases_contain": ["help", "want", "need", "how are"]
+    },
+    {
+      "id": "02_basic_need",
+      "description": "Expressing a need",
+      "partial_input": "I need ",
+      "expected_words": ["help", "water", "food", "bathroom", "rest"],
+      "expected_phrases_contain": ["help", "water", "bathroom"]
+    },
+    {
+      "id": "03_feeling",
+      "description": "Describing how they feel",
+      "partial_input": "I feel ",
+      "expected_words": ["good", "tired", "hungry", "happy", "sick"],
+      "expected_phrases_contain": ["feel", "good", "tired"]
+    },
+    {
+      "id": "04_want_something",
+      "description": "Wanting something",
+      "partial_input": "I want ",
+      "expected_words": ["water", "food", "help", "sleep", "go"],
+      "expected_phrases_contain": ["want", "please"]
+    },
+    {
+      "id": "05_going_somewhere",
+      "description": "Wanting to go to a location",
+      "partial_input": "I want to go to the ",
+      "expected_words": ["bathroom", "park", "kitchen", "store", "bedroom"],
+      "expected_phrases_contain": ["go to", "want to go"]
+    },
+    {
+      "id": "06_mid_word_ple",
+      "description": "Mid-word completion for 'ple'",
+      "partial_input": "ple",
+      "expected_words": ["please", "plenty", "pleasant"],
+      "expected_letters": ["a", "e", "n"]
+    },
+    {
+      "id": "07_mid_word_hel",
+      "description": "Mid-word completion for 'hel'",
+      "partial_input": "hel",
+      "expected_words": ["help", "hello", "helpful"],
+      "expected_letters": ["p", "l", "o"]
+    },
+    {
+      "id": "08_asking_help",
+      "description": "Asking someone for help",
+      "partial_input": "Can you ",
+      "expected_words": ["help", "please", "come", "wait", "get"],
+      "expected_phrases_contain": ["help", "please", "can you"]
+    },
+    {
+      "id": "09_thank_you",
+      "description": "Expressing gratitude",
+      "partial_input": "Thank ",
+      "expected_words": ["you", "thanks"],
+      "expected_phrases_contain": ["thank you", "thanks"]
+    },
+    {
+      "id": "10_yes_response",
+      "description": "Affirmative response",
+      "partial_input": "Yes ",
+      "expected_words": ["please", "I", "that", "okay", "thanks"],
+      "expected_phrases_contain": ["yes", "please", "want"]
+    },
+    {
+      "id": "11_no_response",
+      "description": "Negative response",
+      "partial_input": "No ",
+      "expected_words": ["thanks", "I", "not", "problem", "thank"],
+      "expected_phrases_contain": ["no", "thank", "don't"]
+    },
+    {
+      "id": "12_question_what",
+      "description": "Asking a what question",
+      "partial_input": "What ",
+      "expected_words": ["is", "time", "are", "do", "about"],
+      "expected_phrases_contain": ["what", "time", "is"]
+    },
+    {
+      "id": "13_pain_discomfort",
+      "description": "Expressing pain or discomfort",
+      "partial_input": "My ",
+      "expected_words": ["head", "stomach", "back", "leg", "arm"],
+      "expected_phrases_contain": ["hurts", "pain", "my"]
+    },
+    {
+      "id": "14_hungry_thirsty",
+      "description": "Expressing hunger or thirst state",
+      "partial_input": "I am ",
+      "expected_words": ["hungry", "thirsty", "tired", "okay", "fine"],
+      "expected_phrases_contain": ["hungry", "thirsty", "tired", "am"]
+    },
+    {
+      "id": "15_watching_tv",
+      "description": "Entertainment related",
+      "partial_input": "I want to watch ",
+      "expected_words": ["TV", "movie", "show", "video", "something"],
+      "expected_phrases_contain": ["watch", "TV", "movie"]
+    }
+  ],
+  "expected_json_structure": {
+    "phrases": "array of 3 strings (complete sentences)",
+    "words": "array of 5 strings (single words)",
+    "letters": "array of 5 strings (single lowercase letters)"
+  }
+}

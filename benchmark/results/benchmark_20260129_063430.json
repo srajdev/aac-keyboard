@@ -1,0 +1,508 @@
+[
+  {
+    "model": "claude-sonnet-4-20250514",
+    "prompt": "default",
+    "max_tokens": 300,
+    "tests": [
+      {
+        "test_id": "01_starting_fresh",
+        "latency_ms": 2372.4496364593506,
+        "word_accuracy": 0.6,
+        "phrase_relevance": 0.75,
+        "valid_json": true,
+        "errors": [],
+        "response": {
+          "phrases": [
+            "How are you doing today?",
+            "I need help with something.",
+            "Can we talk about this later?"
+          ],
+          "words": [
+            "hello",
+            "hi",
+            "yes",
+            "no",
+            "thank"
+          ],
+          "letters": [
+            "h",
+            "i",
+            "y",
+            "n",
+            "t"
+          ]
+        },
+        "usage": {
+          "input_tokens": 295,
+          "output_tokens": 75
+        }
+      },
+      {
+        "test_id": "02_basic_need",
+        "latency_ms": 2054.382085800171,
+        "word_accuracy": 0.6,
+        "phrase_relevance": 1.0,
+        "valid_json": true,
+        "errors": [],
+        "response": {
+          "phrases": [
+            "I need help with something",
+            "I need to go to the bathroom",
+            "I need some water please"
+          ],
+          "words": [
+            "help",
+            "to",
+            "some",
+            "water",
+            "food"
+          ],
+          "letters": [
+            "h",
+            "t",
+            "s",
+            "w",
+            "f"
+          ]
+        },
+        "usage": {
+          "input_tokens": 292,
+          "output_tokens": 74
+        }
+      },
+      {
+        "test_id": "03_feeling",
+        "latency_ms": 2719.592332839966,
+        "word_accuracy": 0.8,
+        "phrase_relevance": 0.6666666666666666,
+        "valid_json": true,
+        "errors": [],
+        "response": {
+          "phrases": [
+            "I feel tired today and need to rest",
+            "I feel like having pizza for dinner tonight",
+            "I feel much better after taking my medicine"
+          ],
+          "words": [
+            "good",
+            "tired",
+            "sick",
+            "better",
+            "hungry"
+          ],
+          "letters": [
+            "g",
+            "t",
+            "s",
+            "b",
+            "h"
+          ]
+        },
+        "usage": {
+          "input_tokens": 292,
+          "output_tokens": 81
+        }
+      },
+      {
+        "test_id": "04_want_something",
+        "latency_ms": 2270.8067893981934,
+        "word_accuracy": 0.4,
+        "phrase_relevance": 1.0,
+        "valid_json": true,
+        "errors": [],
+        "response": {
+          "phrases": [
+            "I want to go home now",
+            "I want something to eat please",
+            "I want to watch a movie"
+          ],
+          "words": [
+            "to",
+            "some",
+            "a",
+            "food",
+            "help"
+          ],
+          "letters": [
+            "t",
+            "s",
+            "a",
+            "f",
+            "h"
+          ]
+        },
+        "usage": {
+          "input_tokens": 292,
+          "output_tokens": 75
+        }
+      },
+      {
+        "test_id": "05_going_somewhere",
+        "latency_ms": 2450.009346008301,
+        "word_accuracy": 0.6,
+        "phrase_relevance": 1.0,
+        "valid_json": true,
+        "errors": [],
+        "response": {
+          "phrases": [
+            "I want to go to the store to buy some groceries",
+            "I want to go to the park with my friends today",
+            "I want to go to the doctor for my appointment"
+          ],
+          "words": [
+            "store",
+            "park",
+            "doctor",
+            "bathroom",
+            "mall"
+          ],
+          "letters": [
+            "s",
+            "p",
+            "d",
+            "b",
+            "m"
+          ]
+        },
+        "usage": {
+          "input_tokens": 296,
+          "output_tokens": 90
+        }
+      },
+      {
+        "test_id": "06_mid_word_ple",
+        "latency_ms": 2171.304225921631,
+        "word_accuracy": 1.0,
+        "phrase_relevance": 1.0,
+        "valid_json": true,
+        "errors": [],
+        "response": {
+          "phrases": [
+            "Please help me with this",
+            "Please can you come here",
+            "Please wait for me"
+          ],
+          "words": [
+            "please",
+            "plenty",
+            "pleasant",
+            "place",
+            "play"
+          ],
+          "letters": [
+            "a",
+            "d",
+            "n",
+            "s",
+            "t"
+          ]
+        },
+        "usage": {
+          "input_tokens": 292,
+          "output_tokens": 71
+        }
+      },
+      {
+        "test_id": "07_mid_word_hel",
+        "latency_ms": 2495.09859085083,
+        "word_accuracy": 0.6666666666666666,
+        "phrase_relevance": 1.0,
+        "valid_json": true,
+        "errors": [],
+        "response": {
+          "phrases": [
+            "Hello, how are you today?",
+            "Hello, I need some help please.",
+            "Hello, can we talk later?"
+          ],
+          "words": [
+            "hello",
+            "help",
+            "here",
+            "held",
+            "hello"
+          ],
+          "letters": [
+            "l",
+            "p",
+            "i",
+            "m",
+            "d"
+          ]
+        },
+        "usage": {
+          "input_tokens": 292,
+          "output_tokens": 78
+        }
+      },
+      {
+        "test_id": "08_asking_help",
+        "latency_ms": 2294.123888015747,
+        "word_accuracy": 0.8,
+        "phrase_relevance": 1.0,
+        "valid_json": true,
+        "errors": [],
+        "response": {
+          "phrases": [
+            "Can you help me with something please",
+            "Can you please turn on the lights",
+            "Can you come here for a minute"
+          ],
+          "words": [
+            "help",
+            "please",
+            "come",
+            "turn",
+            "get"
+          ],
+          "letters": [
+            "h",
+            "p",
+            "c",
+            "t",
+            "g"
+          ]
+        },
+        "usage": {
+          "input_tokens": 292,
+          "output_tokens": 78
+        }
+      },
+      {
+        "test_id": "09_thank_you",
+        "latency_ms": 2300.3764152526855,
+        "word_accuracy": 0.5,
+        "phrase_relevance": 0.5,
+        "valid_json": true,
+        "errors": [],
+        "response": {
+          "phrases": [
+            "Thank you so much for your help",
+            "Thank you for being so patient with me",
+            "Thank you for understanding my situation"
+          ],
+          "words": [
+            "you",
+            "goodness",
+            "God",
+            "everyone",
+            "them"
+          ],
+          "letters": [
+            "y",
+            "g",
+            "s",
+            "f",
+            "e"
+          ]
+        },
+        "usage": {
+          "input_tokens": 291,
+          "output_tokens": 79
+        }
+      },
+      {
+        "test_id": "10_yes_response",
+        "latency_ms": 2584.080219268799,
+        "word_accuracy": 0.2,
+        "phrase_relevance": 0.3333333333333333,
+        "valid_json": true,
+        "errors": [],
+        "response": {
+          "phrases": [
+            "Yes I would like that very much",
+            "Yes that sounds good to me",
+            "Yes I think that's a great idea"
+          ],
+          "words": [
+            "please",
+            "absolutely",
+            "definitely",
+            "sure",
+            "exactly"
+          ],
+          "letters": [
+            "i",
+            "t",
+            "p",
+            "a",
+            "s"
+          ]
+        },
+        "usage": {
+          "input_tokens": 291,
+          "output_tokens": 78
+        }
+      },
+      {
+        "test_id": "11_no_response",
+        "latency_ms": 2275.2480506896973,
+        "word_accuracy": 0.4,
+        "phrase_relevance": 1.0,
+        "valid_json": true,
+        "errors": [],
+        "response": {
+          "phrases": [
+            "No I don't want to do that",
+            "No thank you I'm not interested",
+            "No that's not what I meant"
+          ],
+          "words": [
+            "problem",
+            "thanks",
+            "way",
+            "worries",
+            "need"
+          ],
+          "letters": [
+            "t",
+            "p",
+            "w",
+            "n",
+            "o"
+          ]
+        },
+        "usage": {
+          "input_tokens": 291,
+          "output_tokens": 80
+        }
+      },
+      {
+        "test_id": "12_question_what",
+        "latency_ms": 3093.9009189605713,
+        "word_accuracy": 0.6,
+        "phrase_relevance": 1.0,
+        "valid_json": true,
+        "errors": [],
+        "response": {
+          "phrases": [
+            "What time is it right now?",
+            "What are we doing today?",
+            "What do you think about this?"
+          ],
+          "words": [
+            "time",
+            "are",
+            "do",
+            "did",
+            "should"
+          ],
+          "letters": [
+            "t",
+            "a",
+            "d",
+            "s",
+            "i"
+          ]
+        },
+        "usage": {
+          "input_tokens": 291,
+          "output_tokens": 77
+        }
+      },
+      {
+        "test_id": "13_pain_discomfort",
+        "latency_ms": 2824.687957763672,
+        "word_accuracy": 0.0,
+        "phrase_relevance": 0.3333333333333333,
+        "valid_json": true,
+        "errors": [],
+        "response": {
+          "phrases": [
+            "My name is Viraj and I'm happy to meet you",
+            "My tablet is working well today thank you",
+            "My day has been going pretty good so far"
+          ],
+          "words": [
+            "name",
+            "day",
+            "tablet",
+            "family",
+            "phone"
+          ],
+          "letters": [
+            "n",
+            "d",
+            "f",
+            "b",
+            "h"
+          ]
+        },
+        "usage": {
+          "input_tokens": 291,
+          "output_tokens": 87
+        }
+      },
+      {
+        "test_id": "14_hungry_thirsty",
+        "latency_ms": 2548.076391220093,
+        "word_accuracy": 0.4,
+        "phrase_relevance": 0.5,
+        "valid_json": true,
+        "errors": [],
+        "response": {
+          "phrases": [
+            "I am feeling good today",
+            "I am ready to go now",
+            "I am hungry for some food"
+          ],
+          "words": [
+            "feeling",
+            "ready",
+            "hungry",
+            "tired",
+            "happy"
+          ],
+          "letters": [
+            "f",
+            "r",
+            "h",
+            "t",
+            "g"
+          ]
+        },
+        "usage": {
+          "input_tokens": 292,
+          "output_tokens": 74
+        }
+      },
+      {
+        "test_id": "15_watching_tv",
+        "latency_ms": 2594.0568447113037,
+        "word_accuracy": 0.4,
+        "phrase_relevance": 1.0,
+        "valid_json": true,
+        "errors": [],
+        "response": {
+          "phrases": [
+            "I want to watch a movie tonight",
+            "I want to watch TV with you",
+            "I want to watch something funny on Netflix"
+          ],
+          "words": [
+            "TV",
+            "Netflix",
+            "movies",
+            "something",
+            "YouTube"
+          ],
+          "letters": [
+            "a",
+            "m",
+            "t",
+            "s",
+            "n"
+          ]
+        },
+        "usage": {
+          "input_tokens": 294,
+          "output_tokens": 79
+        }
+      }
+    ],
+    "avg_latency": 2469.8795795440674,
+    "avg_word_accuracy": 0.5311111111111112,
+    "avg_phrase_relevance": 0.8055555555555556,
+    "valid_json_pct": 1.0
+  }
+]
