@@ -9,7 +9,18 @@
     <link rel="stylesheet" href="/static/styles/main.css?v=2">
 </head>
 <body>
-    <div id="app">
+    <!-- Password Gate -->
+    <div id="password-gate" class="password-gate">
+        <div class="password-box">
+            <h2>Viraj Keyboard</h2>
+            <p>Enter password to continue</p>
+            <input type="password" id="password-input" placeholder="Password">
+            <button id="password-submit" onclick="Auth.checkPassword()">Enter</button>
+            <p id="password-error" class="password-error"></p>
+        </div>
+    </div>
+
+    <div id="app" style="display: none;">
         <!-- Header -->
         <header class="header">
             <h1>VIRAJ KEYBOARD</h1>
@@ -140,6 +151,7 @@
         </button>
     </div>
 
+    <script src="/static/services/auth.js?v=2"></script>
     <script src="/static/services/api.js?v=2"></script>
     <script src="/static/services/speech.js?v=2"></script>
     <script src="/static/services/storage.js?v=2"></script>
