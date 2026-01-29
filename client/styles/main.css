@@ -276,18 +276,18 @@ body {
 }
 
 .key {
-    min-width: 60px;
-    height: 55px;
+    min-width: 70px;
+    height: 65px;
     background: linear-gradient(180deg, #3d4a6b, #2d3a5a);
     border: 1px solid #4361ee;
     border-radius: 8px;
     color: #ffffff;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.1s;
     flex: 1;
-    max-width: 70px;
+    max-width: 80px;
 }
 
 .key:active {
@@ -410,7 +410,7 @@ body {
     }
 
     .key {
-        height: 60px;
-        font-size: 1.2rem;
+        height: 70px;
+        font-size: 1.3rem;
     }
 }
