@@ -5,6 +5,7 @@ const App = {
     lastPredictionRequest: '',
     predictionsEnabled: false,
     predictionsToggleBtn: null,
+    currentPredictionController: null,
 
     init() {
         // Initialize all components
@@ -122,16 +123,32 @@ const App = {
         }
         this.lastPredictionRequest = requestKey;
 
+        // Cancel any in-flight prediction request
+        if (this.currentPredictionController) {
+            this.currentPredictionController.abort();
+        }
+
+        // Create new abort controller for this request
+        this.currentPredictionController = new AbortController();
+        const signal = this.currentPredictionController.signal;
+
         // Show loading state
         Predictions.setLoading(true);
 
         try {
-            const predictions = await ApiService.getPredictions(partialInput, context);
+            const predictions = await ApiService.getPredictions(partialInput, context, signal);
             Predictions.update(predictions);
         } catch (error) {
+            // Ignore abort errors - they're expected when canceling
+            if (error.name === 'AbortError') {
+                return;
+            }
             console.error('Failed to get predictions:', error);
         } finally {
-            Predictions.setLoading(false);
+            // Only clear loading if this request wasn't aborted
+            if (!signal.aborted) {
+                Predictions.setLoading(false);
+            }
         }
     },
 };

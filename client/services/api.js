@@ -3,7 +3,7 @@
 const ApiService = {
     baseUrl: '',
 
-    async getPredictions(partialInput, conversationContext) {
+    async getPredictions(partialInput, conversationContext, signal) {
         try {
             const response = await fetch(`${this.baseUrl}/api/predict`, {
                 method: 'POST',
@@ -14,6 +14,7 @@ const ApiService = {
                     partialInput: partialInput || '',
                     conversationContext: conversationContext || '',
                 }),
+                signal: signal,
             });
 
             if (!response.ok) {
@@ -22,6 +23,10 @@ const ApiService = {
 
             return await response.json();
         } catch (error) {
+            // Re-throw abort errors so caller can handle them
+            if (error.name === 'AbortError') {
+                throw error;
+            }
             console.error('Prediction API error:', error);
             // Return fallback predictions
             return {
