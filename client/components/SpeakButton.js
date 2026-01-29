@@ -46,9 +46,8 @@ const SpeakButton = {
             // Save to history
             StorageService.addToHistory(message);
 
-            // Clear message - directly update DOM and MessageArea state
-            MessageArea.currentMessage = '';
-            document.getElementById('message-text').textContent = '';
+            // Clear message after speaking
+            MessageArea.clear();
         }
     },
 };
