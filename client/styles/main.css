@@ -362,6 +362,10 @@ body {
 /* Custom 6-Row Keyboard */
 .keyboard-section-new {
     flex-shrink: 0;
+    max-width: 14cm;      /* Physical constraint for right-thumb reach */
+    margin-left: auto;    /* Right-align keyboard on wide screens */
+    margin-right: 0;
+    width: 100%;          /* Allow flexibility on narrow screens */
 }
 
 .keyboard-new {
@@ -706,5 +710,18 @@ body {
     .key-new {
         min-height: 70px;
         font-size: 1.1rem;
+    }
+}
+
+/* 14cm keyboard constraint - graceful degradation for narrow screens */
+@media (max-width: 14cm) {
+    .keyboard-section-new {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .key-new {
+        min-height: 60px;
+        font-size: 0.95rem;
     }
 }
