@@ -56,13 +56,30 @@ const SpeechService = {
         utterance.rate = 0.9;
         utterance.pitch = 1;
 
-        // Try to use a natural voice
+        // Select best available male voice
         const voices = this.synthesis.getVoices();
-        const preferredVoice = voices.find(
-            (v) => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Samantha'))
-        );
-        if (preferredVoice) {
-            utterance.voice = preferredVoice;
+        const englishVoices = voices.filter(v => v.lang.startsWith('en'));
+
+        // Priority order for male voices:
+        // 1. Enhanced/Premium male voices
+        // 2. Named male voices (David, Daniel, Alex, James, etc.)
+        // 3. Any voice with "Male" in the name
+        const maleVoice =
+            englishVoices.find(v => v.name.includes('Enhanced') && v.name.includes('Male')) ||
+            englishVoices.find(v => v.name.includes('Premium') && v.name.includes('Male')) ||
+            englishVoices.find(v => v.name.includes('Natural') && v.name.includes('Male')) ||
+            englishVoices.find(v => v.name.includes('Google') && v.name.includes('Male')) ||
+            englishVoices.find(v => v.name.includes('David')) ||
+            englishVoices.find(v => v.name.includes('Daniel')) ||
+            englishVoices.find(v => v.name.includes('Alex')) ||
+            englishVoices.find(v => v.name.includes('James')) ||
+            englishVoices.find(v => v.name.includes('Male'));
+
+        if (maleVoice) {
+            utterance.voice = maleVoice;
+            console.log('Using voice:', maleVoice.name);
+        } else {
+            console.log('No male voice found, using default');
         }
 
         this.synthesis.speak(utterance);
