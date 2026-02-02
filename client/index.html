@@ -21,11 +21,25 @@
     </div>
 
     <div id="app" style="display: none;">
+        <!-- Header with Controls -->
+        <header class="header">
+            <button id="predictions-toggle" class="toggle-btn" aria-label="Toggle predictions">
+                <span class="toggle-icon">🤖</span>
+                <span class="toggle-text">AI: ON</span>
+            </button>
+            <button id="listen-toggle" class="toggle-btn" aria-label="Toggle listening">
+                <span class="toggle-icon">🎤</span>
+                <span class="toggle-text">Listen: OFF</span>
+            </button>
+            <input type="text" id="explicit-context-input" class="context-input" placeholder="Add context..." aria-label="Additional context">
+        </header>
+
         <!-- Message Area with CLEAR button -->
         <section class="message-section-new">
             <div class="message-header">
                 <div id="message-area" class="message-area-new">
                     <span id="message-text" class="message-text"></span>
+                    <span class="cursor">▌</span>
                 </div>
                 <button id="clear-btn" class="clear-btn-new" aria-label="Clear all">CLEAR</button>
             </div>
@@ -161,10 +175,14 @@
             </div>
         </section>
 
-        <!-- Bottom Context Buttons -->
-        <section class="context-buttons-section">
-            <button id="what-i-heard-btn" class="context-btn">WHAT I HEARD</button>
-            <button id="explicit-context-btn" class="context-btn">EXPLICIT CONTEXT</button>
+        <!-- Context Panel (Collapsible) -->
+        <section id="context-section" class="context-section collapsed">
+            <button id="context-toggle" class="context-toggle">
+                👂 What I heard: <span id="context-indicator">(tap to expand)</span>
+            </button>
+            <div id="context-content" class="context-content">
+                <p id="context-text">No conversation captured yet. Tap "Listen" to start.</p>
+            </div>
         </section>
     </div>
 
@@ -187,19 +205,6 @@
         </div>
     </div>
 
-    <!-- Explicit Context Modal -->
-    <div id="explicit-context-modal" class="modal" style="display: none;">
-        <div class="modal-overlay"></div>
-        <div class="modal-content explicit-context-content">
-            <h2>Explicit Context</h2>
-            <textarea id="explicit-context-textarea" placeholder="Enter context to help predictions..." rows="6"></textarea>
-            <div class="modal-buttons">
-                <button id="explicit-context-save" class="modal-btn modal-btn-primary">Save</button>
-                <button id="explicit-context-cancel" class="modal-btn modal-btn-secondary">Cancel</button>
-            </div>
-        </div>
-    </div>
-
     <script src="/static/services/auth.js?v=3"></script>
     <script src="/static/services/api.js?v=3"></script>
     <script src="/static/services/speech.js?v=3"></script>
@@ -209,7 +214,6 @@
     <script src="/static/components/Predictions.js?v=3"></script>
     <script src="/static/components/SpeakButton.js?v=3"></script>
     <script src="/static/components/ListenToggle.js?v=3"></script>
-    <script src="/static/components/ExplicitContext.js?v=3"></script>
     <script src="/static/app.js?v=3"></script>
 </body>
 </html>

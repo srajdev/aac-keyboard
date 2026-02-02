@@ -2,8 +2,10 @@
 
 const App = {
     predictionTimeout: null,
+    contextInputTimeout: null,
     lastPredictionRequest: '',
-    predictionsEnabled: true, // Default to ON for new layout
+    predictionsEnabled: true, // Default to ON
+    predictionsToggleBtn: null,
     currentPredictionController: null,
 
     init() {
@@ -13,7 +15,16 @@ const App = {
         Predictions.init();
         SpeakButton.init();
         ListenToggle.init();
-        ExplicitContext.init();
+
+        // Get UI elements
+        this.predictionsToggleBtn = document.getElementById('predictions-toggle');
+
+        // Load saved preference
+        const saved = StorageService.getPreferences();
+        if (saved.predictionsEnabled !== undefined) {
+            this.predictionsEnabled = saved.predictionsEnabled;
+        }
+        this.updatePredictionsToggleUI();
 
         // Wire up component callbacks
         this.setupCallbacks();
@@ -27,6 +38,28 @@ const App = {
     },
 
     setupCallbacks() {
+        // AI Toggle
+        if (this.predictionsToggleBtn) {
+            this.predictionsToggleBtn.addEventListener('click', () => {
+                this.togglePredictions();
+            });
+        }
+
+        // Explicit context input
+        const contextInput = document.getElementById('explicit-context-input');
+        if (contextInput) {
+            contextInput.addEventListener('input', (e) => {
+                const context = e.target.value;
+
+                // Debounce context updates
+                clearTimeout(this.contextInputTimeout);
+                this.contextInputTimeout = setTimeout(() => {
+                    ListenToggle.setExplicitContext(context);
+                    this.requestPredictions();
+                }, 500);
+            });
+        }
+
         // Keyboard input - handle all key types
         Keyboard.onKeyPress = (char, type, state) => {
             switch (type) {
@@ -90,19 +123,34 @@ const App = {
         ListenToggle.onContextUpdate = (context) => {
             this.requestPredictions();
         };
+    },
 
-        // Explicit context save triggers predictions
-        ExplicitContext.onContextSave = (context) => {
-            ListenToggle.setExplicitContext(context);
+    togglePredictions() {
+        this.predictionsEnabled = !this.predictionsEnabled;
+        this.updatePredictionsToggleUI();
+
+        // Save preference
+        const prefs = StorageService.getPreferences();
+        prefs.predictionsEnabled = this.predictionsEnabled;
+        StorageService.savePreferences(prefs);
+
+        // Request predictions if just enabled
+        if (this.predictionsEnabled) {
             this.requestPredictions();
-        };
+        } else {
+            Predictions.showDefaults();
+        }
+    },
 
-        // Wire "WHAT I HEARD" button to toggle listening
-        const whatIHeardBtn = document.getElementById('what-i-heard-btn');
-        if (whatIHeardBtn) {
-            whatIHeardBtn.addEventListener('click', () => {
-                ListenToggle.toggle();
-            });
+    updatePredictionsToggleUI() {
+        if (!this.predictionsToggleBtn) return;
+
+        if (this.predictionsEnabled) {
+            this.predictionsToggleBtn.classList.add('active');
+            this.predictionsToggleBtn.querySelector('.toggle-text').textContent = 'AI: ON';
+        } else {
+            this.predictionsToggleBtn.classList.remove('active');
+            this.predictionsToggleBtn.querySelector('.toggle-text').textContent = 'AI: OFF';
         }
     },
 
