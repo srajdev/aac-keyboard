@@ -71,7 +71,7 @@ const Predictions = {
             });
         }
 
-        // Update letter predictions
+        // Update letter predictions (shown when highlights are OFF)
         if (predictions.letters) {
             this.letterButtons.forEach((btn, i) => {
                 if (predictions.letters[i]) {

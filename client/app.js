@@ -5,7 +5,9 @@ const App = {
     contextInputTimeout: null,
     lastPredictionRequest: '',
     predictionsEnabled: true, // Default to ON
+    highlightsEnabled: true, // Default to ON
     predictionsToggleBtn: null,
+    highlightsToggleBtn: null,
     currentPredictionController: null,
 
     init() {
@@ -19,13 +21,18 @@ const App = {
 
         // Get UI elements
         this.predictionsToggleBtn = document.getElementById('predictions-toggle');
+        this.highlightsToggleBtn = document.getElementById('highlights-toggle');
 
-        // Load saved preference
+        // Load saved preferences
         const saved = StorageService.getPreferences();
         if (saved.predictionsEnabled !== undefined) {
             this.predictionsEnabled = saved.predictionsEnabled;
         }
+        if (saved.highlightsEnabled !== undefined) {
+            this.highlightsEnabled = saved.highlightsEnabled;
+        }
         this.updatePredictionsToggleUI();
+        this.updateHighlightsToggleUI();
 
         // Wire up component callbacks
         this.setupCallbacks();
@@ -43,6 +50,13 @@ const App = {
         if (this.predictionsToggleBtn) {
             this.predictionsToggleBtn.addEventListener('click', () => {
                 this.togglePredictions();
+            });
+        }
+
+        // Highlights Toggle
+        if (this.highlightsToggleBtn) {
+            this.highlightsToggleBtn.addEventListener('click', () => {
+                this.toggleHighlights();
             });
         }
 
@@ -140,6 +154,7 @@ const App = {
             this.requestPredictions();
         } else {
             Predictions.showDefaults();
+            Keyboard.setPredictions([]);
         }
     },
 
@@ -152,6 +167,37 @@ const App = {
         } else {
             this.predictionsToggleBtn.classList.remove('active');
             this.predictionsToggleBtn.querySelector('.toggle-text').textContent = 'AI: OFF';
+        }
+    },
+
+    toggleHighlights() {
+        this.highlightsEnabled = !this.highlightsEnabled;
+        this.updateHighlightsToggleUI();
+
+        // Save preference
+        const prefs = StorageService.getPreferences();
+        prefs.highlightsEnabled = this.highlightsEnabled;
+        StorageService.savePreferences(prefs);
+
+        // Update display based on highlights state
+        if (this.highlightsEnabled) {
+            // Re-request predictions to update highlights
+            this.requestPredictions();
+        } else {
+            // Clear keyboard highlights (predictions still fetched but not shown)
+            Keyboard.setPredictions([]);
+        }
+    },
+
+    updateHighlightsToggleUI() {
+        if (!this.highlightsToggleBtn) return;
+
+        if (this.highlightsEnabled) {
+            this.highlightsToggleBtn.classList.add('active');
+            this.highlightsToggleBtn.querySelector('.toggle-text').textContent = 'Highlights: ON';
+        } else {
+            this.highlightsToggleBtn.classList.remove('active');
+            this.highlightsToggleBtn.querySelector('.toggle-text').textContent = 'Highlights: OFF';
         }
     },
 
@@ -207,6 +253,15 @@ const App = {
             }
 
             Predictions.update(predictions);
+
+            // Send letter predictions to keyboard for highlighting (only if highlights enabled)
+            if (this.highlightsEnabled) {
+                if (predictions.letters && predictions.letters.length > 0) {
+                    Keyboard.setPredictions(predictions.letters);
+                } else {
+                    Keyboard.setPredictions([]);
+                }
+            }
         } catch (error) {
             // Ignore abort errors - they're expected when canceling
             if (error.name === 'AbortError') {

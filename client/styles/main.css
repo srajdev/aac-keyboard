@@ -478,6 +478,45 @@ body {
     background: #72dff9;
 }
 
+/* Predicted letter keys - Emphasized styling */
+.key-predicted {
+    /* Size emphasis */
+    transform: scale(1.15);
+    font-size: 1.3rem;
+    font-weight: 900;
+
+    /* Color emphasis - Pink/magenta */
+    background: linear-gradient(180deg, #f72585, #b5179e) !important;
+    border-color: #f72585 !important;
+    border-width: 3px !important;
+
+    /* Glow effect */
+    box-shadow: 0 0 20px rgba(247, 37, 133, 0.8),
+                0 0 40px rgba(247, 37, 133, 0.4);
+
+    z-index: 10;
+    position: relative;
+    transition: all 0.2s ease-out;
+    animation: predicted-pulse 2s ease-in-out infinite;
+}
+
+.key-predicted:active {
+    background: #ff006e !important;
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(255, 0, 110, 0.9);
+}
+
+@keyframes predicted-pulse {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(247, 37, 133, 0.8),
+                    0 0 40px rgba(247, 37, 133, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 25px rgba(247, 37, 133, 1),
+                    0 0 50px rgba(247, 37, 133, 0.6);
+    }
+}
+
 /* Modifier keys - Orange gradient */
 .key-modifier {
     background: linear-gradient(180deg, #996300, #7d5000);

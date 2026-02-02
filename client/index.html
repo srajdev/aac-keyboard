@@ -31,6 +31,10 @@
                 <span class="toggle-icon">🎤</span>
                 <span class="toggle-text">Listen: OFF</span>
             </button>
+            <button id="highlights-toggle" class="toggle-btn" aria-label="Toggle keyboard highlights">
+                <span class="toggle-icon">✨</span>
+                <span class="toggle-text">Highlights: ON</span>
+            </button>
             <div class="keyboard-width-control">
                 <label>Keyboard:</label>
                 <button id="width-decrease" class="width-btn" aria-label="Decrease keyboard width">◄</button>
@@ -77,8 +81,8 @@
             </div>
         </section>
 
-        <!-- Letter Predictions -->
-        <section class="letter-section">
+        <!-- Letter Predictions (shown when highlights are OFF) -->
+        <section id="letter-section" class="letter-section" style="display: none;">
             <div id="letter-predictions" class="letter-predictions">
                 <button class="letter-btn" data-index="0">...</button>
                 <button class="letter-btn" data-index="1">...</button>
