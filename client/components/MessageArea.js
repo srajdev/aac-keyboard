@@ -3,12 +3,14 @@
 const MessageArea = {
     currentMessage: '',
     cursorPosition: null, // null = end of text, number = position
-    element: null,
+    beforeElement: null,
+    afterElement: null,
     clearBtn: null,
     onMessageChange: null,
 
     init() {
-        this.element = document.getElementById('message-text');
+        this.beforeElement = document.getElementById('message-before');
+        this.afterElement = document.getElementById('message-after');
         this.clearBtn = document.getElementById('clear-btn');
 
         if (this.clearBtn) {
@@ -193,16 +195,16 @@ const MessageArea = {
     },
 
     render() {
-        if (!this.element) return;
+        if (!this.beforeElement || !this.afterElement) return;
 
         if (this.cursorPosition === null || this.cursorPosition === this.currentMessage.length) {
-            // Cursor at end - no visual cursor needed
-            this.element.textContent = this.currentMessage;
+            // Cursor at end
+            this.beforeElement.textContent = this.currentMessage;
+            this.afterElement.textContent = '';
         } else {
-            // Show cursor in middle of text
-            const before = this.currentMessage.slice(0, this.cursorPosition);
-            const after = this.currentMessage.slice(this.cursorPosition);
-            this.element.textContent = before + '|' + after;
+            // Cursor in middle - split text at cursor position
+            this.beforeElement.textContent = this.currentMessage.slice(0, this.cursorPosition);
+            this.afterElement.textContent = this.currentMessage.slice(this.cursorPosition);
         }
     },
 
