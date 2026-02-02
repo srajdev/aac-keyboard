@@ -100,6 +100,23 @@ const StorageService = {
             console.error('Failed to save keyboard width:', e);
         }
     },
+
+    // Prediction Width
+    getPredictionWidth() {
+        try {
+            return localStorage.getItem('viraj_prediction_width') || 'medium';
+        } catch (e) {
+            return 'medium';
+        }
+    },
+
+    setPredictionWidth(width) {
+        try {
+            localStorage.setItem('viraj_prediction_width', width);
+        } catch (e) {
+            console.error('Failed to save prediction width:', e);
+        }
+    },
 };
 
 // Global alias for convenience

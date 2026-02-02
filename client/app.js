@@ -18,6 +18,7 @@ const App = {
         SpeakButton.init();
         ListenToggle.init();
         KeyboardWidthControl.init();
+        PredictionWidthControl.init();
 
         // Get UI elements
         this.predictionsToggleBtn = document.getElementById('predictions-toggle');

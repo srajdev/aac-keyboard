@@ -426,6 +426,25 @@ body {
     transform: scale(0.95);
 }
 
+/* Prediction Width Variants */
+.predictions-section-new.pred-width-compact .phrases-container {
+    flex: 4;
+}
+
+.predictions-section-new.pred-width-compact .words-container {
+    flex: 3;
+}
+
+/* Medium is default (flex: 6 and flex: 4) - no override needed */
+
+.predictions-section-new.pred-width-wide .phrases-container {
+    flex: 8;
+}
+
+.predictions-section-new.pred-width-wide .words-container {
+    flex: 5;
+}
+
 /* Custom 6-Row Keyboard */
 .keyboard-section-new {
     flex-shrink: 0;

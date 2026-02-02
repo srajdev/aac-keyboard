@@ -42,6 +42,13 @@
                 <button id="width-increase" class="width-btn" aria-label="Increase keyboard width">►</button>
                 <button id="width-reset" class="width-reset">Reset</button>
             </div>
+            <div class="keyboard-width-control">
+                <label>Predictions:</label>
+                <button id="pred-width-decrease" class="width-btn" aria-label="Decrease prediction width">◄</button>
+                <span id="pred-width-display" class="width-display">Medium</span>
+                <button id="pred-width-increase" class="width-btn" aria-label="Increase prediction width">►</button>
+                <button id="pred-width-reset" class="width-reset">Reset</button>
+            </div>
             <input type="text" id="explicit-context-input" class="context-input" placeholder="Add context..." aria-label="Additional context">
         </header>
 
@@ -227,6 +234,7 @@
     <script src="/static/components/SpeakButton.js?v=3"></script>
     <script src="/static/components/ListenToggle.js?v=3"></script>
     <script src="/static/components/KeyboardWidthControl.js?v=3"></script>
+    <script src="/static/components/PredictionWidthControl.js?v=3"></script>
     <script src="/static/app.js?v=3"></script>
 </body>
 </html>
