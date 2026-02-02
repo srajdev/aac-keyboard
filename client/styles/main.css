@@ -470,57 +470,57 @@ body {
 
 /* Letter keys - Blue gradient */
 .key-letter {
-    background: linear-gradient(180deg, #3d4a6b, #2d3a5a);
-    border-color: #4361ee;
+    background: linear-gradient(180deg, #5b7fe6, #4361ee);
+    border-color: #72dff9;
 }
 
 .key-letter:active {
-    background: #4361ee;
+    background: #72dff9;
 }
 
 /* Modifier keys - Orange gradient */
 .key-modifier {
-    background: linear-gradient(180deg, #ff8500, #d67000);
-    border-color: #ff8500;
+    background: linear-gradient(180deg, #996300, #7d5000);
+    border-color: #b37700;
     font-size: 0.85rem;
 }
 
 .key-modifier:active {
-    background: #ffaa00;
+    background: #c48900;
 }
 
 .key-modifier.active {
-    background: #ffaa00;
-    box-shadow: 0 0 15px rgba(255, 170, 0, 0.6);
+    background: #c48900;
+    box-shadow: 0 0 15px rgba(196, 137, 0, 0.6);
 }
 
 /* Action keys - Purple/Pink gradient */
 .key-action {
-    background: linear-gradient(180deg, #7209b7, #560bad);
-    border-color: #b5179e;
+    background: linear-gradient(180deg, #5a3a7d, #4a2a6a);
+    border-color: #7209b7;
     font-size: 0.85rem;
 }
 
 .key-action:active {
-    background: #b5179e;
+    background: #7209b7;
 }
 
 /* Arrow keys - Cyan gradient */
 .key-arrow {
-    background: linear-gradient(180deg, #4cc9f0, #3a9fc0);
-    border-color: #4cc9f0;
+    background: linear-gradient(180deg, #3a8fa8, #2d7085);
+    border-color: #4a9fb8;
     font-size: 1.3rem;
 }
 
 .key-arrow:active {
-    background: #72dff9;
+    background: #4a9fb8;
 }
 
 /* Space bar - Green gradient */
 .key-space {
     flex: 3;
-    background: linear-gradient(180deg, #2a9d8f, #1f7a6f);
-    border-color: #2a9d8f;
+    background: linear-gradient(180deg, #3dbeaf, #2a9d8f);
+    border-color: #3dbeaf;
 }
 
 .key-space:active {
@@ -543,13 +543,13 @@ body {
 
 /* Punctuation buttons */
 .key-punct {
-    background: linear-gradient(180deg, #5a3a5a, #4a2a4a);
-    border-color: #f72585;
+    background: linear-gradient(180deg, #4a3a5a, #3a2a4a);
+    border-color: #7209b7;
     font-size: 2rem;
 }
 
 .key-punct:active {
-    background: #f72585;
+    background: #7209b7;
 }
 
 /* Number Keyboard */
@@ -644,8 +644,8 @@ body {
 .punct-btn {
     width: 80px;
     height: 80px;
-    background: linear-gradient(180deg, #3d4a6b, #2d3a5a);
-    border: 2px solid #4361ee;
+    background: linear-gradient(180deg, #4a3a5a, #3a2a4a);
+    border: 2px solid #7209b7;
     border-radius: 12px;
     color: #ffffff;
     font-size: 2rem;
@@ -655,7 +655,7 @@ body {
 }
 
 .punct-btn:active {
-    background: #4361ee;
+    background: #7209b7;
     transform: scale(0.95);
 }
 
