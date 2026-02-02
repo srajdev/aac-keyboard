@@ -9,8 +9,8 @@ const Predictions = {
     onLetterSelect: null,
 
     init() {
-        this.phraseButtons = document.querySelectorAll('.phrase-btn');
-        this.wordButtons = document.querySelectorAll('.word-btn');
+        this.phraseButtons = document.querySelectorAll('.phrase-btn-new');
+        this.wordButtons = document.querySelectorAll('.word-btn-new');
         this.letterButtons = document.querySelectorAll('.letter-btn');
 
         // Phrase button handlers
@@ -86,9 +86,9 @@ const Predictions = {
     },
 
     setLoading(isLoading) {
-        const section = document.querySelector('.predictions-section');
+        const section = document.querySelector('.predictions-section-new');
         if (isLoading) {
-            section.classList.add('loading');
+            section?.classList.add('loading');
             // Show loading text
             this.phraseButtons.forEach(btn => {
                 btn.textContent = 'Loading...';
@@ -103,7 +103,7 @@ const Predictions = {
                 btn.disabled = true;
             });
         } else {
-            section.classList.remove('loading');
+            section?.classList.remove('loading');
         }
     },
 
@@ -115,7 +115,7 @@ const Predictions = {
                 'I am feeling good',
                 'Can we talk'
             ],
-            words: ['yes', 'no', 'please', 'thanks', 'help'],
+            words: ['yes', 'no', 'please', 'thanks', 'help', 'okay'],
             letters: ['i', 'a', 'e', 'o', 'u']
         };
         this.update(defaults);

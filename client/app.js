@@ -3,8 +3,7 @@
 const App = {
     predictionTimeout: null,
     lastPredictionRequest: '',
-    predictionsEnabled: false,
-    predictionsToggleBtn: null,
+    predictionsEnabled: true, // Default to ON for new layout
     currentPredictionController: null,
 
     init() {
@@ -14,67 +13,61 @@ const App = {
         Predictions.init();
         SpeakButton.init();
         ListenToggle.init();
-
-        // Set up predictions toggle (uses inline onclick in HTML for iOS compatibility)
-        this.predictionsToggleBtn = document.getElementById('predictions-toggle');
-
-        // Load saved preference (default is off)
-        const saved = StorageService.getPreferences();
-        if (saved.predictionsEnabled === true) {
-            this.predictionsEnabled = true;
-        }
-        this.updatePredictionsToggleUI();
+        ExplicitContext.init();
 
         // Wire up component callbacks
         this.setupCallbacks();
 
-        // Load predictions based on initial state
+        // Load initial predictions
         if (this.predictionsEnabled) {
             this.requestPredictions();
         } else {
-            Predictions.showDefaults();
-        }
-    },
-
-    togglePredictions() {
-        this.predictionsEnabled = !this.predictionsEnabled;
-        this.updatePredictionsToggleUI();
-
-        // Save preference
-        const prefs = StorageService.getPreferences();
-        prefs.predictionsEnabled = this.predictionsEnabled;
-        StorageService.savePreferences(prefs);
-
-        // Request predictions if just enabled
-        if (this.predictionsEnabled) {
-            this.requestPredictions();
-        }
-    },
-
-    updatePredictionsToggleUI() {
-        if (this.predictionsEnabled) {
-            this.predictionsToggleBtn.classList.add('active');
-            this.predictionsToggleBtn.querySelector('.toggle-text').textContent = 'AI: ON';
-        } else {
-            this.predictionsToggleBtn.classList.remove('active');
-            this.predictionsToggleBtn.querySelector('.toggle-text').textContent = 'AI: OFF';
             Predictions.showDefaults();
         }
     },
 
     setupCallbacks() {
-        // Keyboard input
-        Keyboard.onKeyPress = (char, type) => {
-            if (type === 'backspace') {
-                MessageArea.backspace();
-            } else {
-                MessageArea.appendText(char);
+        // Keyboard input - handle all key types
+        Keyboard.onKeyPress = (char, type, state) => {
+            switch (type) {
+                case 'backspace':
+                    MessageArea.backspace();
+                    break;
+                case 'del-word':
+                    MessageArea.deleteWord();
+                    break;
+                case 'letter':
+                case 'space':
+                case 'enter':
+                case 'tab':
+                    MessageArea.appendText(char);
+                    break;
+                case 'phrase':
+                    MessageArea.appendPhrase(char);
+                    break;
+                case 'speak':
+                    SpeakButton.speak();
+                    break;
+                case 'arrow-up':
+                    MessageArea.moveCursorToStart();
+                    break;
+                case 'arrow-down':
+                    MessageArea.moveCursorToEnd();
+                    break;
+                case 'arrow-left':
+                    MessageArea.moveCursorToPrevWord();
+                    break;
+                case 'arrow-right':
+                    MessageArea.moveCursorToNextWord();
+                    break;
             }
         };
 
-        // Message changes trigger prediction updates
-        MessageArea.onMessageChange = (message) => {
-            this.debouncedPredictions(message);
+        // Message changes trigger prediction updates (only on text changes, not cursor moves)
+        MessageArea.onMessageChange = (message, textChanged) => {
+            if (textChanged) {
+                this.debouncedPredictions(message);
+            }
         };
 
         // Prediction selections
@@ -97,6 +90,20 @@ const App = {
         ListenToggle.onContextUpdate = (context) => {
             this.requestPredictions();
         };
+
+        // Explicit context save triggers predictions
+        ExplicitContext.onContextSave = (context) => {
+            ListenToggle.setExplicitContext(context);
+            this.requestPredictions();
+        };
+
+        // Wire "WHAT I HEARD" button to toggle listening
+        const whatIHeardBtn = document.getElementById('what-i-heard-btn');
+        if (whatIHeardBtn) {
+            whatIHeardBtn.addEventListener('click', () => {
+                ListenToggle.toggle();
+            });
+        }
     },
 
     debouncedPredictions(message) {

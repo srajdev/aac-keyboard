@@ -27,394 +27,6 @@ body {
     gap: 8px;
 }
 
-/* Header */
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 12px;
-    background: #16213e;
-    border-radius: 12px;
-    flex-shrink: 0;
-}
-
-.header h1 {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #4cc9f0;
-}
-
-.header-controls {
-    display: flex;
-    gap: 8px;
-}
-
-.toggle-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 10px 14px;
-    background: #2d3a5a;
-    border: 2px solid #555;
-    border-radius: 25px;
-    color: #999;
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.toggle-btn .toggle-icon,
-.toggle-btn .toggle-text {
-    pointer-events: none;
-}
-
-.toggle-btn.active {
-    background: #4361ee;
-    border-color: #4cc9f0;
-    color: #ffffff;
-}
-
-.toggle-btn.listening {
-    animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(76, 201, 240, 0.4); }
-    50% { box-shadow: 0 0 0 10px rgba(76, 201, 240, 0); }
-}
-
-/* Message Area */
-.message-section {
-    flex-shrink: 0;
-}
-
-.message-area {
-    background: #0f0f23;
-    border: 2px solid #4361ee;
-    border-radius: 12px;
-    padding: 16px;
-    min-height: 70px;
-    font-size: 1.4rem;
-    line-height: 1.4;
-    margin-bottom: 8px;
-}
-
-.message-text {
-    color: #ffffff;
-    white-space: pre-wrap;
-}
-
-.cursor {
-    color: #4cc9f0;
-    animation: blink 1s infinite;
-}
-
-@keyframes blink {
-    0%, 50% { opacity: 1; }
-    51%, 100% { opacity: 0; }
-}
-
-.message-controls {
-    display: flex;
-    gap: 8px;
-}
-
-.speak-btn {
-    flex: 2;
-    padding: 14px 20px;
-    background: linear-gradient(135deg, #4361ee, #3a0ca3);
-    border: none;
-    border-radius: 12px;
-    color: #ffffff;
-    font-size: 1.1rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: transform 0.1s, box-shadow 0.1s;
-}
-
-.speak-btn:active {
-    transform: scale(0.98);
-    box-shadow: 0 0 20px rgba(67, 97, 238, 0.5);
-}
-
-.control-btn {
-    flex: 1;
-    padding: 14px 12px;
-    background: #2d3a5a;
-    border: 2px solid #4361ee;
-    border-radius: 12px;
-    color: #ffffff;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.1s;
-}
-
-.control-btn:active {
-    background: #4361ee;
-    transform: scale(0.98);
-}
-
-/* Predictions Section */
-.predictions-section {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    overflow-y: auto;
-    min-height: 0;
-}
-
-.prediction-group {
-    flex-shrink: 0;
-}
-
-.prediction-label {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #8b8fa3;
-    margin-bottom: 8px;
-    padding-left: 4px;
-}
-
-/* Phrase Predictions */
-.phrase-predictions {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.phrase-btn {
-    width: 100%;
-    padding: 22px 20px;
-    background: linear-gradient(135deg, #16213e, #1a1a2e);
-    border: 3px solid #4361ee;
-    border-radius: 12px;
-    color: #ffffff;
-    font-size: 1.2rem;
-    text-align: left;
-    cursor: pointer;
-    transition: all 0.15s;
-    min-height: 65px;
-}
-
-.phrase-btn:active {
-    background: #4361ee;
-    transform: scale(0.99);
-}
-
-/* Word Predictions */
-.word-predictions {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.word-btn {
-    flex: 1;
-    min-width: 90px;
-    min-height: 60px;
-    padding: 18px 12px;
-    background: #2d3a5a;
-    border: 3px solid #7209b7;
-    border-radius: 12px;
-    color: #ffffff;
-    font-size: 1.15rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s;
-}
-
-.word-btn:active {
-    background: #7209b7;
-    transform: scale(0.95);
-}
-
-/* Letter Predictions */
-.letter-predictions {
-    display: flex;
-    gap: 10px;
-}
-
-.letter-btn {
-    flex: 1;
-    min-height: 60px;
-    padding: 18px 12px;
-    background: #2d3a5a;
-    border: 3px solid #f72585;
-    border-radius: 12px;
-    color: #ffffff;
-    font-size: 1.4rem;
-    font-weight: 700;
-    text-transform: lowercase;
-    cursor: pointer;
-    transition: all 0.15s;
-}
-
-.letter-btn:active {
-    background: #f72585;
-    transform: scale(0.95);
-}
-
-/* Keyboard Section */
-.keyboard-section {
-    flex-shrink: 0;
-    padding-top: 8px;
-}
-
-.keyboard {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.keyboard-row {
-    display: flex;
-    justify-content: center;
-    gap: 5px;
-}
-
-.key {
-    min-width: 70px;
-    height: 65px;
-    background: linear-gradient(180deg, #3d4a6b, #2d3a5a);
-    border: 1px solid #4361ee;
-    border-radius: 8px;
-    color: #ffffff;
-    font-size: 1.2rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.1s;
-    flex: 1;
-    max-width: 80px;
-}
-
-.key:active {
-    background: #4361ee;
-    transform: translateY(2px);
-}
-
-.backspace-key {
-    background: linear-gradient(180deg, #5a3a5a, #4a2a4a);
-    border-color: #f72585;
-}
-
-.backspace-key:active {
-    background: #f72585;
-}
-
-.space-key {
-    flex: 2.5;
-    max-width: 180px;
-    background: linear-gradient(180deg, #3a5a4a, #2a4a3a);
-    border-color: #4cc9f0;
-}
-
-.space-key:active {
-    background: #4cc9f0;
-    color: #1a1a2e;
-}
-
-/* Context Section */
-.context-section {
-    flex-shrink: 0;
-    background: #16213e;
-    border-radius: 12px;
-    overflow: hidden;
-    transition: max-height 0.3s;
-}
-
-.context-section.collapsed .context-content {
-    display: none;
-}
-
-.context-toggle {
-    width: 100%;
-    padding: 12px 16px;
-    background: transparent;
-    border: none;
-    color: #8b8fa3;
-    font-size: 0.9rem;
-    text-align: left;
-    cursor: pointer;
-}
-
-.context-content {
-    padding: 0 16px 12px;
-}
-
-#context-text {
-    color: #b8c0d4;
-    font-size: 0.95rem;
-    line-height: 1.4;
-    font-style: italic;
-}
-
-/* Floating Speak Button */
-.floating-speak-btn {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #4361ee, #3a0ca3);
-    border: 3px solid #4cc9f0;
-    color: #ffffff;
-    font-size: 2rem;
-    cursor: pointer;
-    box-shadow: 0 4px 15px rgba(67, 97, 238, 0.4);
-    transition: transform 0.1s, box-shadow 0.1s;
-    z-index: 100;
-}
-
-.floating-speak-btn:active {
-    transform: scale(0.95);
-    box-shadow: 0 2px 10px rgba(67, 97, 238, 0.6);
-}
-
-/* Loading State */
-.predictions-section.loading {
-    pointer-events: none;
-}
-
-.predictions-section.loading .phrase-btn,
-.predictions-section.loading .word-btn,
-.predictions-section.loading .letter-btn {
-    opacity: 0.6;
-}
-
-/* Responsive adjustments for smaller tablets */
-@media (max-height: 800px) {
-    .message-area {
-        min-height: 50px;
-        padding: 12px;
-    }
-
-    .phrase-btn {
-        padding: 10px 14px;
-    }
-
-    .key {
-        height: 48px;
-        min-width: 50px;
-    }
-}
-
-/* Larger tablets / landscape */
-@media (min-width: 1024px) {
-    #app {
-        max-width: 900px;
-        margin: 0 auto;
-    }
-
-    .key {
-        height: 70px;
-        font-size: 1.3rem;
-    }
-}
-
 /* Password Gate */
 .password-gate {
     display: none;
@@ -487,4 +99,497 @@ body {
     color: #f72585;
     margin-top: 15px;
     font-size: 0.9rem;
+}
+
+/* Message Area with CLEAR button */
+.message-section-new {
+    flex-shrink: 0;
+}
+
+.message-header {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.message-area-new {
+    flex: 1;
+    background: #0f0f23;
+    border: 2px solid #4361ee;
+    border-radius: 12px;
+    padding: 16px;
+    min-height: 70px;
+    font-size: 1.4rem;
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+}
+
+.message-text {
+    color: #ffffff;
+    white-space: pre-wrap;
+}
+
+.clear-btn-new {
+    padding: 16px 20px;
+    background: linear-gradient(135deg, #f72585, #b5179e);
+    border: none;
+    border-radius: 12px;
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.1s;
+    min-width: 100px;
+}
+
+.clear-btn-new:active {
+    transform: scale(0.98);
+    box-shadow: 0 0 20px rgba(247, 37, 133, 0.5);
+}
+
+/* Predictions Section (side-by-side: phrases 60%, words 40%) */
+.predictions-section-new {
+    flex-shrink: 0;
+    display: flex;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.phrases-container {
+    flex: 6;
+    display: flex;
+}
+
+.words-container {
+    flex: 4;
+    display: flex;
+}
+
+.phrase-predictions-new {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.phrase-btn-new {
+    width: 100%;
+    padding: 16px 16px;
+    background: linear-gradient(135deg, #16213e, #1a1a2e);
+    border: 3px solid #4361ee;
+    border-radius: 12px;
+    color: #ffffff;
+    font-size: 1rem;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s;
+    min-height: 65px;
+    display: flex;
+    align-items: center;
+}
+
+.phrase-btn-new:active {
+    background: #4361ee;
+    transform: scale(0.99);
+}
+
+.word-predictions-new {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 8px;
+    width: 100%;
+}
+
+.word-btn-new {
+    padding: 12px 10px;
+    background: #2d3a5a;
+    border: 3px solid #7209b7;
+    border-radius: 12px;
+    color: #ffffff;
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.word-btn-new:active {
+    background: #7209b7;
+    transform: scale(0.95);
+}
+
+/* Letter Predictions */
+.letter-section {
+    flex-shrink: 0;
+    margin-bottom: 8px;
+}
+
+.letter-predictions {
+    display: flex;
+    gap: 10px;
+}
+
+.letter-btn {
+    flex: 1;
+    min-height: 60px;
+    padding: 18px 12px;
+    background: #2d3a5a;
+    border: 3px solid #f72585;
+    border-radius: 12px;
+    color: #ffffff;
+    font-size: 1.4rem;
+    font-weight: 700;
+    text-transform: lowercase;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.letter-btn:active {
+    background: #f72585;
+    transform: scale(0.95);
+}
+
+/* Custom 6-Row Keyboard */
+.keyboard-section-new {
+    flex-shrink: 0;
+}
+
+.keyboard-new {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.keyboard-row-new {
+    display: flex;
+    gap: 5px;
+    justify-content: stretch;
+}
+
+.key-new {
+    flex: 1;
+    min-height: 65px;
+    padding: 8px 4px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.key-new:active {
+    transform: scale(0.95);
+}
+
+/* Letter keys - Blue gradient */
+.key-letter {
+    background: linear-gradient(180deg, #3d4a6b, #2d3a5a);
+    border-color: #4361ee;
+}
+
+.key-letter:active {
+    background: #4361ee;
+}
+
+/* Modifier keys - Orange gradient */
+.key-modifier {
+    background: linear-gradient(180deg, #ff8500, #d67000);
+    border-color: #ff8500;
+    font-size: 0.85rem;
+}
+
+.key-modifier:active {
+    background: #ffaa00;
+}
+
+.key-modifier.active {
+    background: #ffaa00;
+    box-shadow: 0 0 15px rgba(255, 170, 0, 0.6);
+}
+
+/* Action keys - Purple/Pink gradient */
+.key-action {
+    background: linear-gradient(180deg, #7209b7, #560bad);
+    border-color: #b5179e;
+    font-size: 0.85rem;
+}
+
+.key-action:active {
+    background: #b5179e;
+}
+
+/* Arrow keys - Cyan gradient */
+.key-arrow {
+    background: linear-gradient(180deg, #4cc9f0, #3a9fc0);
+    border-color: #4cc9f0;
+    font-size: 1.3rem;
+}
+
+.key-arrow:active {
+    background: #72dff9;
+}
+
+/* Space bar - Green gradient */
+.key-space {
+    flex: 3;
+    background: linear-gradient(180deg, #2a9d8f, #1f7a6f);
+    border-color: #2a9d8f;
+}
+
+.key-space:active {
+    background: #3dbeaf;
+    color: #1a1a2e;
+}
+
+/* Quick phrase button */
+.key-phrase {
+    flex: 1.5;
+    background: linear-gradient(180deg, #3d4a6b, #2d3a5a);
+    border-color: #4361ee;
+    font-size: 0.7rem;
+    line-height: 1.2;
+}
+
+.key-phrase:active {
+    background: #4361ee;
+}
+
+/* Punctuation buttons */
+.key-punct {
+    background: linear-gradient(180deg, #5a3a5a, #4a2a4a);
+    border-color: #f72585;
+    font-size: 2rem;
+}
+
+.key-punct:active {
+    background: #f72585;
+}
+
+/* Number Keyboard */
+.number-keyboard {
+    display: none;
+}
+
+.number-keyboard.active {
+    display: flex;
+}
+
+/* Context Buttons at Bottom */
+.context-buttons-section {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+    margin-top: 8px;
+}
+
+.context-btn {
+    flex: 1;
+    padding: 16px 12px;
+    background: #2d3a5a;
+    border: 2px solid #4361ee;
+    border-radius: 12px;
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.1s;
+}
+
+.context-btn:active {
+    background: #4361ee;
+    transform: scale(0.98);
+}
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    display: none;
+}
+
+.modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.modal-content {
+    position: relative;
+    background: #16213e;
+    border-radius: 16px;
+    padding: 24px;
+    border: 2px solid #4361ee;
+    max-width: 90%;
+    z-index: 1001;
+}
+
+/* Punctuation Grid Modal */
+.punctuation-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    padding: 20px;
+}
+
+.punct-btn {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(180deg, #3d4a6b, #2d3a5a);
+    border: 2px solid #4361ee;
+    border-radius: 12px;
+    color: #ffffff;
+    font-size: 2rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.1s;
+}
+
+.punct-btn:active {
+    background: #4361ee;
+    transform: scale(0.95);
+}
+
+/* Explicit Context Modal */
+.explicit-context-content {
+    width: 500px;
+    max-width: 90%;
+}
+
+.explicit-context-content h2 {
+    color: #4cc9f0;
+    margin-bottom: 16px;
+    font-size: 1.5rem;
+    text-align: center;
+}
+
+#explicit-context-textarea {
+    width: 100%;
+    padding: 16px;
+    font-size: 1.1rem;
+    line-height: 1.5;
+    border: 2px solid #4361ee;
+    border-radius: 12px;
+    background: #0f0f23;
+    color: #ffffff;
+    font-family: inherit;
+    resize: vertical;
+    margin-bottom: 16px;
+}
+
+#explicit-context-textarea:focus {
+    outline: none;
+    border-color: #4cc9f0;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.modal-btn {
+    flex: 1;
+    padding: 16px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.1s;
+}
+
+.modal-btn-primary {
+    background: linear-gradient(135deg, #4361ee, #3a0ca3);
+    color: #ffffff;
+}
+
+.modal-btn-primary:active {
+    transform: scale(0.98);
+    box-shadow: 0 0 20px rgba(67, 97, 238, 0.5);
+}
+
+.modal-btn-secondary {
+    background: #2d3a5a;
+    color: #ffffff;
+    border: 2px solid #4361ee;
+}
+
+.modal-btn-secondary:active {
+    background: #3d4a6b;
+    transform: scale(0.98);
+}
+
+/* Loading State */
+.predictions-section-new.loading {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+/* Responsive adjustments for smaller tablets */
+@media (max-height: 800px) {
+    .message-area-new {
+        min-height: 50px;
+        padding: 12px;
+        font-size: 1.2rem;
+    }
+
+    .phrase-btn-new {
+        padding: 12px 14px;
+        min-height: 55px;
+        font-size: 0.9rem;
+    }
+
+    .word-btn-new {
+        min-height: 50px;
+        font-size: 0.95rem;
+    }
+
+    .letter-btn {
+        min-height: 50px;
+    }
+
+    .key-new {
+        min-height: 55px;
+        font-size: 0.9rem;
+    }
+
+    .key-arrow, .key-punct {
+        font-size: 1.1rem;
+    }
+}
+
+/* Larger tablets / landscape */
+@media (min-width: 1024px) {
+    #app {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .key-new {
+        min-height: 70px;
+        font-size: 1.1rem;
+    }
 }

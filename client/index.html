@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <title>Viraj Keyboard</title>
-    <link rel="stylesheet" href="/static/styles/main.css?v=2">
+    <link rel="stylesheet" href="/static/styles/main.css?v=3">
 </head>
 <body>
     <!-- Password Gate -->
@@ -21,145 +21,195 @@
     </div>
 
     <div id="app" style="display: none;">
-        <!-- Header -->
-        <header class="header">
-            <h1>VIRAJ KEYBOARD</h1>
-            <div class="header-controls">
-                <button id="predictions-toggle" class="toggle-btn" aria-label="Toggle predictions" onclick="App.togglePredictions()">
-                    <span class="toggle-icon">🤖</span>
-                    <span class="toggle-text">AI: OFF</span>
-                </button>
-                <button id="listen-toggle" class="toggle-btn" aria-label="Toggle listening">
-                    <span class="toggle-icon">🎤</span>
-                    <span class="toggle-text">Listen: OFF</span>
-                </button>
-            </div>
-        </header>
-
-        <!-- Message Area -->
-        <section class="message-section">
-            <div id="message-area" class="message-area">
-                <span id="message-text" class="message-text"></span>
-                <span class="cursor">▌</span>
-            </div>
-            <div class="message-controls">
-                <button id="speak-btn" class="speak-btn" aria-label="Speak message" onclick="SpeakButton.speak()">
-                    🔊 SPEAK
-                </button>
-                <button id="delete-word-btn" class="control-btn" aria-label="Delete last word">
-                    ⌫ Delete Word
-                </button>
-                <button id="clear-btn" class="control-btn" aria-label="Clear all">
-                    Clear
-                </button>
+        <!-- Message Area with CLEAR button -->
+        <section class="message-section-new">
+            <div class="message-header">
+                <div id="message-area" class="message-area-new">
+                    <span id="message-text" class="message-text"></span>
+                </div>
+                <button id="clear-btn" class="clear-btn-new" aria-label="Clear all">CLEAR</button>
             </div>
         </section>
 
-        <!-- Predictions Section -->
-        <section class="predictions-section">
-            <!-- Phrase Predictions -->
-            <div class="prediction-group">
-                <h2 class="prediction-label">💬 PHRASE PREDICTIONS</h2>
-                <div id="phrase-predictions" class="phrase-predictions">
-                    <button class="phrase-btn" data-index="0">Loading...</button>
-                    <button class="phrase-btn" data-index="1">Loading...</button>
-                    <button class="phrase-btn" data-index="2">Loading...</button>
+        <!-- Predictions Section (side-by-side: phrases left 60%, words right 40%) -->
+        <section class="predictions-section-new">
+            <!-- Phrase Predictions (Left 60%) -->
+            <div class="phrases-container">
+                <div id="phrase-predictions" class="phrase-predictions-new">
+                    <button class="phrase-btn-new" data-index="0">Loading...</button>
+                    <button class="phrase-btn-new" data-index="1">Loading...</button>
+                    <button class="phrase-btn-new" data-index="2">Loading...</button>
                 </div>
             </div>
 
-            <!-- Word Predictions -->
-            <div class="prediction-group">
-                <h2 class="prediction-label">📝 WORD PREDICTIONS</h2>
-                <div id="word-predictions" class="word-predictions">
-                    <button class="word-btn" data-index="0">...</button>
-                    <button class="word-btn" data-index="1">...</button>
-                    <button class="word-btn" data-index="2">...</button>
-                    <button class="word-btn" data-index="3">...</button>
-                    <button class="word-btn" data-index="4">...</button>
-                </div>
-            </div>
-
-            <!-- Letter Predictions -->
-            <div class="prediction-group">
-                <h2 class="prediction-label">🔤 LETTER PREDICTIONS</h2>
-                <div id="letter-predictions" class="letter-predictions">
-                    <button class="letter-btn" data-index="0">...</button>
-                    <button class="letter-btn" data-index="1">...</button>
-                    <button class="letter-btn" data-index="2">...</button>
-                    <button class="letter-btn" data-index="3">...</button>
-                    <button class="letter-btn" data-index="4">...</button>
+            <!-- Word Predictions (Right 40%, 2x3 grid) -->
+            <div class="words-container">
+                <div id="word-predictions" class="word-predictions-new">
+                    <button class="word-btn-new" data-index="0">...</button>
+                    <button class="word-btn-new" data-index="1">...</button>
+                    <button class="word-btn-new" data-index="2">...</button>
+                    <button class="word-btn-new" data-index="3">...</button>
+                    <button class="word-btn-new" data-index="4">...</button>
+                    <button class="word-btn-new" data-index="5">...</button>
                 </div>
             </div>
         </section>
 
-        <!-- Keyboard Section -->
-        <section class="keyboard-section">
-            <div id="keyboard" class="keyboard">
-                <!-- Row 1 -->
-                <div class="keyboard-row">
-                    <button class="key" data-key="q">Q</button>
-                    <button class="key" data-key="w">W</button>
-                    <button class="key" data-key="e">E</button>
-                    <button class="key" data-key="r">R</button>
-                    <button class="key" data-key="t">T</button>
-                    <button class="key" data-key="y">Y</button>
-                    <button class="key" data-key="u">U</button>
-                    <button class="key" data-key="i">I</button>
-                    <button class="key" data-key="o">O</button>
-                    <button class="key" data-key="p">P</button>
+        <!-- Letter Predictions -->
+        <section class="letter-section">
+            <div id="letter-predictions" class="letter-predictions">
+                <button class="letter-btn" data-index="0">...</button>
+                <button class="letter-btn" data-index="1">...</button>
+                <button class="letter-btn" data-index="2">...</button>
+                <button class="letter-btn" data-index="3">...</button>
+                <button class="letter-btn" data-index="4">...</button>
+            </div>
+        </section>
+
+        <!-- Custom 6-Row Keyboard -->
+        <section class="keyboard-section-new">
+            <!-- Letter Keyboard -->
+            <div id="keyboard" class="keyboard-new">
+                <!-- Row 1: Q W E R T [DEL WORD] [BKSP] -->
+                <div class="keyboard-row-new">
+                    <button class="key-new key-letter" data-key="q">Q</button>
+                    <button class="key-new key-letter" data-key="w">W</button>
+                    <button class="key-new key-letter" data-key="e">E</button>
+                    <button class="key-new key-letter" data-key="r">R</button>
+                    <button class="key-new key-letter" data-key="t">T</button>
+                    <button class="key-new key-action" data-key="del-word">DEL WORD</button>
+                    <button class="key-new key-action" data-key="backspace">BKSP</button>
                 </div>
-                <!-- Row 2 -->
-                <div class="keyboard-row">
-                    <button class="key" data-key="a">A</button>
-                    <button class="key" data-key="s">S</button>
-                    <button class="key" data-key="d">D</button>
-                    <button class="key" data-key="f">F</button>
-                    <button class="key" data-key="g">G</button>
-                    <button class="key" data-key="h">H</button>
-                    <button class="key" data-key="j">J</button>
-                    <button class="key" data-key="k">K</button>
-                    <button class="key" data-key="l">L</button>
-                    <button class="key backspace-key" data-key="backspace">⌫</button>
+
+                <!-- Row 2: [TAB] [↑] [↓] Y U O I P -->
+                <div class="keyboard-row-new">
+                    <button class="key-new key-modifier" data-key="tab">TAB</button>
+                    <button class="key-new key-arrow" data-key="arrow-up">↑</button>
+                    <button class="key-new key-arrow" data-key="arrow-down">↓</button>
+                    <button class="key-new key-letter" data-key="y">Y</button>
+                    <button class="key-new key-letter" data-key="u">U</button>
+                    <button class="key-new key-letter" data-key="o">O</button>
+                    <button class="key-new key-letter" data-key="i">I</button>
+                    <button class="key-new key-letter" data-key="p">P</button>
                 </div>
-                <!-- Row 3 -->
-                <div class="keyboard-row">
-                    <button class="key" data-key="z">Z</button>
-                    <button class="key" data-key="x">X</button>
-                    <button class="key" data-key="c">C</button>
-                    <button class="key" data-key="v">V</button>
-                    <button class="key" data-key="b">B</button>
-                    <button class="key" data-key="n">N</button>
-                    <button class="key" data-key="m">M</button>
-                    <button class="key space-key" data-key="space">SPACE</button>
+
+                <!-- Row 3: [CAPS] A S D F [SPEAK] [ENTER] -->
+                <div class="keyboard-row-new">
+                    <button class="key-new key-modifier" data-key="caps" id="caps-key">CAPS</button>
+                    <button class="key-new key-letter" data-key="a">A</button>
+                    <button class="key-new key-letter" data-key="s">S</button>
+                    <button class="key-new key-letter" data-key="d">D</button>
+                    <button class="key-new key-letter" data-key="f">F</button>
+                    <button class="key-new key-action" data-key="speak">SPEAK</button>
+                    <button class="key-new key-action" data-key="enter">ENTER</button>
+                </div>
+
+                <!-- Row 4: [CTRL] ! ? [123] G H K L -->
+                <div class="keyboard-row-new">
+                    <button class="key-new key-modifier" data-key="ctrl" id="ctrl-key">CTRL</button>
+                    <button class="key-new key-letter" data-key="!">!</button>
+                    <button class="key-new key-letter" data-key="?">?</button>
+                    <button class="key-new key-modifier" data-key="123" id="num-key">123</button>
+                    <button class="key-new key-letter" data-key="g">G</button>
+                    <button class="key-new key-letter" data-key="h">H</button>
+                    <button class="key-new key-letter" data-key="k">K</button>
+                    <button class="key-new key-letter" data-key="l">L</button>
+                </div>
+
+                <!-- Row 5: [SHIFT] Z X C V B N M -->
+                <div class="keyboard-row-new">
+                    <button class="key-new key-modifier" data-key="shift" id="shift-key">SHIFT</button>
+                    <button class="key-new key-letter" data-key="z">Z</button>
+                    <button class="key-new key-letter" data-key="x">X</button>
+                    <button class="key-new key-letter" data-key="c">C</button>
+                    <button class="key-new key-letter" data-key="v">V</button>
+                    <button class="key-new key-letter" data-key="b">B</button>
+                    <button class="key-new key-letter" data-key="n">N</button>
+                    <button class="key-new key-letter" data-key="m">M</button>
+                </div>
+
+                <!-- Row 6: [SORRY, I GOOFED UP!] [•punct] [←] [SPACE] [→] [•period] -->
+                <div class="keyboard-row-new">
+                    <button class="key-new key-phrase" data-key="phrase-goof">SORRY, I GOOFED UP!</button>
+                    <button class="key-new key-punct" data-key="punct-menu">•</button>
+                    <button class="key-new key-arrow" data-key="arrow-left">←</button>
+                    <button class="key-new key-space" data-key="space">SPACE</button>
+                    <button class="key-new key-arrow" data-key="arrow-right">→</button>
+                    <button class="key-new key-punct" data-key="period">•</button>
+                </div>
+            </div>
+
+            <!-- Number Keyboard (hidden by default) -->
+            <div id="number-keyboard" class="keyboard-new number-keyboard" style="display: none;">
+                <div class="keyboard-row-new">
+                    <button class="key-new key-letter" data-key="1">1</button>
+                    <button class="key-new key-letter" data-key="2">2</button>
+                    <button class="key-new key-letter" data-key="3">3</button>
+                    <button class="key-new key-letter" data-key="4">4</button>
+                    <button class="key-new key-letter" data-key="5">5</button>
+                </div>
+                <div class="keyboard-row-new">
+                    <button class="key-new key-letter" data-key="6">6</button>
+                    <button class="key-new key-letter" data-key="7">7</button>
+                    <button class="key-new key-letter" data-key="8">8</button>
+                    <button class="key-new key-letter" data-key="9">9</button>
+                    <button class="key-new key-letter" data-key="0">0</button>
+                </div>
+                <div class="keyboard-row-new">
+                    <button class="key-new key-modifier" data-key="abc">ABC</button>
                 </div>
             </div>
         </section>
 
-        <!-- Context Panel (Collapsible) -->
-        <section id="context-section" class="context-section collapsed">
-            <button id="context-toggle" class="context-toggle">
-                👂 What I heard: <span id="context-indicator">(tap to expand)</span>
-            </button>
-            <div id="context-content" class="context-content">
-                <p id="context-text">No conversation captured yet. Tap "Listen" to start.</p>
-            </div>
+        <!-- Bottom Context Buttons -->
+        <section class="context-buttons-section">
+            <button id="what-i-heard-btn" class="context-btn">WHAT I HEARD</button>
+            <button id="explicit-context-btn" class="context-btn">EXPLICIT CONTEXT</button>
         </section>
-
-        <!-- Floating Speak Button -->
-        <button id="floating-speak-btn" class="floating-speak-btn" aria-label="Speak message" onclick="SpeakButton.speak()">
-            🔊
-        </button>
     </div>
 
-    <script src="/static/services/auth.js?v=2"></script>
-    <script src="/static/services/api.js?v=2"></script>
-    <script src="/static/services/speech.js?v=2"></script>
-    <script src="/static/services/storage.js?v=2"></script>
-    <script src="/static/components/MessageArea.js?v=2"></script>
-    <script src="/static/components/Keyboard.js?v=2"></script>
-    <script src="/static/components/Predictions.js?v=2"></script>
-    <script src="/static/components/SpeakButton.js?v=2"></script>
-    <script src="/static/components/ListenToggle.js?v=2"></script>
-    <script src="/static/app.js?v=2"></script>
+    <!-- Punctuation Modal -->
+    <div id="punctuation-modal" class="modal" style="display: none;">
+        <div class="modal-overlay"></div>
+        <div class="modal-content punctuation-grid">
+            <button class="punct-btn" data-char=",">,</button>
+            <button class="punct-btn" data-char=".">.</button>
+            <button class="punct-btn" data-char="!">!</button>
+            <button class="punct-btn" data-char="?">?</button>
+            <button class="punct-btn" data-char=";">;</button>
+            <button class="punct-btn" data-char=":">:</button>
+            <button class="punct-btn" data-char="'">'</button>
+            <button class="punct-btn" data-char='"'>"</button>
+            <button class="punct-btn" data-char="-">-</button>
+            <button class="punct-btn" data-char="(">(</button>
+            <button class="punct-btn" data-char=")">)</button>
+            <button class="punct-btn" data-char="/">/</button>
+        </div>
+    </div>
+
+    <!-- Explicit Context Modal -->
+    <div id="explicit-context-modal" class="modal" style="display: none;">
+        <div class="modal-overlay"></div>
+        <div class="modal-content explicit-context-content">
+            <h2>Explicit Context</h2>
+            <textarea id="explicit-context-textarea" placeholder="Enter context to help predictions..." rows="6"></textarea>
+            <div class="modal-buttons">
+                <button id="explicit-context-save" class="modal-btn modal-btn-primary">Save</button>
+                <button id="explicit-context-cancel" class="modal-btn modal-btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/services/auth.js?v=3"></script>
+    <script src="/static/services/api.js?v=3"></script>
+    <script src="/static/services/speech.js?v=3"></script>
+    <script src="/static/services/storage.js?v=3"></script>
+    <script src="/static/components/MessageArea.js?v=3"></script>
+    <script src="/static/components/Keyboard.js?v=3"></script>
+    <script src="/static/components/Predictions.js?v=3"></script>
+    <script src="/static/components/SpeakButton.js?v=3"></script>
+    <script src="/static/components/ListenToggle.js?v=3"></script>
+    <script src="/static/components/ExplicitContext.js?v=3"></script>
+    <script src="/static/app.js?v=3"></script>
 </body>
 </html>

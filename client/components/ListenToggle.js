@@ -6,6 +6,7 @@ const ListenToggle = {
     contextSection: null,
     isListening: false,
     conversationContext: '',
+    explicitContext: '',
     onContextUpdate: null,
 
     init() {
@@ -78,7 +79,19 @@ const ListenToggle = {
     },
 
     getContext() {
-        return this.conversationContext;
+        // Combine conversation context and explicit context
+        const parts = [];
+        if (this.conversationContext) {
+            parts.push(this.conversationContext);
+        }
+        if (this.explicitContext) {
+            parts.push(`Context: ${this.explicitContext}`);
+        }
+        return parts.join(' | ');
+    },
+
+    setExplicitContext(context) {
+        this.explicitContext = context;
     },
 
     clearContext() {
