@@ -52,15 +52,16 @@ const MessageArea = {
                 wordStart--;
             }
 
-            // Replace the partial word with the predicted word
-            this.currentMessage = before.slice(0, wordStart) + word + after;
-            this.cursorPosition = wordStart + word.length;
+            // Replace the partial word with the predicted word + automatic space
+            this.currentMessage = before.slice(0, wordStart) + word + ' ' + after;
+            this.cursorPosition = wordStart + word.length + 1; // +1 for the space
         } else {
-            // No partial word - just add the word (with space if needed)
+            // No partial word - just add the word (with space before if needed, and space after)
             let textToAdd = word;
             if (before.length > 0 && !before.endsWith(' ')) {
                 textToAdd = ' ' + word;
             }
+            textToAdd += ' '; // Add space after the word
 
             this.currentMessage = before + textToAdd + after;
 
@@ -74,8 +75,8 @@ const MessageArea = {
     },
 
     appendPhrase(phrase) {
-        // Replace current message with phrase (or append if user was mid-sentence)
-        this.currentMessage = phrase;
+        // Replace current message with phrase + automatic space
+        this.currentMessage = phrase + ' ';
         this.cursorPosition = null; // Reset cursor to end
         this.render();
         this.notifyChange(true);
