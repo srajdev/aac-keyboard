@@ -103,10 +103,10 @@ const App = {
                     SpeakButton.speak();
                     break;
                 case 'arrow-up':
-                    MessageArea.moveCursorToStart();
+                    MessageArea.moveCursorToEnd();
                     break;
                 case 'arrow-down':
-                    MessageArea.moveCursorToEnd();
+                    MessageArea.moveCursorToStart();
                     break;
                 case 'arrow-left':
                     MessageArea.moveCursorToPrevWord();
