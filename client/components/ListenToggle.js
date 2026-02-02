@@ -98,19 +98,24 @@ const ListenToggle = {
     },
 
     getContext() {
-        // Combine conversation context and explicit context
+        // Combine conversation context and explicit context with clear labels
         const parts = [];
+
+        if (this.explicitContext && this.explicitContext.trim()) {
+            // Explicit context describes Viraj's environment/situation
+            parts.push(`Viraj's situation: ${this.explicitContext.trim()}`);
+        }
+
         if (this.conversationContext) {
             // Clean the conversation context: remove timestamp [HH:MM] and quotes
             const cleaned = this.cleanContextText(this.conversationContext);
             if (cleaned) {
-                parts.push(cleaned);
+                // Conversation context is what others are saying around Viraj
+                parts.push(`What others said: "${cleaned}"`);
             }
         }
-        if (this.explicitContext) {
-            parts.push(this.explicitContext);
-        }
-        return parts.join(' | ');
+
+        return parts.join('\n');
     },
 
     cleanContextText(text) {

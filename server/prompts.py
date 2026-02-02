@@ -13,8 +13,11 @@ Always return valid JSON with exactly the structure requested."""
 def build_prediction_prompt(partial_input: str, conversation_context: str) -> str:
     prompt = ""
 
+    # Context can include two types of information:
+    # 1. Viraj's situation (environment, room, activity) - from explicit context input
+    # 2. What others said (ambient conversation) - from speech recognition
     if conversation_context and conversation_context.strip():
-        prompt += f'Context from ongoing conversation:\n"{conversation_context}"\n\n'
+        prompt += f'Context:\n{conversation_context}\n\n'
 
     if partial_input and partial_input.strip():
         prompt += f'Viraj has typed so far: "{partial_input}"\n\n'
@@ -33,11 +36,16 @@ Rules:
 - words: 5 single words that could come next (or start a message if no input)
 - letters: 5 most likely next letters (lowercase)
 
-Consider:
-1. The conversation context (what others just said)
-2. Common responses to questions
-3. Viraj's partial input and natural completion
-4. Natural conversation flow
+Consider when making predictions:
+1. Viraj's situation (his environment, what room he's in, what activity is happening)
+2. What others said to Viraj (questions asked, statements made)
+3. Common responses to questions and statements in conversation
+4. Viraj's partial input and natural ways to complete it
+5. Natural conversation flow for the given situation
+
+Use BOTH the situational context and conversational context to generate relevant predictions.
+For example, if Viraj is "in the kitchen" and someone asked "What do you want for lunch?",
+predictions should relate to food choices, not generic responses.
 
 Return ONLY the JSON object, no other text."""
 
