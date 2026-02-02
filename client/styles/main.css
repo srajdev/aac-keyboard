@@ -326,6 +326,10 @@ body {
     display: flex;
     gap: 10px;
     margin-bottom: 8px;
+    max-width: var(--prediction-max-width, 100%);  /* Dynamically adjustable width */
+    margin-left: auto;    /* Right-align on wide screens */
+    margin-right: 0;
+    width: 100%;          /* Allow flexibility on narrow screens */
 }
 
 .phrases-container {
@@ -424,25 +428,6 @@ body {
 .letter-btn:active {
     background: #f72585;
     transform: scale(0.95);
-}
-
-/* Prediction Width Variants */
-.predictions-section-new.pred-width-compact .phrases-container {
-    flex: 4;
-}
-
-.predictions-section-new.pred-width-compact .words-container {
-    flex: 3;
-}
-
-/* Medium is default (flex: 6 and flex: 4) - no override needed */
-
-.predictions-section-new.pred-width-wide .phrases-container {
-    flex: 8;
-}
-
-.predictions-section-new.pred-width-wide .words-container {
-    flex: 5;
 }
 
 /* Custom 6-Row Keyboard */

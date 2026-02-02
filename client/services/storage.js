@@ -104,9 +104,9 @@ const StorageService = {
     // Prediction Width
     getPredictionWidth() {
         try {
-            return localStorage.getItem('viraj_prediction_width') || 'medium';
+            return localStorage.getItem('viraj_prediction_width') || '18';
         } catch (e) {
-            return 'medium';
+            return '18';
         }
     },
 
