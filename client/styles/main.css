@@ -590,7 +590,7 @@ body {
 .key-punct {
     background: linear-gradient(180deg, #4a3a5a, #3a2a4a);
     border-color: #7209b7;
-    font-size: 2rem;
+    font-size: 1rem;
 }
 
 .key-punct:active {
