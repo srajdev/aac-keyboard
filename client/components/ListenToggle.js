@@ -101,12 +101,25 @@ const ListenToggle = {
         // Combine conversation context and explicit context
         const parts = [];
         if (this.conversationContext) {
-            parts.push(this.conversationContext);
+            // Clean the conversation context: remove timestamp [HH:MM] and quotes
+            const cleaned = this.cleanContextText(this.conversationContext);
+            if (cleaned) {
+                parts.push(cleaned);
+            }
         }
         if (this.explicitContext) {
-            parts.push(`Context: ${this.explicitContext}`);
+            parts.push(this.explicitContext);
         }
         return parts.join(' | ');
+    },
+
+    cleanContextText(text) {
+        // Remove timestamps like [12:34] and surrounding quotes
+        // Example: '[12:34] "hello there"' -> 'hello there'
+        return text
+            .replace(/\[\d{1,2}:\d{2}\]\s*/g, '') // Remove [HH:MM] timestamps
+            .replace(/^["'\s]+|["'\s]+$/g, '')     // Remove leading/trailing quotes and spaces
+            .trim();
     },
 
     setExplicitContext(context) {
