@@ -6,10 +6,10 @@
 const PredictionWidthControl = {
     MIN_WIDTH: 10,  // 10cm minimum
     MAX_WIDTH: 25,  // 25cm maximum (or "full")
-    DEFAULT_WIDTH: 18,  // 18cm default
+    DEFAULT_WIDTH: 'full',  // Full width default
     STEP: 1,  // 1cm increments
 
-    currentWidth: 18,
+    currentWidth: 'full',
 
     init() {
         // Load saved width from localStorage
