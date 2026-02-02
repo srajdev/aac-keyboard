@@ -91,6 +91,10 @@ const App = {
                 case 'enter':
                 case 'tab':
                     MessageArea.appendText(char);
+                    // Auto-speak on sentence delimiters (. or ?)
+                    if (char === '.' || char === '?') {
+                        SpeakButton.speak();
+                    }
                     break;
                 case 'phrase':
                     MessageArea.appendPhrase(char);
