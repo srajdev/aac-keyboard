@@ -37,25 +37,38 @@ const MessageArea = {
     },
 
     appendWord(word) {
-        // Add space before word if needed
-        let textToAdd = word;
-        if (this.cursorPosition === null) {
-            if (this.currentMessage && !this.currentMessage.endsWith(' ')) {
-                textToAdd = ' ' + word;
+        // Check if cursor is in the middle of a word (partial word exists before cursor)
+        const pos = this.cursorPosition === null ? this.currentMessage.length : this.cursorPosition;
+        const before = this.currentMessage.slice(0, pos);
+        const after = this.currentMessage.slice(pos);
+
+        // Check if there's a partial word to replace (non-space immediately before cursor)
+        const hasPartialWord = before.length > 0 && !before.endsWith(' ');
+
+        if (hasPartialWord) {
+            // Find start of the partial word
+            let wordStart = before.length - 1;
+            while (wordStart > 0 && before[wordStart - 1] !== ' ') {
+                wordStart--;
             }
-            this.currentMessage += textToAdd;
+
+            // Replace the partial word with the predicted word
+            this.currentMessage = before.slice(0, wordStart) + word + after;
+            this.cursorPosition = wordStart + word.length;
         } else {
-            // Insert at cursor position
-            const before = this.currentMessage.slice(0, this.cursorPosition);
-            if (before && !before.endsWith(' ')) {
+            // No partial word - just add the word (with space if needed)
+            let textToAdd = word;
+            if (before.length > 0 && !before.endsWith(' ')) {
                 textToAdd = ' ' + word;
             }
-            this.currentMessage =
-                before +
-                textToAdd +
-                this.currentMessage.slice(this.cursorPosition);
-            this.cursorPosition += textToAdd.length;
+
+            this.currentMessage = before + textToAdd + after;
+
+            if (this.cursorPosition !== null) {
+                this.cursorPosition = (before + textToAdd).length;
+            }
         }
+
         this.render();
         this.notifyChange(true);
     },
