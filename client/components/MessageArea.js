@@ -137,18 +137,23 @@ const MessageArea = {
 
         const pos = this.cursorPosition === null ? this.currentMessage.length : this.cursorPosition;
 
-        // Move to end of previous word
+        if (pos === 0) return; // Already at start
+
         let newPos = pos - 1;
 
-        // Skip spaces
+        // Skip backward through current word (non-spaces)
+        while (newPos > 0 && this.currentMessage[newPos] !== ' ') {
+            newPos--;
+        }
+
+        // Skip backward through spaces
         while (newPos > 0 && this.currentMessage[newPos] === ' ') {
             newPos--;
         }
 
-        // Find start of word
-        while (newPos > 0 && this.currentMessage[newPos - 1] !== ' ') {
-            newPos--;
-        }
+        // Now newPos is at the last letter of the previous word
+        // Position cursor after this letter (end of previous word)
+        newPos++;
 
         this.cursorPosition = newPos;
         this.render();
