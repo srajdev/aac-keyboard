@@ -21,34 +21,12 @@
     </div>
 
     <div id="app" style="display: none;">
-        <!-- Header with Controls -->
+        <!-- Header with Settings Button and Context -->
         <header class="header">
-            <button id="predictions-toggle" class="toggle-btn" aria-label="Toggle predictions">
-                <span class="toggle-icon">🤖</span>
-                <span class="toggle-text">AI: ON</span>
+            <button id="settings-btn" class="settings-btn" aria-label="Open settings">
+                <span class="settings-icon">⚙️</span>
+                <span class="settings-text">Settings</span>
             </button>
-            <button id="listen-toggle" class="toggle-btn" aria-label="Toggle listening">
-                <span class="toggle-icon">🎤</span>
-                <span class="toggle-text">Listen: OFF</span>
-            </button>
-            <button id="highlights-toggle" class="toggle-btn" aria-label="Toggle keyboard highlights">
-                <span class="toggle-icon">✨</span>
-                <span class="toggle-text">Highlights: ON</span>
-            </button>
-            <div class="keyboard-width-control">
-                <label>Keyboard:</label>
-                <button id="width-decrease" class="width-btn" aria-label="Decrease keyboard width">◄</button>
-                <span id="width-display" class="width-display">14cm</span>
-                <button id="width-increase" class="width-btn" aria-label="Increase keyboard width">►</button>
-                <button id="width-reset" class="width-reset">Reset</button>
-            </div>
-            <div class="keyboard-width-control">
-                <label>Predictions:</label>
-                <button id="pred-width-decrease" class="width-btn" aria-label="Decrease prediction width">◄</button>
-                <span id="pred-width-display" class="width-display">18cm</span>
-                <button id="pred-width-increase" class="width-btn" aria-label="Increase prediction width">►</button>
-                <button id="pred-width-reset" class="width-reset">Reset</button>
-            </div>
             <input type="text" id="explicit-context-input" class="context-input" placeholder="Add context..." aria-label="Additional context">
         </header>
 
@@ -224,6 +202,56 @@
         </div>
     </div>
 
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal" style="display: none;">
+        <div class="modal-overlay"></div>
+        <div class="modal-content settings-panel">
+            <h2 class="settings-title">Settings</h2>
+
+            <div class="settings-section">
+                <h3>Features</h3>
+                <div class="setting-row">
+                    <button id="predictions-toggle" class="toggle-btn-setting" aria-label="Toggle predictions">
+                        <span class="toggle-icon">🤖</span>
+                        <span class="toggle-text">AI: ON</span>
+                    </button>
+                </div>
+                <div class="setting-row">
+                    <button id="listen-toggle" class="toggle-btn-setting" aria-label="Toggle listening">
+                        <span class="toggle-icon">🎤</span>
+                        <span class="toggle-text">Listen: OFF</span>
+                    </button>
+                </div>
+                <div class="setting-row">
+                    <button id="highlights-toggle" class="toggle-btn-setting" aria-label="Toggle keyboard highlights">
+                        <span class="toggle-icon">✨</span>
+                        <span class="toggle-text">Highlights: ON</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3>Width Controls</h3>
+                <div class="setting-row width-control-row">
+                    <label>Keyboard:</label>
+                    <button id="width-decrease" class="width-btn" aria-label="Decrease keyboard width">◄</button>
+                    <span id="width-display" class="width-display">14cm</span>
+                    <button id="width-increase" class="width-btn" aria-label="Increase keyboard width">►</button>
+                    <button id="width-reset" class="width-reset">Reset</button>
+                </div>
+                <div class="setting-row width-control-row">
+                    <label>Predictions:</label>
+                    <button id="pred-width-decrease" class="width-btn" aria-label="Decrease prediction width">◄</button>
+                    <span id="pred-width-display" class="width-display">18cm</span>
+                    <button id="pred-width-increase" class="width-btn" aria-label="Increase prediction width">►</button>
+                    <button id="pred-width-reset" class="width-reset">Reset</button>
+                </div>
+            </div>
+
+            <button id="settings-close" class="settings-close-btn">Close</button>
+        </div>
+    </div>
+
     <script src="/static/services/auth.js?v=3"></script>
     <script src="/static/services/api.js?v=3"></script>
     <script src="/static/services/speech.js?v=3"></script>
@@ -235,6 +263,7 @@
     <script src="/static/components/ListenToggle.js?v=3"></script>
     <script src="/static/components/KeyboardWidthControl.js?v=3"></script>
     <script src="/static/components/PredictionWidthControl.js?v=3"></script>
+    <script src="/static/components/SettingsModal.js?v=3"></script>
     <script src="/static/app.js?v=3"></script>
 </body>
 </html>

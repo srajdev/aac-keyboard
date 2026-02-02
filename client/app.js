@@ -19,6 +19,7 @@ const App = {
         ListenToggle.init();
         KeyboardWidthControl.init();
         PredictionWidthControl.init();
+        SettingsModal.init();
 
         // Get UI elements
         this.predictionsToggleBtn = document.getElementById('predictions-toggle');
