@@ -212,6 +212,25 @@ const MessageArea = {
         return this.currentMessage;
     },
 
+    getCurrentWord() {
+        // Get the word currently being typed at/before cursor position
+        const pos = this.cursorPosition === null ? this.currentMessage.length : this.cursorPosition;
+        const before = this.currentMessage.slice(0, pos);
+
+        // Check if there's a word being typed (non-space immediately before cursor)
+        if (before.length === 0 || before.endsWith(' ')) {
+            return ''; // No current word
+        }
+
+        // Find the start of the current word
+        let wordStart = before.length - 1;
+        while (wordStart > 0 && before[wordStart - 1] !== ' ') {
+            wordStart--;
+        }
+
+        return before.slice(wordStart);
+    },
+
     render() {
         if (!this.beforeElement || !this.afterElement) return;
 

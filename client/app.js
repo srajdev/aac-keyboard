@@ -193,6 +193,19 @@ const App = {
 
         try {
             const predictions = await ApiService.getPredictions(partialInput, context, signal);
+
+            // Inject current word being typed as first word prediction (if it exists)
+            const currentWord = MessageArea.getCurrentWord();
+            if (currentWord && currentWord.length > 0) {
+                // Add current word as first prediction if not already present
+                if (!predictions.words || !predictions.words.includes(currentWord)) {
+                    predictions.words = predictions.words || [];
+                    predictions.words.unshift(currentWord);
+                    // Keep only first 6 words
+                    predictions.words = predictions.words.slice(0, 6);
+                }
+            }
+
             Predictions.update(predictions);
         } catch (error) {
             // Ignore abort errors - they're expected when canceling
