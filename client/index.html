@@ -31,6 +31,13 @@
                 <span class="toggle-icon">🎤</span>
                 <span class="toggle-text">Listen: OFF</span>
             </button>
+            <div class="keyboard-width-control">
+                <label>Keyboard:</label>
+                <button id="width-decrease" class="width-btn" aria-label="Decrease keyboard width">◄</button>
+                <span id="width-display" class="width-display">14cm</span>
+                <button id="width-increase" class="width-btn" aria-label="Increase keyboard width">►</button>
+                <button id="width-reset" class="width-reset">Reset</button>
+            </div>
             <input type="text" id="explicit-context-input" class="context-input" placeholder="Add context..." aria-label="Additional context">
         </header>
 
@@ -215,6 +222,7 @@
     <script src="/static/components/Predictions.js?v=3"></script>
     <script src="/static/components/SpeakButton.js?v=3"></script>
     <script src="/static/components/ListenToggle.js?v=3"></script>
+    <script src="/static/components/KeyboardWidthControl.js?v=3"></script>
     <script src="/static/app.js?v=3"></script>
 </body>
 </html>

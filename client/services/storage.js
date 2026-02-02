@@ -83,4 +83,24 @@ const StorageService = {
     savePreferences(prefs) {
         localStorage.setItem(this.KEYS.PREFERENCES, JSON.stringify(prefs));
     },
+
+    // Keyboard Width
+    getKeyboardWidth() {
+        try {
+            return localStorage.getItem('viraj_keyboard_width') || '14';
+        } catch (e) {
+            return '14';
+        }
+    },
+
+    setKeyboardWidth(width) {
+        try {
+            localStorage.setItem('viraj_keyboard_width', width);
+        } catch (e) {
+            console.error('Failed to save keyboard width:', e);
+        }
+    },
 };
+
+// Global alias for convenience
+const Storage = StorageService;

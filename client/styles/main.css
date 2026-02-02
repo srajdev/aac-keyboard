@@ -18,6 +18,10 @@ body {
     touch-action: manipulation;
 }
 
+:root {
+    --keyboard-max-width: 14cm;  /* Default keyboard width, dynamically adjustable */
+}
+
 #app {
     display: flex;
     flex-direction: column;
@@ -93,6 +97,69 @@ body {
 
 .context-input::placeholder {
     color: #666;
+}
+
+/* Keyboard Width Control */
+.keyboard-width-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.keyboard-width-control label {
+    font-size: 0.8rem;
+    color: #999;
+    white-space: nowrap;
+}
+
+.width-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    border: none;
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 1.3rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.width-btn:active {
+    transform: scale(0.95);
+}
+
+.width-display {
+    min-width: 60px;
+    padding: 8px 12px;
+    background: #0f0f23;
+    border: 2px solid #4361ee;
+    border-radius: 8px;
+    color: #4cc9f0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.width-reset {
+    padding: 8px 12px;
+    background: #2d3a5a;
+    border: 2px solid #555;
+    border-radius: 8px;
+    color: #999;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.width-reset:active {
+    transform: scale(0.95);
+    background: #4361ee;
+    color: #fff;
 }
 
 /* Password Gate */
@@ -362,7 +429,7 @@ body {
 /* Custom 6-Row Keyboard */
 .keyboard-section-new {
     flex-shrink: 0;
-    max-width: 14cm;      /* Physical constraint for right-thumb reach */
+    max-width: var(--keyboard-max-width);  /* Dynamically adjustable width */
     margin-left: auto;    /* Right-align keyboard on wide screens */
     margin-right: 0;
     width: 100%;          /* Allow flexibility on narrow screens */
