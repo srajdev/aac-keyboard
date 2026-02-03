@@ -34,22 +34,45 @@ async def generate_predictions_gemini(partial_input: str, conversation_context: 
     api_call_start = time.time()
 
     try:
-        model = genai.GenerativeModel('models/gemini-2.5-flash')
+        model = genai.GenerativeModel(
+            'models/gemini-2.5-flash',
+            safety_settings={
+                'HARASSMENT': 'BLOCK_NONE',
+                'HATE_SPEECH': 'BLOCK_NONE',
+                'SEXUALLY_EXPLICIT': 'BLOCK_NONE',
+                'DANGEROUS_CONTENT': 'BLOCK_NONE',
+            }
+        )
 
         response = await model.generate_content_async(
             full_prompt,
             generation_config={
                 'temperature': 0.7,
                 'max_output_tokens': 300,
-                'response_mime_type': 'application/json',
             }
         )
 
         api_call_ms = (time.time() - api_call_start) * 1000
 
+        # Check if response was blocked
+        if not response.candidates or not response.candidates[0].content.parts:
+            finish_reason = response.candidates[0].finish_reason if response.candidates else 'UNKNOWN'
+            print(f"Gemini response blocked. Finish reason: {finish_reason}")
+            raise ValueError(f"Response blocked by safety filters: {finish_reason}")
+
         # Timing: parse
         parse_start = time.time()
-        result = json.loads(response.text)
+        response_text = response.text
+
+        # Extract JSON from response (might have markdown code blocks)
+        import re
+        json_match = re.search(r'\{[\s\S]*\}', response_text)
+        if json_match:
+            result = json.loads(json_match.group())
+        else:
+            print(f"No JSON found in Gemini response: {response_text[:200]}")
+            raise ValueError("No JSON found in response")
+
         parse_ms = (time.time() - parse_start) * 1000
 
         # Log with detailed timing breakdown
