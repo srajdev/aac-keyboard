@@ -49,7 +49,7 @@ async def generate_predictions_gemini(partial_input: str, conversation_context: 
             full_prompt,
             generation_config={
                 'temperature': 0.7,
-                'max_output_tokens': 300,
+                'max_output_tokens': 500,  # Increased from 300
             }
         )
 
@@ -63,15 +63,26 @@ async def generate_predictions_gemini(partial_input: str, conversation_context: 
 
         # Timing: parse
         parse_start = time.time()
-        response_text = response.text
+        response_text = response.text.strip()
 
-        # Extract JSON from response (might have markdown code blocks)
+        # Remove markdown code blocks if present
         import re
+        response_text = re.sub(r'^```json\s*', '', response_text)
+        response_text = re.sub(r'\s*```$', '', response_text)
+        response_text = response_text.strip()
+
+        # Extract JSON from response
         json_match = re.search(r'\{[\s\S]*\}', response_text)
         if json_match:
-            result = json.loads(json_match.group())
+            json_str = json_match.group()
+            try:
+                result = json.loads(json_str)
+            except json.JSONDecodeError as e:
+                print(f"JSON decode error: {e}")
+                print(f"Attempted to parse: {json_str[:500]}")
+                raise ValueError(f"Invalid JSON: {e}")
         else:
-            print(f"No JSON found in Gemini response: {response_text[:200]}")
+            print(f"No JSON found in Gemini response: {response_text[:500]}")
             raise ValueError("No JSON found in response")
 
         parse_ms = (time.time() - parse_start) * 1000
