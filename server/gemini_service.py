@@ -1,27 +1,24 @@
 import json
+import re
 import time
 from datetime import datetime
 from pathlib import Path
-import google.generativeai as genai
-from google.generativeai.types import HarmCategory, HarmBlockThreshold
+from google import genai
+from google.genai import types
 from .prompts import SYSTEM_PROMPT_WITH_RULES, build_prediction_prompt
 from .performance_tracker import get_tracker
 
 
-# Configure Gemini
+# Initialize Gemini client with new SDK (lazy initialization)
 import os
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+_gemini_client = None
 
-# Initialize model once at module level (not per-request)
-gemini_model = genai.GenerativeModel(
-    'models/gemini-2.5-flash',
-    safety_settings={
-        HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
-        HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
-        HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
-        HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
-    }
-)
+def _get_gemini_client():
+    """Lazy initialization of Gemini client."""
+    global _gemini_client
+    if _gemini_client is None:
+        _gemini_client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
+    return _gemini_client
 
 # Log file for predictions
 LOG_DIR = Path(__file__).parent.parent / "logs"
@@ -33,7 +30,7 @@ perf_tracker = get_tracker(LOG_DIR)
 
 
 async def generate_predictions_gemini(partial_input: str, conversation_context: str) -> dict:
-    """Generate predictions using Gemini 2.5 Flash."""
+    """Generate predictions using Gemini 2.5 Flash with NEW SDK and thinking_budget=0."""
     # Timing: prompt build
     prompt_build_start = time.time()
     user_prompt = build_prediction_prompt(partial_input, conversation_context)
@@ -46,35 +43,45 @@ async def generate_predictions_gemini(partial_input: str, conversation_context: 
     api_call_start = time.time()
 
     try:
-        # Use pre-initialized model from module level
-        response = await gemini_model.generate_content_async(
-            full_prompt,
-            generation_config={
-                'temperature': 0.7,
-                'max_output_tokens': 1500,  # Gemini tokenizer needs more tokens than Claude
-            }
+        # Use new SDK with thinking_budget=0 for optimal speed
+        client = _get_gemini_client()
+        response = await client.aio.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=full_prompt,
+            config=types.GenerateContentConfig(
+                temperature=0.7,
+                max_output_tokens=1500,
+                thinking_config=types.ThinkingConfig(
+                    thinking_budget=0  # Disables slow reasoning mode - 40-50x speedup!
+                ),
+                safety_settings=[
+                    types.SafetySetting(
+                        category="HARM_CATEGORY_HARASSMENT",
+                        threshold="BLOCK_NONE"
+                    ),
+                    types.SafetySetting(
+                        category="HARM_CATEGORY_HATE_SPEECH",
+                        threshold="BLOCK_NONE"
+                    ),
+                    types.SafetySetting(
+                        category="HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                        threshold="BLOCK_NONE"
+                    ),
+                    types.SafetySetting(
+                        category="HARM_CATEGORY_DANGEROUS_CONTENT",
+                        threshold="BLOCK_NONE"
+                    ),
+                ]
+            )
         )
 
         api_call_ms = (time.time() - api_call_start) * 1000
-
-        # Check if response was blocked or truncated
-        if not response.candidates or not response.candidates[0].content.parts:
-            finish_reason = response.candidates[0].finish_reason if response.candidates else 'UNKNOWN'
-            print(f"Gemini response blocked. Finish reason: {finish_reason}")
-            raise ValueError(f"Response blocked: {finish_reason}")
-
-        # Check if hit token limit (finish_reason 2 = MAX_TOKENS)
-        finish_reason = response.candidates[0].finish_reason
-        if finish_reason == 2:  # MAX_TOKENS
-            print(f"Gemini hit token limit. Consider increasing max_output_tokens.")
-            # Continue anyway - might have partial valid JSON
 
         # Timing: parse
         parse_start = time.time()
         response_text = response.text.strip()
 
         # Remove markdown code blocks if present
-        import re
         response_text = re.sub(r'^```json\s*', '', response_text)
         response_text = re.sub(r'\s*```$', '', response_text)
         response_text = response_text.strip()
@@ -102,7 +109,7 @@ async def generate_predictions_gemini(partial_input: str, conversation_context: 
         # Log the prediction with detailed timing
         log_entry = {
             "timestamp": datetime.now().isoformat(),
-            "model": "gemini-2.5-flash",
+            "model": "gemini-2.5-flash-new-sdk",
             "input": partial_input,
             "context": conversation_context,
             "response": result,
@@ -116,9 +123,9 @@ async def generate_predictions_gemini(partial_input: str, conversation_context: 
         with open(LOG_FILE, "a") as f:
             f.write(json.dumps(log_entry) + "\n")
 
-        # Record performance metrics (no cache tracking for Gemini yet)
+        # Record performance metrics
         perf_tracker.record_request(
-            model="gemini-2.5-flash",
+            model="gemini-2.5-flash-new-sdk",
             latency_ms=api_call_ms,
             cache_hit=False,
         )
