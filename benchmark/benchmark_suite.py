@@ -10,8 +10,13 @@ import os
 import asyncio
 from datetime import datetime
 from pathlib import Path
+from dotenv import load_dotenv
 import benchmark_claude
 import benchmark_gemini
+
+# Load environment variables from .env file in parent directory
+env_path = Path(__file__).parent.parent / ".env"
+load_dotenv(env_path)
 
 
 # Predefined test cases covering common scenarios

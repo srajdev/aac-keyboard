@@ -9,8 +9,15 @@ import json
 import re
 import time
 import statistics
+import os
 from datetime import datetime
+from pathlib import Path
+from dotenv import load_dotenv
 from anthropic import Anthropic
+
+# Load environment variables from .env file in parent directory
+env_path = Path(__file__).parent.parent / ".env"
+load_dotenv(env_path)
 
 
 # Prompt templates (copied from server/prompts.py)
@@ -168,27 +175,31 @@ def print_results(results: list, partial_input: str, conversation_context: str):
         print(f"{'Metric':<20} {'Average':<12} {'Min':<12} {'Max':<12} {'P95':<12}")
         print("-" * 70)
 
+        # Helper to calculate P95 safely
+        def safe_p95(values):
+            return statistics.quantiles(values, n=20)[18] if len(values) >= 2 else max(values)
+
         # Total latency
         print(f"{'Total Latency':<20} {statistics.mean(total_times):>10.0f}ms "
               f"{min(total_times):>10.0f}ms {max(total_times):>10.0f}ms "
-              f"{statistics.quantiles(total_times, n=20)[18]:>10.0f}ms")
+              f"{safe_p95(total_times):>10.0f}ms")
 
         # API call latency
         print(f"{'API Call':<20} {statistics.mean(api_times):>10.0f}ms "
               f"{min(api_times):>10.0f}ms {max(api_times):>10.0f}ms "
-              f"{statistics.quantiles(api_times, n=20)[18]:>10.0f}ms")
+              f"{safe_p95(api_times):>10.0f}ms")
 
         # Prompt build
         prompt_times = [r["timings"]["prompt_build_ms"] for r in successful_runs]
         print(f"{'Prompt Build':<20} {statistics.mean(prompt_times):>10.1f}ms "
               f"{min(prompt_times):>10.1f}ms {max(prompt_times):>10.1f}ms "
-              f"{statistics.quantiles(prompt_times, n=20)[18]:>10.1f}ms")
+              f"{safe_p95(prompt_times):>10.1f}ms")
 
         # Parse
         parse_times = [r["timings"]["parse_ms"] for r in successful_runs]
         print(f"{'JSON Parse':<20} {statistics.mean(parse_times):>10.1f}ms "
               f"{min(parse_times):>10.1f}ms {max(parse_times):>10.1f}ms "
-              f"{statistics.quantiles(parse_times, n=20)[18]:>10.1f}ms")
+              f"{safe_p95(parse_times):>10.1f}ms")
 
         print()
         print("CACHE PERFORMANCE")

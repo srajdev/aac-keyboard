@@ -12,9 +12,15 @@ import statistics
 import os
 import asyncio
 from datetime import datetime
+from pathlib import Path
+from dotenv import load_dotenv
 from anthropic import Anthropic
 import google.generativeai as genai
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
+
+# Load environment variables from .env file in parent directory
+env_path = Path(__file__).parent.parent / ".env"
+load_dotenv(env_path)
 
 
 # Prompt templates (copied from server/prompts.py)
@@ -237,10 +243,12 @@ def print_comparison(claude_results: list, gemini_results: list, partial_input: 
         print(f"{'Avg Total Latency':<25} {claude_avg:>17.0f}ms {gemini_avg:>17.0f}ms "
               f"{'Claude' if claude_avg < gemini_avg else 'Gemini':<15}")
 
-        claude_p95 = statistics.quantiles([r["total_ms"] for r in claude_successful], n=20)[18]
-        gemini_p95 = statistics.quantiles([r["total_ms"] for r in gemini_successful], n=20)[18]
-        print(f"{'P95 Latency':<25} {claude_p95:>17.0f}ms {gemini_p95:>17.0f}ms "
-              f"{'Claude' if claude_p95 < gemini_p95 else 'Gemini':<15}")
+        # Only show P95 if we have enough data points
+        if len(claude_successful) >= 2 and len(gemini_successful) >= 2:
+            claude_p95 = statistics.quantiles([r["total_ms"] for r in claude_successful], n=20)[18]
+            gemini_p95 = statistics.quantiles([r["total_ms"] for r in gemini_successful], n=20)[18]
+            print(f"{'P95 Latency':<25} {claude_p95:>17.0f}ms {gemini_p95:>17.0f}ms "
+                  f"{'Claude' if claude_p95 < gemini_p95 else 'Gemini':<15}")
 
         claude_min = min([r["total_ms"] for r in claude_successful])
         gemini_min = min([r["total_ms"] for r in gemini_successful])
