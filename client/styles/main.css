@@ -960,3 +960,130 @@ body {
 .settings-close-btn:active {
     transform: scale(0.95);
 }
+
+/* Model Selector */
+.model-label {
+    color: #ffffff;
+    font-weight: 600;
+    margin-right: 12px;
+}
+
+.model-selector {
+    flex: 1;
+    padding: 10px 12px;
+    background: #2d3a5a;
+    border: 2px solid #4a5a7a;
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.model-selector:focus {
+    outline: none;
+    border-color: #4361ee;
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.3);
+}
+
+.model-selector option {
+    background: #1a1a2e;
+    color: white;
+}
+
+/* Performance Dashboard */
+.performance-dashboard {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+}
+
+.perf-loading {
+    color: #94a3b8;
+    text-align: center;
+    font-style: italic;
+    padding: 12px;
+}
+
+.perf-stats {
+    color: white;
+}
+
+.perf-model-section {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.perf-model-section:last-of-type {
+    border-bottom: none;
+    margin-bottom: 12px;
+}
+
+.perf-model-section h4 {
+    color: #60a5fa;
+    font-size: 1rem;
+    margin: 0 0 8px 0;
+}
+
+.perf-metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.perf-metric {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.perf-label {
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+.perf-value {
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.perf-overall {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    text-align: center;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.perf-overall strong {
+    color: #ffffff;
+}
+
+.action-btn {
+    flex: 1;
+    padding: 10px 16px;
+    background: #2d3a5a;
+    border: 2px solid #4a5a7a;
+    border-radius: 8px;
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.action-btn:active {
+    transform: scale(0.95);
+    background: #3d4a6a;
+}
+
+.setting-row:has(.action-btn) {
+    display: flex;
+    gap: 8px;
+}

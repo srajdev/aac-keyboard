@@ -6,8 +6,10 @@ const App = {
     lastPredictionRequest: '',
     predictionsEnabled: true, // Default to ON
     highlightsEnabled: true, // Default to ON
+    selectedModel: 'claude', // Default to Claude
     predictionsToggleBtn: null,
     highlightsToggleBtn: null,
+    modelSelector: null,
     currentPredictionController: null,
 
     init() {
@@ -24,6 +26,7 @@ const App = {
         // Get UI elements
         this.predictionsToggleBtn = document.getElementById('predictions-toggle');
         this.highlightsToggleBtn = document.getElementById('highlights-toggle');
+        this.modelSelector = document.getElementById('model-selector');
 
         // Load saved preferences
         const saved = StorageService.getPreferences();
@@ -33,8 +36,12 @@ const App = {
         if (saved.highlightsEnabled !== undefined) {
             this.highlightsEnabled = saved.highlightsEnabled;
         }
+        if (saved.selectedModel !== undefined) {
+            this.selectedModel = saved.selectedModel;
+        }
         this.updatePredictionsToggleUI();
         this.updateHighlightsToggleUI();
+        this.updateModelSelectorUI();
 
         // Wire up component callbacks
         this.setupCallbacks();
@@ -59,6 +66,19 @@ const App = {
         if (this.highlightsToggleBtn) {
             this.highlightsToggleBtn.addEventListener('click', () => {
                 this.toggleHighlights();
+            });
+        }
+
+        // Model Selector
+        if (this.modelSelector) {
+            this.modelSelector.addEventListener('change', (e) => {
+                this.selectedModel = e.target.value;
+                // Save preference
+                const prefs = StorageService.getPreferences();
+                prefs.selectedModel = this.selectedModel;
+                StorageService.savePreferences(prefs);
+                // Request new predictions with selected model
+                this.requestPredictions();
             });
         }
 
@@ -207,6 +227,11 @@ const App = {
         }
     },
 
+    updateModelSelectorUI() {
+        if (!this.modelSelector) return;
+        this.modelSelector.value = this.selectedModel;
+    },
+
     debouncedPredictions(message) {
         // Debounce prediction requests (500ms delay)
         clearTimeout(this.predictionTimeout);
@@ -244,7 +269,7 @@ const App = {
         Predictions.setLoading(true);
 
         try {
-            const predictions = await ApiService.getPredictions(partialInput, context, signal);
+            const predictions = await ApiService.getPredictions(partialInput, context, signal, this.selectedModel);
 
             // Inject current word being typed as first word prediction (if it exists)
             const currentWord = MessageArea.getCurrentWord();

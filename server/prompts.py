@@ -1,4 +1,6 @@
-SYSTEM_PROMPT = """You are an assistive communication AI helping Viraj communicate faster.
+# Restructured for Claude prompt caching
+# Static system prompt with rules will be cached for 5 minutes
+SYSTEM_PROMPT_WITH_RULES = """You are an assistive communication AI helping Viraj communicate faster.
 Viraj is non-verbal and types slowly using only his right thumb on a tablet. Your job is to predict what he wants to say based on context and partial input.
 
 Your predictions should be:
@@ -7,10 +9,27 @@ Your predictions should be:
 - Varied (not repetitive)
 - Practical for everyday communication
 
-Always return valid JSON with exactly the structure requested."""
+Always return valid JSON with exactly the structure requested.
+
+PREDICTION RULES:
+- phrases: 3 complete sentences (5+ words) Viraj likely wants to say
+- words: 5 single words that could come next (or start a message if no input)
+- letters: 5 most likely next letters (lowercase)
+
+Consider when making predictions:
+1. Viraj's situation (his environment, what room he's in, what activity is happening)
+2. What others said to Viraj (questions asked, statements made)
+3. Common responses to questions and statements in conversation
+4. Viraj's partial input and natural ways to complete it
+5. Natural conversation flow for the given situation
+
+Use BOTH the situational context and conversational context to generate relevant predictions.
+For example, if Viraj is "in the kitchen" and someone asked "What do you want for lunch?",
+predictions should relate to food choices, not generic responses."""
 
 
 def build_prediction_prompt(partial_input: str, conversation_context: str) -> str:
+    """Build the user prompt (dynamic part that changes per request)."""
     prompt = ""
 
     # Context can include two types of information:
@@ -30,22 +49,6 @@ def build_prediction_prompt(partial_input: str, conversation_context: str) -> st
   "words": ["word1", "word2", "word3", "word4", "word5"],
   "letters": ["a", "b", "c", "d", "e"]
 }
-
-Rules:
-- phrases: 3 complete sentences (5+ words) Viraj likely wants to say
-- words: 5 single words that could come next (or start a message if no input)
-- letters: 5 most likely next letters (lowercase)
-
-Consider when making predictions:
-1. Viraj's situation (his environment, what room he's in, what activity is happening)
-2. What others said to Viraj (questions asked, statements made)
-3. Common responses to questions and statements in conversation
-4. Viraj's partial input and natural ways to complete it
-5. Natural conversation flow for the given situation
-
-Use BOTH the situational context and conversational context to generate relevant predictions.
-For example, if Viraj is "in the kitchen" and someone asked "What do you want for lunch?",
-predictions should relate to food choices, not generic responses.
 
 Return ONLY the JSON object, no other text."""
 

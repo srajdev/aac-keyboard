@@ -231,6 +231,28 @@
             </div>
 
             <div class="settings-section">
+                <h3>Model Selection</h3>
+                <div class="setting-row">
+                    <label for="model-selector" class="model-label">AI Model:</label>
+                    <select id="model-selector" class="model-selector">
+                        <option value="claude">Claude Haiku (Higher Quality)</option>
+                        <option value="gemini">Gemini Flash (Faster)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3>Performance Stats</h3>
+                <div id="performance-dashboard" class="performance-dashboard">
+                    <div class="perf-loading">Use the keyboard to see performance stats...</div>
+                </div>
+                <div class="setting-row">
+                    <button id="clear-cache-btn" class="action-btn">Clear Cache</button>
+                    <button id="clear-metrics-btn" class="action-btn">Clear Metrics</button>
+                </div>
+            </div>
+
+            <div class="settings-section">
                 <h3>Width Controls</h3>
                 <div class="setting-row width-control-row">
                     <label>Keyboard:</label>
