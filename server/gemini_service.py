@@ -21,7 +21,7 @@ perf_tracker = get_tracker(LOG_DIR)
 
 
 async def generate_predictions_gemini(partial_input: str, conversation_context: str) -> dict:
-    """Generate predictions using Gemini Flash 1.5."""
+    """Generate predictions using Gemini 2.5 Flash."""
     # Timing: prompt build
     prompt_build_start = time.time()
     user_prompt = build_prediction_prompt(partial_input, conversation_context)
@@ -34,7 +34,7 @@ async def generate_predictions_gemini(partial_input: str, conversation_context: 
     api_call_start = time.time()
 
     try:
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel('models/gemini-2.5-flash')
 
         response = await model.generate_content_async(
             full_prompt,
@@ -59,7 +59,7 @@ async def generate_predictions_gemini(partial_input: str, conversation_context: 
         # Log the prediction with detailed timing
         log_entry = {
             "timestamp": datetime.now().isoformat(),
-            "model": "gemini-1.5-flash",
+            "model": "gemini-2.5-flash",
             "input": partial_input,
             "context": conversation_context,
             "response": result,
@@ -75,7 +75,7 @@ async def generate_predictions_gemini(partial_input: str, conversation_context: 
 
         # Record performance metrics (no cache tracking for Gemini yet)
         perf_tracker.record_request(
-            model="gemini-1.5-flash",
+            model="gemini-2.5-flash",
             latency_ms=api_call_ms,
             cache_hit=False,
         )
