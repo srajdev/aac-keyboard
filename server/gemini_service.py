@@ -49,7 +49,7 @@ async def generate_predictions_gemini(partial_input: str, conversation_context: 
             full_prompt,
             generation_config={
                 'temperature': 0.7,
-                'max_output_tokens': 1500,
+                'max_output_tokens': 5000,
             }
         )
 
