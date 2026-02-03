@@ -5,6 +5,7 @@ from datetime import datetime
 from pathlib import Path
 import anthropic
 from .prompts import SYSTEM_PROMPT_WITH_RULES, build_prediction_prompt
+from .performance_tracker import get_tracker
 
 
 client = anthropic.Anthropic()
@@ -13,6 +14,9 @@ client = anthropic.Anthropic()
 LOG_DIR = Path(__file__).parent.parent / "logs"
 LOG_DIR.mkdir(exist_ok=True)
 LOG_FILE = LOG_DIR / "predictions.jsonl"
+
+# Get performance tracker
+perf_tracker = get_tracker(LOG_DIR)
 
 
 async def generate_predictions(partial_input: str, conversation_context: str) -> dict:
@@ -84,6 +88,14 @@ async def generate_predictions(partial_input: str, conversation_context: str) ->
             }
             with open(LOG_FILE, "a") as f:
                 f.write(json.dumps(log_entry) + "\n")
+
+            # Record performance metrics
+            perf_tracker.record_request(
+                model="claude-haiku-4-5",
+                latency_ms=api_call_ms,
+                cache_hit=cache_hit,
+            )
+
             return result
         raise ValueError("No JSON found in response")
     except (json.JSONDecodeError, ValueError) as e:

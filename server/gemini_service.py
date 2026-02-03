@@ -4,6 +4,7 @@ from datetime import datetime
 from pathlib import Path
 import google.generativeai as genai
 from .prompts import SYSTEM_PROMPT_WITH_RULES, build_prediction_prompt
+from .performance_tracker import get_tracker
 
 
 # Configure Gemini
@@ -14,6 +15,9 @@ genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 LOG_DIR = Path(__file__).parent.parent / "logs"
 LOG_DIR.mkdir(exist_ok=True)
 LOG_FILE = LOG_DIR / "predictions.jsonl"
+
+# Get performance tracker
+perf_tracker = get_tracker(LOG_DIR)
 
 
 async def generate_predictions_gemini(partial_input: str, conversation_context: str) -> dict:
@@ -68,6 +72,13 @@ async def generate_predictions_gemini(partial_input: str, conversation_context: 
         }
         with open(LOG_FILE, "a") as f:
             f.write(json.dumps(log_entry) + "\n")
+
+        # Record performance metrics (no cache tracking for Gemini yet)
+        perf_tracker.record_request(
+            model="gemini-2.0-flash",
+            latency_ms=api_call_ms,
+            cache_hit=False,
+        )
 
         return result
 

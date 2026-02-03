@@ -12,8 +12,26 @@ load_dotenv()
 
 from .claude_service import generate_predictions as generate_predictions_claude
 from .gemini_service import generate_predictions_gemini
+from .performance_tracker import get_tracker
 
 app = FastAPI(title="Viraj Keyboard API")
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialize performance tracking on startup."""
+    tracker = get_tracker()
+    print("[Performance] Tracker initialized - stats will be logged every 60 seconds")
+    print("[Performance] View stats at: logs/performance_stats.jsonl")
+    print("[Performance] API endpoint: GET /api/performance-stats")
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Log final stats on shutdown."""
+    tracker = get_tracker()
+    tracker.log_aggregate_stats()
+    tracker.print_current_stats()
 
 
 # Middleware to disable caching for static files during development
@@ -104,6 +122,13 @@ app.mount("/static", StaticFiles(directory=client_path), name="static")
 async def root():
     """Serve the main HTML file."""
     return FileResponse(client_path / "index.html")
+
+
+@app.get("/api/performance-stats")
+async def get_performance_stats():
+    """Get current performance statistics."""
+    tracker = get_tracker()
+    return tracker.get_all_stats()
 
 
 if __name__ == "__main__":

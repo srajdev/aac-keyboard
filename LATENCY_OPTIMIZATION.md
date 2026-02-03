@@ -5,6 +5,16 @@ Implemented latency optimizations targeting 60-75% reduction in effective predic
 
 ## Changes Implemented
 
+### Backend Performance Tracking ✅
+
+#### Backend Performance Statistics (`server/performance_tracker.py`)
+- **Aggregate metrics**: Tracks avg, P50, P95, P99, min, max latency per model
+- **Cache tracking**: Per-model cache hit/miss rates
+- **Auto-logging**: Logs aggregate stats every 60 seconds to `logs/performance_stats.jsonl`
+- **API endpoint**: `GET /api/performance-stats` returns current stats as JSON
+- **Console output**: Prints stats on server shutdown
+- **View script**: `./view_stats.py` to view stats from command line
+
 ### Phase 1: Caching & Instrumentation ✅
 
 #### 1. Client-Side Response Cache (`client/services/api.js`)
@@ -171,6 +181,14 @@ Implemented latency optimizations targeting 60-75% reduction in effective predic
 4. **Monitor logs**:
    - Console: Shows cache hits/misses, timing breakdowns
    - `logs/predictions.jsonl`: Full prediction history with metrics
+   - `logs/performance_stats.jsonl`: Aggregate stats logged every 60 seconds
+
+5. **View performance stats**:
+   - Command line: `./view_stats.py`
+   - Watch live: `./view_stats.py --watch` (updates every 5 seconds)
+   - Tail logs: `tail -f logs/performance_stats.jsonl`
+   - API endpoint: `curl http://localhost:3000/api/performance-stats`
+   - Server shutdown: Prints final stats to console
 
 ## Verification
 
