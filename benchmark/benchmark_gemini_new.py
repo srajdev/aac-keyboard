@@ -89,7 +89,7 @@ async def run_single_test(client: genai.Client, partial_input: str, conversation
 
     try:
         response = await client.aio.models.generate_content(
-            model="gemini-1.5-flash",  # Using 1.5 due to 2.5 quota limits
+            model="gemini-2.5-flash",  # Using 1.5 due to 2.5 quota limits
             contents=full_prompt,
             config=types.GenerateContentConfig(
                 temperature=0.7,
