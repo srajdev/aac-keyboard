@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Standalone benchmark script for Gemini 2.5 Flash predictions.
-Tests latency, error rates, and statistical performance.
+Uses NEW google-genai SDK with thinking_budget=0 for optimal performance.
 """
 
 import argparse
@@ -14,8 +14,8 @@ import asyncio
 from datetime import datetime
 from pathlib import Path
 from dotenv import load_dotenv
-import google.generativeai as genai
-from google.generativeai.types import HarmCategory, HarmBlockThreshold
+from google import genai
+from google.genai import types
 
 # Load environment variables from .env file in parent directory
 env_path = Path(__file__).parent.parent / ".env"
@@ -75,7 +75,7 @@ Return ONLY the JSON object, no other text."""
     return prompt
 
 
-async def run_single_test(model, partial_input: str, conversation_context: str) -> dict:
+async def run_single_test(client: genai.Client, partial_input: str, conversation_context: str) -> dict:
     """Run a single prediction test and return detailed metrics."""
 
     # Timing: prompt build
@@ -88,33 +88,37 @@ async def run_single_test(model, partial_input: str, conversation_context: str) 
     api_call_start = time.time()
 
     try:
-        response = await model.generate_content_async(
-            full_prompt,
-            generation_config={
-                'temperature': 0.7,
-                'max_output_tokens': 1500,  # Gemini tokenizer needs more tokens than Claude
-            }
+        response = await client.aio.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=full_prompt,
+            config=types.GenerateContentConfig(
+                temperature=0.7,
+                max_output_tokens=1500,
+                thinking_config=types.ThinkingConfig(
+                    thinking_budget=0  # Disables slow reasoning mode - KEY OPTIMIZATION!
+                ),
+                safety_settings=[
+                    types.SafetySetting(
+                        category="HARM_CATEGORY_HARASSMENT",
+                        threshold="BLOCK_NONE"
+                    ),
+                    types.SafetySetting(
+                        category="HARM_CATEGORY_HATE_SPEECH",
+                        threshold="BLOCK_NONE"
+                    ),
+                    types.SafetySetting(
+                        category="HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                        threshold="BLOCK_NONE"
+                    ),
+                    types.SafetySetting(
+                        category="HARM_CATEGORY_DANGEROUS_CONTENT",
+                        threshold="BLOCK_NONE"
+                    ),
+                ]
+            )
         )
 
         api_call_ms = (time.time() - api_call_start) * 1000
-
-        # Check if response was blocked or truncated
-        if not response.candidates or not response.candidates[0].content.parts:
-            finish_reason = response.candidates[0].finish_reason if response.candidates else 'UNKNOWN'
-            return {
-                "success": False,
-                "error": f"Response blocked: {finish_reason}",
-                "timings": {
-                    "prompt_build_ms": prompt_build_ms,
-                    "api_call_ms": api_call_ms,
-                    "parse_ms": 0,
-                    "total_ms": prompt_build_ms + api_call_ms,
-                },
-                "finish_reason": str(finish_reason),
-                "response": None,
-            }
-
-        finish_reason = response.candidates[0].finish_reason
 
         # Timing: parse
         parse_start = time.time()
@@ -152,7 +156,6 @@ async def run_single_test(model, partial_input: str, conversation_context: str) 
                 "parse_ms": parse_ms,
                 "total_ms": total_ms,
             },
-            "finish_reason": str(finish_reason),
             "response": result,
         }
 
@@ -167,7 +170,6 @@ async def run_single_test(model, partial_input: str, conversation_context: str) 
                 "parse_ms": 0,
                 "total_ms": prompt_build_ms + api_call_ms,
             },
-            "finish_reason": "ERROR",
             "response": None,
         }
 
@@ -270,20 +272,11 @@ def print_results(results: list, partial_input: str, conversation_context: str):
 
 async def main_async(args):
     """Async main function."""
-    # Configure Gemini
-    genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+    # Initialize new SDK client
+    client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
 
-    model = genai.GenerativeModel(
-        'models/gemini-2.5-flash',
-        safety_settings={
-            HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
-            HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
-            HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
-            HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
-        }
-    )
-
-    print(f"\nStarting Gemini 2.5 Flash benchmark with {args.runs} runs...")
+    print(f"\n🚀 NEW SDK with thinking_budget=0")
+    print(f"Starting Gemini 2.5 Flash benchmark with {args.runs} runs...")
     print(f"Input: '{args.input}'")
     if args.context:
         print(f"Context: '{args.context}'")
@@ -293,7 +286,7 @@ async def main_async(args):
     results = []
     for i in range(args.runs):
         print(f"Run {i+1}/{args.runs}...", end=" ", flush=True)
-        result = await run_single_test(model, args.input, args.context)
+        result = await run_single_test(client, args.input, args.context)
         results.append(result)
         print(f"{result['timings']['total_ms']:.0f}ms {'✓' if result['success'] else '✗'}")
 

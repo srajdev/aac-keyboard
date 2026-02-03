@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Head-to-head comparison of Claude Haiku 4.5 vs Gemini 2.5 Flash.
-Runs both models with identical inputs and compares performance.
+Uses NEW google-genai SDK with thinking_budget=0 for optimal Gemini performance.
 """
 
 import argparse
@@ -15,8 +15,8 @@ from datetime import datetime
 from pathlib import Path
 from dotenv import load_dotenv
 from anthropic import Anthropic
-import google.generativeai as genai
-from google.generativeai.types import HarmCategory, HarmBlockThreshold
+from google import genai
+from google.genai import types
 
 # Load environment variables from .env file in parent directory
 env_path = Path(__file__).parent.parent / ".env"
@@ -130,8 +130,8 @@ def run_claude_test(client: Anthropic, partial_input: str, conversation_context:
     }
 
 
-async def run_gemini_test(model, partial_input: str, conversation_context: str) -> dict:
-    """Run Gemini prediction test."""
+async def run_gemini_test(client: genai.Client, partial_input: str, conversation_context: str) -> dict:
+    """Run Gemini prediction test with NEW SDK."""
     prompt_build_start = time.time()
     user_prompt = build_prediction_prompt(partial_input, conversation_context)
     full_prompt = f"{SYSTEM_PROMPT_WITH_RULES}\n\n{user_prompt}"
@@ -140,24 +140,37 @@ async def run_gemini_test(model, partial_input: str, conversation_context: str) 
     api_call_start = time.time()
 
     try:
-        response = await model.generate_content_async(
-            full_prompt,
-            generation_config={
-                'temperature': 0.7,
-                'max_output_tokens': 1500,  # Gemini tokenizer counts differently than Claude
-            }
+        response = await client.aio.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=full_prompt,
+            config=types.GenerateContentConfig(
+                temperature=0.7,
+                max_output_tokens=1500,
+                thinking_config=types.ThinkingConfig(
+                    thinking_budget=0  # Disables slow reasoning mode!
+                ),
+                safety_settings=[
+                    types.SafetySetting(
+                        category="HARM_CATEGORY_HARASSMENT",
+                        threshold="BLOCK_NONE"
+                    ),
+                    types.SafetySetting(
+                        category="HARM_CATEGORY_HATE_SPEECH",
+                        threshold="BLOCK_NONE"
+                    ),
+                    types.SafetySetting(
+                        category="HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                        threshold="BLOCK_NONE"
+                    ),
+                    types.SafetySetting(
+                        category="HARM_CATEGORY_DANGEROUS_CONTENT",
+                        threshold="BLOCK_NONE"
+                    ),
+                ]
+            )
         )
 
         api_call_ms = (time.time() - api_call_start) * 1000
-
-        if not response.candidates or not response.candidates[0].content.parts:
-            return {
-                "success": False,
-                "total_ms": prompt_build_ms + api_call_ms,
-                "api_call_ms": api_call_ms,
-                "error": "Response blocked",
-                "response": None,
-            }
 
         parse_start = time.time()
         response_text = response.text.strip()
@@ -359,19 +372,10 @@ async def main_async(args):
     """Async main function."""
     # Initialize clients
     claude_client = Anthropic()
+    gemini_client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
 
-    genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-    gemini_model = genai.GenerativeModel(
-        'models/gemini-2.5-flash',
-        safety_settings={
-            HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
-            HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
-            HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
-            HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
-        }
-    )
-
-    print(f"\nStarting head-to-head comparison with {args.runs} runs per model...")
+    print(f"\n🚀 NEW SDK: Gemini with thinking_budget=0")
+    print(f"Starting head-to-head comparison with {args.runs} runs per model...")
     print(f"Input: '{args.input}'")
     if args.context:
         print(f"Context: '{args.context}'")
@@ -392,7 +396,7 @@ async def main_async(args):
 
         # Gemini test
         print(f"  Gemini...", end=" ", flush=True)
-        gemini_result = await run_gemini_test(gemini_model, args.input, args.context)
+        gemini_result = await run_gemini_test(gemini_client, args.input, args.context)
         gemini_results.append(gemini_result)
         print(f"{gemini_result['total_ms']:.0f}ms {'✓' if gemini_result['success'] else '✗'}")
 
