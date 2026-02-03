@@ -1,0 +1,311 @@
+#!/usr/bin/env python3
+"""
+Standalone benchmark script for Gemini 2.5 Flash predictions.
+Tests latency, error rates, and statistical performance.
+"""
+
+import argparse
+import json
+import re
+import time
+import statistics
+import os
+import asyncio
+from datetime import datetime
+import google.generativeai as genai
+from google.generativeai.types import HarmCategory, HarmBlockThreshold
+
+
+# Prompt templates (copied from server/prompts.py)
+SYSTEM_PROMPT_WITH_RULES = """You are an assistive communication AI helping Viraj communicate faster.
+Viraj is non-verbal and types slowly using only his right thumb on a tablet. Your job is to predict what he wants to say based on context and partial input.
+
+Your predictions should be:
+- Natural and conversational
+- Appropriate for the context
+- Varied (not repetitive)
+- Practical for everyday communication
+
+Always return valid JSON with exactly the structure requested.
+
+PREDICTION RULES:
+- phrases: 3 complete sentences (5+ words) Viraj likely wants to say
+- words: 5 single words that could come next (or start a message if no input)
+- letters: 5 most likely next letters (lowercase)
+
+Consider when making predictions:
+1. Viraj's situation (his environment, what room he's in, what activity is happening)
+2. What others said to Viraj (questions asked, statements made)
+3. Common responses to questions and statements in conversation
+4. Viraj's partial input and natural ways to complete it
+5. Natural conversation flow for the given situation
+
+Use BOTH the situational context and conversational context to generate relevant predictions.
+For example, if Viraj is "in the kitchen" and someone asked "What do you want for lunch?",
+predictions should relate to food choices, not generic responses."""
+
+
+def build_prediction_prompt(partial_input: str, conversation_context: str) -> str:
+    """Build the user prompt (dynamic part that changes per request)."""
+    prompt = ""
+
+    if conversation_context and conversation_context.strip():
+        prompt += f'Context:\n{conversation_context}\n\n'
+
+    if partial_input and partial_input.strip():
+        prompt += f'Viraj has typed so far: "{partial_input}"\n\n'
+    else:
+        prompt += "Viraj hasn't typed anything yet.\n\n"
+
+    prompt += """Provide predictions in this exact JSON format:
+{
+  "phrases": ["phrase1", "phrase2", "phrase3"],
+  "words": ["word1", "word2", "word3", "word4", "word5"],
+  "letters": ["a", "b", "c", "d", "e"]
+}
+
+Return ONLY the JSON object, no other text."""
+
+    return prompt
+
+
+async def run_single_test(model, partial_input: str, conversation_context: str) -> dict:
+    """Run a single prediction test and return detailed metrics."""
+
+    # Timing: prompt build
+    prompt_build_start = time.time()
+    user_prompt = build_prediction_prompt(partial_input, conversation_context)
+    full_prompt = f"{SYSTEM_PROMPT_WITH_RULES}\n\n{user_prompt}"
+    prompt_build_ms = (time.time() - prompt_build_start) * 1000
+
+    # Timing: API call
+    api_call_start = time.time()
+
+    try:
+        response = await model.generate_content_async(
+            full_prompt,
+            generation_config={
+                'temperature': 0.7,
+                'max_output_tokens': 5000,
+            }
+        )
+
+        api_call_ms = (time.time() - api_call_start) * 1000
+
+        # Check if response was blocked or truncated
+        if not response.candidates or not response.candidates[0].content.parts:
+            finish_reason = response.candidates[0].finish_reason if response.candidates else 'UNKNOWN'
+            return {
+                "success": False,
+                "error": f"Response blocked: {finish_reason}",
+                "timings": {
+                    "prompt_build_ms": prompt_build_ms,
+                    "api_call_ms": api_call_ms,
+                    "parse_ms": 0,
+                    "total_ms": prompt_build_ms + api_call_ms,
+                },
+                "finish_reason": str(finish_reason),
+                "response": None,
+            }
+
+        finish_reason = response.candidates[0].finish_reason
+
+        # Timing: parse
+        parse_start = time.time()
+        response_text = response.text.strip()
+
+        # Remove markdown code blocks if present
+        response_text = re.sub(r'^```json\s*', '', response_text)
+        response_text = re.sub(r'\s*```$', '', response_text)
+        response_text = response_text.strip()
+
+        # Extract JSON from response
+        json_match = re.search(r'\{[\s\S]*\}', response_text)
+        if json_match:
+            json_str = json_match.group()
+            try:
+                result = json.loads(json_str)
+                parse_ms = (time.time() - parse_start) * 1000
+                success = True
+            except json.JSONDecodeError as e:
+                result = None
+                parse_ms = (time.time() - parse_start) * 1000
+                success = False
+        else:
+            result = None
+            parse_ms = (time.time() - parse_start) * 1000
+            success = False
+
+        total_ms = prompt_build_ms + api_call_ms + parse_ms
+
+        return {
+            "success": success,
+            "timings": {
+                "prompt_build_ms": prompt_build_ms,
+                "api_call_ms": api_call_ms,
+                "parse_ms": parse_ms,
+                "total_ms": total_ms,
+            },
+            "finish_reason": str(finish_reason),
+            "response": result,
+        }
+
+    except Exception as e:
+        api_call_ms = (time.time() - api_call_start) * 1000
+        return {
+            "success": False,
+            "error": str(e),
+            "timings": {
+                "prompt_build_ms": prompt_build_ms,
+                "api_call_ms": api_call_ms,
+                "parse_ms": 0,
+                "total_ms": prompt_build_ms + api_call_ms,
+            },
+            "finish_reason": "ERROR",
+            "response": None,
+        }
+
+
+def print_results(results: list, partial_input: str, conversation_context: str):
+    """Print formatted benchmark results."""
+
+    # Calculate statistics
+    successful_runs = [r for r in results if r["success"]]
+    total_times = [r["timings"]["total_ms"] for r in successful_runs]
+    api_times = [r["timings"]["api_call_ms"] for r in successful_runs]
+
+    print("\n" + "=" * 70)
+    print("GEMINI 2.5 FLASH BENCHMARK RESULTS")
+    print("=" * 70)
+    print(f"Input: '{partial_input}'")
+    if conversation_context:
+        print(f"Context: '{conversation_context[:50]}...'")
+    print(f"Runs: {len(results)}")
+    print(f"Success Rate: {len(successful_runs)}/{len(results)} ({len(successful_runs)/len(results)*100:.0f}%)")
+    print()
+
+    if successful_runs:
+        print("LATENCY BREAKDOWN")
+        print("-" * 70)
+        print(f"{'Metric':<20} {'Average':<12} {'Min':<12} {'Max':<12} {'P95':<12}")
+        print("-" * 70)
+
+        # Total latency
+        print(f"{'Total Latency':<20} {statistics.mean(total_times):>10.0f}ms "
+              f"{min(total_times):>10.0f}ms {max(total_times):>10.0f}ms "
+              f"{statistics.quantiles(total_times, n=20)[18]:>10.0f}ms")
+
+        # API call latency
+        print(f"{'API Call':<20} {statistics.mean(api_times):>10.0f}ms "
+              f"{min(api_times):>10.0f}ms {max(api_times):>10.0f}ms "
+              f"{statistics.quantiles(api_times, n=20)[18]:>10.0f}ms")
+
+        # Prompt build
+        prompt_times = [r["timings"]["prompt_build_ms"] for r in successful_runs]
+        print(f"{'Prompt Build':<20} {statistics.mean(prompt_times):>10.1f}ms "
+              f"{min(prompt_times):>10.1f}ms {max(prompt_times):>10.1f}ms "
+              f"{statistics.quantiles(prompt_times, n=20)[18]:>10.1f}ms")
+
+        # Parse
+        parse_times = [r["timings"]["parse_ms"] for r in successful_runs]
+        print(f"{'JSON Parse':<20} {statistics.mean(parse_times):>10.1f}ms "
+              f"{min(parse_times):>10.1f}ms {max(parse_times):>10.1f}ms "
+              f"{statistics.quantiles(parse_times, n=20)[18]:>10.1f}ms")
+
+        print()
+        print("FINISH REASONS")
+        print("-" * 70)
+        finish_reasons = {}
+        for r in results:
+            reason = r.get("finish_reason", "UNKNOWN")
+            finish_reasons[reason] = finish_reasons.get(reason, 0) + 1
+
+        for reason, count in finish_reasons.items():
+            print(f"{reason}: {count}/{len(results)} ({count/len(results)*100:.0f}%)")
+
+        # Cost calculation (Gemini 2.5 Flash pricing)
+        # Note: Gemini doesn't expose token counts in response, using estimates
+        # Rough estimate: ~500 tokens input, ~200 tokens output
+        estimated_input_tokens = 500
+        estimated_output_tokens = 200
+        input_cost_per_1k = 0.075 / 1000  # $0.075 per 1M tokens
+        output_cost_per_1k = 0.30 / 1000  # $0.30 per 1M tokens
+        avg_cost = (estimated_input_tokens * input_cost_per_1k + estimated_output_tokens * output_cost_per_1k) / 1000
+
+        print()
+        print("COST ESTIMATE (based on typical token counts)")
+        print("-" * 70)
+        print(f"Estimated Input Tokens: ~{estimated_input_tokens}")
+        print(f"Estimated Output Tokens: ~{estimated_output_tokens}")
+        print(f"Avg Cost per Request: ${avg_cost:.6f}")
+        print(f"Cost per 1K Requests: ${avg_cost * 1000:.2f}")
+        print(f"Cost per 1M Requests: ${avg_cost * 1000000:.2f}")
+
+        print()
+        print("SAMPLE OUTPUT (last successful run)")
+        print("-" * 70)
+        last_successful = successful_runs[-1]
+        if last_successful["response"]:
+            print(json.dumps(last_successful["response"], indent=2))
+
+    else:
+        print("No successful runs. Errors:")
+        for i, r in enumerate(results):
+            if "error" in r:
+                print(f"  Run {i+1}: {r['error']}")
+
+    print("=" * 70)
+    print()
+
+
+async def main_async(args):
+    """Async main function."""
+    # Configure Gemini
+    genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+
+    model = genai.GenerativeModel(
+        'models/gemini-2.5-flash',
+        safety_settings={
+            HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+            HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+            HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+            HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+        }
+    )
+
+    print(f"\nStarting Gemini 2.5 Flash benchmark with {args.runs} runs...")
+    print(f"Input: '{args.input}'")
+    if args.context:
+        print(f"Context: '{args.context}'")
+    print()
+
+    # Run tests
+    results = []
+    for i in range(args.runs):
+        print(f"Run {i+1}/{args.runs}...", end=" ", flush=True)
+        result = await run_single_test(model, args.input, args.context)
+        results.append(result)
+        print(f"{result['timings']['total_ms']:.0f}ms {'✓' if result['success'] else '✗'}")
+
+    # Print results
+    if args.json:
+        print(json.dumps(results, indent=2))
+    else:
+        print_results(results, args.input, args.context)
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Benchmark Gemini 2.5 Flash predictions")
+    parser.add_argument("-i", "--input", default="I want to", help="Partial input text")
+    parser.add_argument("-c", "--context", default="", help="Conversation context")
+    parser.add_argument("-n", "--runs", type=int, default=5, help="Number of test runs")
+    parser.add_argument("--json", action="store_true", help="Output results as JSON")
+
+    args = parser.parse_args()
+
+    # Run async main
+    asyncio.run(main_async(args))
+
+
+if __name__ == "__main__":
+    main()
