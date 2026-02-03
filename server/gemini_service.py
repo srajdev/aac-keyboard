@@ -12,6 +12,17 @@ from .performance_tracker import get_tracker
 import os
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
+# Initialize model once at module level (not per-request)
+gemini_model = genai.GenerativeModel(
+    'models/gemini-2.5-flash',
+    safety_settings={
+        HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+        HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+        HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+        HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+    }
+)
+
 # Log file for predictions
 LOG_DIR = Path(__file__).parent.parent / "logs"
 LOG_DIR.mkdir(exist_ok=True)
@@ -35,21 +46,12 @@ async def generate_predictions_gemini(partial_input: str, conversation_context: 
     api_call_start = time.time()
 
     try:
-        model = genai.GenerativeModel(
-            'models/gemini-2.5-flash',
-            safety_settings={
-                HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
-                HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
-                HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
-                HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
-            }
-        )
-
-        response = await model.generate_content_async(
+        # Use pre-initialized model from module level
+        response = await gemini_model.generate_content_async(
             full_prompt,
             generation_config={
                 'temperature': 0.7,
-                'max_output_tokens': 5000,
+                'max_output_tokens': 1500,  # Gemini tokenizer needs more tokens than Claude
             }
         )
 

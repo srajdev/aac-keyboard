@@ -144,7 +144,7 @@ async def run_gemini_test(model, partial_input: str, conversation_context: str) 
             full_prompt,
             generation_config={
                 'temperature': 0.7,
-                'max_output_tokens': 5000,
+                'max_output_tokens': 1500,  # Gemini tokenizer counts differently than Claude
             }
         )
 
