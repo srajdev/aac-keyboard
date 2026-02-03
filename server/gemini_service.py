@@ -49,17 +49,23 @@ async def generate_predictions_gemini(partial_input: str, conversation_context: 
             full_prompt,
             generation_config={
                 'temperature': 0.7,
-                'max_output_tokens': 500,  # Increased from 300
+                'max_output_tokens': 1500,
             }
         )
 
         api_call_ms = (time.time() - api_call_start) * 1000
 
-        # Check if response was blocked
+        # Check if response was blocked or truncated
         if not response.candidates or not response.candidates[0].content.parts:
             finish_reason = response.candidates[0].finish_reason if response.candidates else 'UNKNOWN'
             print(f"Gemini response blocked. Finish reason: {finish_reason}")
-            raise ValueError(f"Response blocked by safety filters: {finish_reason}")
+            raise ValueError(f"Response blocked: {finish_reason}")
+
+        # Check if hit token limit (finish_reason 2 = MAX_TOKENS)
+        finish_reason = response.candidates[0].finish_reason
+        if finish_reason == 2:  # MAX_TOKENS
+            print(f"Gemini hit token limit. Consider increasing max_output_tokens.")
+            # Continue anyway - might have partial valid JSON
 
         # Timing: parse
         parse_start = time.time()
