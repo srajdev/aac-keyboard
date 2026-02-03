@@ -3,6 +3,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 import google.generativeai as genai
+from google.generativeai.types import HarmCategory, HarmBlockThreshold
 from .prompts import SYSTEM_PROMPT_WITH_RULES, build_prediction_prompt
 from .performance_tracker import get_tracker
 
@@ -37,10 +38,10 @@ async def generate_predictions_gemini(partial_input: str, conversation_context: 
         model = genai.GenerativeModel(
             'models/gemini-2.5-flash',
             safety_settings={
-                'HARASSMENT': 'BLOCK_NONE',
-                'HATE_SPEECH': 'BLOCK_NONE',
-                'SEXUALLY_EXPLICIT': 'BLOCK_NONE',
-                'DANGEROUS_CONTENT': 'BLOCK_NONE',
+                HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+                HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+                HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+                HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
             }
         )
 
