@@ -45,6 +45,8 @@ const Predictions = {
     },
 
     update(predictions) {
+        const renderStart = performance.now();
+
         // Update phrase predictions
         if (predictions.phrases) {
             this.phraseButtons.forEach((btn, i) => {
@@ -83,6 +85,9 @@ const Predictions = {
                 }
             });
         }
+
+        const renderDuration = performance.now() - renderStart;
+        console.log(`[Render] Predictions updated: ${renderDuration.toFixed(2)}ms`);
     },
 
     setLoading(isLoading) {

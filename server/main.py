@@ -1,4 +1,5 @@
 import os
+import time
 from pathlib import Path
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -74,6 +75,8 @@ async def predict(request: PredictionRequest):
     """Generate predictions based on partial input and conversation context."""
     try:
         # Route to appropriate model service
+        start_time = time.time()
+
         if request.model == "gemini":
             predictions = await generate_predictions_gemini(
                 request.partialInput, request.conversationContext
@@ -89,6 +92,9 @@ async def predict(request: PredictionRequest):
                 request.partialInput, request.conversationContext
             )
 
+        duration_ms = (time.time() - start_time) * 1000
+        print(f"[Backend] Prediction generation ({request.model}): {duration_ms:.0f}ms")
+
         return PredictionResponse(
             phrases=predictions.get("phrases", []),
             words=predictions.get("words", []),
@@ -100,9 +106,13 @@ async def predict(request: PredictionRequest):
         if request.model == "gemini":
             print("Falling back to Claude due to Gemini error")
             try:
+                start_time = time.time()
                 predictions = await generate_predictions_claude(
                     request.partialInput, request.conversationContext
                 )
+                duration_ms = (time.time() - start_time) * 1000
+                print(f"[Backend] Prediction generation (claude-fallback): {duration_ms:.0f}ms")
+
                 return PredictionResponse(
                     phrases=predictions.get("phrases", []),
                     words=predictions.get("words", []),
