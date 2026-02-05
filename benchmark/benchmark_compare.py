@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-3-way comparison of Claude Haiku 4.5 vs Gemini 2.5 Flash vs GPT-5 Mini.
+3-way comparison of Claude Haiku 4.5 vs Gemini 2.5 Flash vs GPT-4.1-nano.
 Uses NEW google-genai SDK with thinking_budget=0 for optimal Gemini performance.
 """
 
@@ -214,7 +214,7 @@ async def run_gemini_test(client: genai.Client, partial_input: str, conversation
 
 
 async def run_gpt_test(client: AsyncOpenAI, partial_input: str, conversation_context: str) -> dict:
-    """Run GPT-5 Mini prediction test."""
+    """Run GPT-4.1-nano prediction test."""
     prompt_build_start = time.time()
     user_prompt = build_prediction_prompt(partial_input, conversation_context)
     prompt_build_ms = (time.time() - prompt_build_start) * 1000
@@ -223,10 +223,9 @@ async def run_gpt_test(client: AsyncOpenAI, partial_input: str, conversation_con
 
     try:
         response = await client.chat.completions.create(
-            model="gpt-5-mini",
-            max_completion_tokens=1000,  # GPT-5 Mini uses max_completion_tokens instead of max_tokens
-            reasoning_effort="low",  # Use minimal reasoning for speed (autocomplete doesn't need deep thinking)
-            # Note: GPT-5 Mini only supports default temperature (1), custom values not allowed
+            model="gpt-4.1-nano",
+            max_tokens=1000,  # GPT-4.1 uses traditional max_tokens parameter
+            temperature=0.7,  # GPT-4.1 supports temperature
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT_WITH_RULES},
                 {"role": "user", "content": user_prompt}
@@ -300,7 +299,7 @@ def print_comparison(claude_results: list, gemini_results: list, gpt_results: li
     gpt_successful = [r for r in gpt_results if r["success"]]
 
     print("\n" + "=" * 95)
-    print("BENCHMARK COMPARISON: CLAUDE vs GEMINI vs GPT-5 MINI")
+    print("BENCHMARK COMPARISON: CLAUDE vs GEMINI vs GPT-4.1-NANO")
     print("=" * 95)
     print(f"Input: '{partial_input}'")
     if conversation_context:
@@ -462,7 +461,7 @@ async def main_async(args):
     gemini_client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
     gpt_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-    print(f"\n🚀 3-WAY COMPARISON: Claude vs Gemini vs GPT-5 Mini")
+    print(f"\n🚀 3-WAY COMPARISON: Claude vs Gemini vs GPT-4.1-nano")
     print(f"Starting benchmark with {args.runs} runs per model...")
     print(f"Input: '{args.input}'")
     if args.context:
@@ -490,7 +489,7 @@ async def main_async(args):
         print(f"{gemini_result['total_ms']:.0f}ms {'✓' if gemini_result['success'] else '✗'}")
 
         # GPT test
-        print(f"  GPT-5...", end=" ", flush=True)
+        print(f"  GPT-4.1-nano...", end=" ", flush=True)
         gpt_result = await run_gpt_test(gpt_client, args.input, args.context)
         gpt_results.append(gpt_result)
         print(f"{gpt_result['total_ms']:.0f}ms {'✓' if gpt_result['success'] else '✗'}")

@@ -74,7 +74,7 @@ Return ONLY the JSON object, no other text."""
     return prompt
 
 
-async def run_single_test(client: AsyncOpenAI, partial_input: str, conversation_context: str) -> dict:
+async def run_single_test(client: AsyncOpenAI, partial_input: str, conversation_context: str, model: str = "gpt-4.1-mini") -> dict:
     """Run a single prediction test and return detailed metrics."""
 
     # Timing: prompt build
@@ -86,10 +86,9 @@ async def run_single_test(client: AsyncOpenAI, partial_input: str, conversation_
     api_call_start = time.time()
     try:
         response = await client.chat.completions.create(
-            model="gpt-5-mini",
-            max_completion_tokens=1000,  # GPT-5 Mini uses max_completion_tokens instead of max_tokens
-            reasoning_effort="low",  # Use minimal reasoning for speed (autocomplete doesn't need deep thinking)
-            # Note: GPT-5 Mini only supports default temperature (1), custom values not allowed
+            model=model,  # gpt-4.1-mini or gpt-4.1-nano
+            max_tokens=1000,  # GPT-4.1 uses max_tokens (traditional parameter)
+            temperature=0.7,  # GPT-4.1 supports temperature
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT_WITH_RULES},
                 {"role": "user", "content": user_prompt}
@@ -159,7 +158,7 @@ async def run_single_test(client: AsyncOpenAI, partial_input: str, conversation_
         }
 
 
-def print_results(results: list, partial_input: str, conversation_context: str):
+def print_results(results: list, partial_input: str, conversation_context: str, model: str = "gpt-4.1-mini"):
     """Print formatted benchmark results."""
 
     # Calculate statistics
@@ -171,7 +170,7 @@ def print_results(results: list, partial_input: str, conversation_context: str):
     avg_output_tokens = statistics.mean([r["tokens"]["output"] for r in successful_runs]) if successful_runs else 0
 
     print("\n" + "=" * 70)
-    print("GPT-5 MINI BENCHMARK RESULTS")
+    print(f"{model.upper()} BENCHMARK RESULTS")
     print("=" * 70)
     print(f"Input: '{partial_input}'")
     if conversation_context:
@@ -219,8 +218,8 @@ def print_results(results: list, partial_input: str, conversation_context: str):
         print(f"Avg Output Tokens: {avg_output_tokens:.0f}")
         print(f"Total Tokens: {avg_input_tokens + avg_output_tokens:.0f}")
 
-        # Cost calculation (GPT-5 Mini pricing - these are placeholder values, need verification)
-        # TODO: Verify actual GPT-5 Mini pricing from OpenAI docs
+        # Cost calculation (GPT-4.1 pricing - placeholder values, need verification)
+        # TODO: Verify actual GPT-4.1-mini/nano pricing from OpenAI docs
         input_cost_per_1k = 0.10 / 1000  # Placeholder: $0.10 per 1M input tokens
         output_cost_per_1k = 0.30 / 1000  # Placeholder: $0.30 per 1M output tokens
         avg_cost = (avg_input_tokens * input_cost_per_1k + avg_output_tokens * output_cost_per_1k) / 1000
@@ -231,7 +230,7 @@ def print_results(results: list, partial_input: str, conversation_context: str):
         print(f"Avg Cost per Request: ${avg_cost:.6f}")
         print(f"Cost per 1K Requests: ${avg_cost * 1000:.2f}")
         print(f"Cost per 1M Requests: ${avg_cost * 1000000:.2f}")
-        print("Note: Pricing is placeholder - verify actual GPT-5 Mini rates")
+        print(f"Note: Pricing is placeholder - verify actual {model} rates")
 
         print()
         print("SAMPLE OUTPUT (last successful run)")
@@ -252,10 +251,13 @@ def print_results(results: list, partial_input: str, conversation_context: str):
 
 
 async def main():
-    parser = argparse.ArgumentParser(description="Benchmark GPT-5 Mini predictions")
+    parser = argparse.ArgumentParser(description="Benchmark GPT-4.1 predictions")
     parser.add_argument("-i", "--input", default="I want to", help="Partial input text")
     parser.add_argument("-c", "--context", default="", help="Conversation context")
     parser.add_argument("-n", "--runs", type=int, default=5, help="Number of test runs")
+    parser.add_argument("-m", "--model", default="gpt-4.1-mini",
+                        choices=["gpt-4.1-mini", "gpt-4.1-nano"],
+                        help="Model to test (default: gpt-4.1-mini)")
     parser.add_argument("--json", action="store_true", help="Output results as JSON")
 
     args = parser.parse_args()
@@ -263,7 +265,7 @@ async def main():
     # Initialize client
     client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-    print(f"\nStarting GPT-5 Mini benchmark with {args.runs} runs...")
+    print(f"\nStarting {args.model} benchmark with {args.runs} runs...")
     print(f"Input: '{args.input}'")
     if args.context:
         print(f"Context: '{args.context}'")
@@ -273,7 +275,7 @@ async def main():
     results = []
     for i in range(args.runs):
         print(f"Run {i+1}/{args.runs}...", end=" ", flush=True)
-        result = await run_single_test(client, args.input, args.context)
+        result = await run_single_test(client, args.input, args.context, args.model)
         results.append(result)
         print(f"{result['timings']['total_ms']:.0f}ms {'✓' if result['success'] else '✗'}")
 

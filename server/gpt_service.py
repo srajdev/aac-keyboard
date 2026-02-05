@@ -29,7 +29,7 @@ perf_tracker = get_tracker(LOG_DIR)
 
 
 async def generate_predictions_gpt(partial_input: str, conversation_context: str) -> dict:
-    """Generate predictions using GPT-5 Mini API (no caching initially)."""
+    """Generate predictions using GPT-4.1-nano API (fast, non-reasoning model)."""
     # Timing: prompt build
     prompt_build_start = time.time()
     user_prompt = build_prediction_prompt(partial_input, conversation_context)
@@ -41,12 +41,11 @@ async def generate_predictions_gpt(partial_input: str, conversation_context: str
     try:
         client = _get_gpt_client()
 
-        # Call OpenAI API with GPT-5 Mini
+        # Call OpenAI API with GPT-4.1-nano
         response = await client.chat.completions.create(
-            model="gpt-5-mini",
-            max_completion_tokens=1000,  # GPT-5 Mini uses max_completion_tokens instead of max_tokens
-            reasoning_effort="low",  # Use minimal reasoning for speed (autocomplete doesn't need deep thinking)
-            # Note: GPT-5 Mini only supports default temperature (1), custom values not allowed
+            model="gpt-4.1-nano",
+            max_tokens=1000,  # GPT-4.1 uses traditional max_tokens parameter
+            temperature=0.7,  # GPT-4.1 supports temperature (unlike GPT-5 reasoning models)
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT_WITH_RULES},
                 {"role": "user", "content": user_prompt}
@@ -61,7 +60,7 @@ async def generate_predictions_gpt(partial_input: str, conversation_context: str
         response_text = response.choices[0].message.content
 
         # Log with detailed timing breakdown
-        print(f"[Predictions] GPT API: {api_call_ms:.0f}ms (prompt: {prompt_build_ms:.1f}ms) | "
+        print(f"[Predictions] GPT-4.1-nano API: {api_call_ms:.0f}ms (prompt: {prompt_build_ms:.1f}ms) | "
               f"Input: '{partial_input[:30]}...' | "
               f"Tokens: {response.usage.prompt_tokens}in/{response.usage.completion_tokens}out")
 
@@ -76,7 +75,7 @@ async def generate_predictions_gpt(partial_input: str, conversation_context: str
                 # Log the prediction with detailed timing
                 log_entry = {
                     "timestamp": datetime.now().isoformat(),
-                    "model": "gpt-5-mini",
+                    "model": "gpt-4.1-nano",
                     "input": partial_input,
                     "context": conversation_context,
                     "response": result,
@@ -94,9 +93,9 @@ async def generate_predictions_gpt(partial_input: str, conversation_context: str
                 with open(LOG_FILE, "a") as f:
                     f.write(json.dumps(log_entry) + "\n")
 
-                # Record performance metrics (no caching for GPT initially)
+                # Record performance metrics (no caching for GPT-4.1-nano)
                 perf_tracker.record_request(
-                    model="gpt-5-mini",
+                    model="gpt-4.1-nano",
                     latency_ms=api_call_ms,
                     cache_hit=False,
                 )
