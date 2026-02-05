@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Head-to-head comparison of Claude Haiku 4.5 vs Gemini 2.5 Flash.
+3-way comparison of Claude Haiku 4.5 vs Gemini 2.5 Flash vs GPT-5 Mini.
 Uses NEW google-genai SDK with thinking_budget=0 for optimal Gemini performance.
 """
 
@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 from anthropic import Anthropic
 from google import genai
 from google.genai import types
+from openai import AsyncOpenAI
 
 # Load environment variables from .env file in parent directory
 env_path = Path(__file__).parent.parent / ".env"
@@ -212,6 +213,69 @@ async def run_gemini_test(client: genai.Client, partial_input: str, conversation
         }
 
 
+async def run_gpt_test(client: AsyncOpenAI, partial_input: str, conversation_context: str) -> dict:
+    """Run GPT-5 Mini prediction test."""
+    prompt_build_start = time.time()
+    user_prompt = build_prediction_prompt(partial_input, conversation_context)
+    prompt_build_ms = (time.time() - prompt_build_start) * 1000
+
+    api_call_start = time.time()
+
+    try:
+        response = await client.chat.completions.create(
+            model="gpt-5-mini",
+            max_tokens=1000,
+            temperature=0.7,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT_WITH_RULES},
+                {"role": "user", "content": user_prompt}
+            ],
+            response_format={"type": "json_object"}
+        )
+
+        api_call_ms = (time.time() - api_call_start) * 1000
+
+        parse_start = time.time()
+        response_text = response.choices[0].message.content
+
+        json_match = re.search(r"\{[\s\S]*\}", response_text)
+        if json_match:
+            json_str = json_match.group()
+            try:
+                result = json.loads(json_str)
+                parse_ms = (time.time() - parse_start) * 1000
+                success = True
+            except json.JSONDecodeError:
+                result = None
+                parse_ms = (time.time() - parse_start) * 1000
+                success = False
+        else:
+            result = None
+            parse_ms = (time.time() - parse_start) * 1000
+            success = False
+
+        return {
+            "success": success,
+            "total_ms": prompt_build_ms + api_call_ms + parse_ms,
+            "api_call_ms": api_call_ms,
+            "tokens": {
+                "input": response.usage.prompt_tokens,
+                "output": response.usage.completion_tokens,
+            },
+            "response": result,
+        }
+
+    except Exception as e:
+        api_call_ms = (time.time() - api_call_start) * 1000
+        return {
+            "success": False,
+            "total_ms": prompt_build_ms + api_call_ms,
+            "api_call_ms": api_call_ms,
+            "error": str(e),
+            "response": None,
+        }
+
+
 def calculate_diversity(predictions: list) -> float:
     """Calculate diversity score for predictions (0-10)."""
     if not predictions:
@@ -227,15 +291,16 @@ def calculate_diversity(predictions: list) -> float:
     return round(diversity, 1)
 
 
-def print_comparison(claude_results: list, gemini_results: list, partial_input: str, conversation_context: str):
-    """Print side-by-side comparison."""
+def print_comparison(claude_results: list, gemini_results: list, gpt_results: list, partial_input: str, conversation_context: str):
+    """Print 3-way comparison."""
 
     claude_successful = [r for r in claude_results if r["success"]]
     gemini_successful = [r for r in gemini_results if r["success"]]
+    gpt_successful = [r for r in gpt_results if r["success"]]
 
-    print("\n" + "=" * 80)
-    print("BENCHMARK COMPARISON: CLAUDE HAIKU 4.5 vs GEMINI 2.5 FLASH")
-    print("=" * 80)
+    print("\n" + "=" * 95)
+    print("BENCHMARK COMPARISON: CLAUDE vs GEMINI vs GPT-5 MINI")
+    print("=" * 95)
     print(f"Input: '{partial_input}'")
     if conversation_context:
         print(f"Context: '{conversation_context[:60]}...'")
@@ -244,127 +309,148 @@ def print_comparison(claude_results: list, gemini_results: list, partial_input: 
 
     # Latency comparison
     print("LATENCY COMPARISON")
-    print("-" * 80)
-    print(f"{'Metric':<25} {'Claude Haiku':<20} {'Gemini Flash':<20} {'Winner':<15}")
-    print("-" * 80)
+    print("-" * 95)
+    print(f"{'Metric':<20} {'Claude':<15} {'Gemini':<15} {'GPT-5':<15} {'Winner':<15}")
+    print("-" * 95)
 
-    if claude_successful and gemini_successful:
+    if claude_successful and gemini_successful and gpt_successful:
         claude_avg = statistics.mean([r["total_ms"] for r in claude_successful])
         gemini_avg = statistics.mean([r["total_ms"] for r in gemini_successful])
-        speedup = gemini_avg / claude_avg if claude_avg > 0 else 0
+        gpt_avg = statistics.mean([r["total_ms"] for r in gpt_successful])
 
-        print(f"{'Avg Total Latency':<25} {claude_avg:>17.0f}ms {gemini_avg:>17.0f}ms "
-              f"{'Claude' if claude_avg < gemini_avg else 'Gemini':<15}")
+        winner = min([("Claude", claude_avg), ("Gemini", gemini_avg), ("GPT-5", gpt_avg)], key=lambda x: x[1])[0]
+        print(f"{'Avg Total Latency':<20} {claude_avg:>13.0f}ms {gemini_avg:>13.0f}ms {gpt_avg:>13.0f}ms {winner:<15}")
 
         # Only show P95 if we have enough data points
-        if len(claude_successful) >= 2 and len(gemini_successful) >= 2:
+        if len(claude_successful) >= 2 and len(gemini_successful) >= 2 and len(gpt_successful) >= 2:
             claude_p95 = statistics.quantiles([r["total_ms"] for r in claude_successful], n=20)[18]
             gemini_p95 = statistics.quantiles([r["total_ms"] for r in gemini_successful], n=20)[18]
-            print(f"{'P95 Latency':<25} {claude_p95:>17.0f}ms {gemini_p95:>17.0f}ms "
-                  f"{'Claude' if claude_p95 < gemini_p95 else 'Gemini':<15}")
+            gpt_p95 = statistics.quantiles([r["total_ms"] for r in gpt_successful], n=20)[18]
+            winner = min([("Claude", claude_p95), ("Gemini", gemini_p95), ("GPT-5", gpt_p95)], key=lambda x: x[1])[0]
+            print(f"{'P95 Latency':<20} {claude_p95:>13.0f}ms {gemini_p95:>13.0f}ms {gpt_p95:>13.0f}ms {winner:<15}")
 
         claude_min = min([r["total_ms"] for r in claude_successful])
         gemini_min = min([r["total_ms"] for r in gemini_successful])
-        print(f"{'Min Latency':<25} {claude_min:>17.0f}ms {gemini_min:>17.0f}ms "
-              f"{'Claude' if claude_min < gemini_min else 'Gemini':<15}")
+        gpt_min = min([r["total_ms"] for r in gpt_successful])
+        winner = min([("Claude", claude_min), ("Gemini", gemini_min), ("GPT-5", gpt_min)], key=lambda x: x[1])[0]
+        print(f"{'Min Latency':<20} {claude_min:>13.0f}ms {gemini_min:>13.0f}ms {gpt_min:>13.0f}ms {winner:<15}")
 
         claude_api = statistics.mean([r["api_call_ms"] for r in claude_successful])
         gemini_api = statistics.mean([r["api_call_ms"] for r in gemini_successful])
-        print(f"{'Avg API Call':<25} {claude_api:>17.0f}ms {gemini_api:>17.0f}ms "
-              f"{'Claude' if claude_api < gemini_api else 'Gemini':<15}")
+        gpt_api = statistics.mean([r["api_call_ms"] for r in gpt_successful])
+        winner = min([("Claude", claude_api), ("Gemini", gemini_api), ("GPT-5", gpt_api)], key=lambda x: x[1])[0]
+        print(f"{'Avg API Call':<20} {claude_api:>13.0f}ms {gemini_api:>13.0f}ms {gpt_api:>13.0f}ms {winner:<15}")
 
     print()
     print("RELIABILITY")
-    print("-" * 80)
+    print("-" * 95)
     claude_success_rate = len(claude_successful) / len(claude_results) * 100 if claude_results else 0
     gemini_success_rate = len(gemini_successful) / len(gemini_results) * 100 if gemini_results else 0
-    print(f"{'Success Rate':<25} {claude_success_rate:>16.0f}% {gemini_success_rate:>16.0f}% "
-          f"{'Tie' if claude_success_rate == gemini_success_rate else ('Claude' if claude_success_rate > gemini_success_rate else 'Gemini'):<15}")
+    gpt_success_rate = len(gpt_successful) / len(gpt_results) * 100 if gpt_results else 0
+
+    winner = max([("Claude", claude_success_rate), ("Gemini", gemini_success_rate), ("GPT-5", gpt_success_rate)], key=lambda x: x[1])[0]
+    print(f"{'Success Rate':<20} {claude_success_rate:>13.0f}% {gemini_success_rate:>13.0f}% {gpt_success_rate:>13.0f}% {winner:<15}")
 
     # Cache performance (Claude only)
     if claude_successful:
         cache_hits = sum(1 for r in claude_results if r.get("cache_hit", False))
         cache_rate = cache_hits / len(claude_results) * 100
-        print(f"{'Cache Hit Rate':<25} {cache_rate:>16.0f}% {'N/A':<20} {'Claude':<15}")
+        print(f"{'Cache Hit Rate':<20} {cache_rate:>13.0f}% {'N/A':<15} {'N/A':<15} {'Claude':<15}")
 
     print()
     print("COST COMPARISON (per 1K requests)")
-    print("-" * 80)
+    print("-" * 95)
 
     # Claude cost (actual token counts)
     if claude_successful:
         avg_input_tokens = statistics.mean([r["tokens"]["input"] for r in claude_successful])
         avg_output_tokens = statistics.mean([r["tokens"]["output"] for r in claude_successful])
         claude_cost = ((avg_input_tokens * 0.80 + avg_output_tokens * 4.00) / 1000) * 1000
-        print(f"{'Cost per 1K requests':<25} ${claude_cost:>16.2f}", end="")
     else:
         claude_cost = 0
-        print(f"{'Cost per 1K requests':<25} {'N/A':<20}", end="")
 
     # Gemini cost (estimated)
     gemini_cost = ((500 * 0.075 + 200 * 0.30) / 1000) * 1000  # Estimated
-    print(f" ${gemini_cost:>16.2f}", end="")
 
-    if claude_cost > 0:
-        savings = ((claude_cost - gemini_cost) / claude_cost) * 100
-        print(f" {'Gemini' if gemini_cost < claude_cost else 'Claude':<15}")
-        print(f"{'Savings':<25} {'':<20} {abs(savings):>15.0f}%")
+    # GPT cost (actual token counts if available)
+    if gpt_successful:
+        avg_input_tokens_gpt = statistics.mean([r["tokens"]["input"] for r in gpt_successful])
+        avg_output_tokens_gpt = statistics.mean([r["tokens"]["output"] for r in gpt_successful])
+        # Placeholder pricing - needs verification
+        gpt_cost = ((avg_input_tokens_gpt * 0.10 + avg_output_tokens_gpt * 0.30) / 1000) * 1000
     else:
-        print(f" {'Gemini':<15}")
+        gpt_cost = 0
+
+    costs = [("Claude", claude_cost), ("Gemini", gemini_cost), ("GPT-5", gpt_cost)]
+    valid_costs = [(name, cost) for name, cost in costs if cost > 0]
+    if valid_costs:
+        winner = min(valid_costs, key=lambda x: x[1])[0]
+        print(f"{'Cost per 1K req':<20} ${claude_cost:>12.2f} ${gemini_cost:>12.2f} ${gpt_cost:>12.2f} {winner:<15}")
+        if gpt_cost > 0:
+            print(f"{'⚠️  GPT pricing':<20} {'(verify OpenAI pricing - placeholder values used)':<60}")
 
     print()
     print("QUALITY METRICS")
-    print("-" * 80)
+    print("-" * 95)
 
-    if claude_successful and gemini_successful:
+    if claude_successful and gemini_successful and gpt_successful:
         # Get last successful outputs
         claude_last = claude_successful[-1]["response"]
         gemini_last = gemini_successful[-1]["response"]
+        gpt_last = gpt_successful[-1]["response"]
 
-        if claude_last and gemini_last:
+        if claude_last and gemini_last and gpt_last:
             # Phrase diversity
             claude_phrase_div = calculate_diversity(claude_last.get("phrases", []))
             gemini_phrase_div = calculate_diversity(gemini_last.get("phrases", []))
-            print(f"{'Phrase Diversity (0-10)':<25} {claude_phrase_div:>17.1f} {gemini_phrase_div:>17.1f} "
-                  f"{'Claude' if claude_phrase_div > gemini_phrase_div else ('Gemini' if gemini_phrase_div > claude_phrase_div else 'Tie'):<15}")
+            gpt_phrase_div = calculate_diversity(gpt_last.get("phrases", []))
+            winner = max([("Claude", claude_phrase_div), ("Gemini", gemini_phrase_div), ("GPT-5", gpt_phrase_div)], key=lambda x: x[1])[0]
+            print(f"{'Phrase Diversity (0-10)':<20} {claude_phrase_div:>13.1f} {gemini_phrase_div:>13.1f} {gpt_phrase_div:>13.1f} {winner:<15}")
 
             # Word variety
             claude_words = len(set(claude_last.get("words", [])))
             gemini_words = len(set(gemini_last.get("words", [])))
-            print(f"{'Unique Words':<25} {claude_words:>17} {gemini_words:>17} "
-                  f"{'Claude' if claude_words > gemini_words else ('Gemini' if gemini_words > claude_words else 'Tie'):<15}")
+            gpt_words = len(set(gpt_last.get("words", [])))
+            winner = max([("Claude", claude_words), ("Gemini", gemini_words), ("GPT-5", gpt_words)], key=lambda x: x[1])[0]
+            print(f"{'Unique Words':<20} {claude_words:>13} {gemini_words:>13} {gpt_words:>13} {winner:<15}")
 
             # Letter coverage
             claude_letters = len(set(claude_last.get("letters", [])))
             gemini_letters = len(set(gemini_last.get("letters", [])))
-            print(f"{'Unique Letters':<25} {claude_letters:>17} {gemini_letters:>17} "
-                  f"{'Claude' if claude_letters > gemini_letters else ('Gemini' if gemini_letters > claude_letters else 'Tie'):<15}")
+            gpt_letters = len(set(gpt_last.get("letters", [])))
+            winner = max([("Claude", claude_letters), ("Gemini", gemini_letters), ("GPT-5", gpt_letters)], key=lambda x: x[1])[0]
+            print(f"{'Unique Letters':<20} {claude_letters:>13} {gemini_letters:>13} {gpt_letters:>13} {winner:<15}")
 
     print()
     print("SUMMARY")
-    print("-" * 80)
+    print("-" * 95)
 
-    if claude_successful and gemini_successful:
-        if speedup > 1.5:
-            print(f"⚡ Claude is {speedup:.1f}x FASTER - Best for speed-critical UX")
-        elif speedup < 0.67:
-            print(f"⚡ Gemini is {1/speedup:.1f}x FASTER - Best for speed-critical UX")
+    if claude_successful and gemini_successful and gpt_successful:
+        # Speed winner
+        latencies = [("Claude", claude_avg), ("Gemini", gemini_avg), ("GPT-5", gpt_avg)]
+        fastest = min(latencies, key=lambda x: x[1])
+        slowest = max(latencies, key=lambda x: x[1])
+        speedup = slowest[1] / fastest[1]
+        print(f"⚡ {fastest[0]} is FASTEST ({fastest[1]:.0f}ms avg) - {speedup:.1f}x faster than {slowest[0]}")
+
+        # Cost winner
+        costs = [("Claude", claude_cost), ("Gemini", gemini_cost), ("GPT-5", gpt_cost)]
+        valid_costs = [(name, cost) for name, cost in costs if cost > 0]
+        if valid_costs:
+            cheapest = min(valid_costs, key=lambda x: x[1])
+            most_expensive = max(valid_costs, key=lambda x: x[1])
+            cost_factor = most_expensive[1] / cheapest[1]
+            print(f"💰 {cheapest[0]} is CHEAPEST (${cheapest[1]:.2f}/1K) - {cost_factor:.1f}x cheaper than {most_expensive[0]}")
+
+        # Reliability
+        rates = [("Claude", claude_success_rate), ("Gemini", gemini_success_rate), ("GPT-5", gpt_success_rate)]
+        most_reliable = max(rates, key=lambda x: x[1])
+        if most_reliable[1] > 99:
+            print(f"✅ All models highly reliable ({most_reliable[0]} at {most_reliable[1]:.0f}%)")
         else:
-            print(f"⚖️  Similar latency (Claude {claude_avg:.0f}ms vs Gemini {gemini_avg:.0f}ms)")
+            print(f"✅ {most_reliable[0]} most reliable ({most_reliable[1]:.0f}% success rate)")
 
-        if claude_cost > 0 and gemini_cost < claude_cost:
-            cost_factor = claude_cost / gemini_cost
-            print(f"💰 Gemini is {cost_factor:.1f}x CHEAPER - Best for cost optimization")
-        elif claude_cost > 0:
-            cost_factor = gemini_cost / claude_cost
-            print(f"💰 Claude is {cost_factor:.1f}x CHEAPER - Best for cost optimization")
-
-        if claude_success_rate > gemini_success_rate:
-            print(f"✅ Claude has higher reliability ({claude_success_rate:.0f}% vs {gemini_success_rate:.0f}%)")
-        elif gemini_success_rate > claude_success_rate:
-            print(f"✅ Gemini has higher reliability ({gemini_success_rate:.0f}% vs {claude_success_rate:.0f}%)")
-
-    print("=" * 80)
+    print("=" * 95)
     print()
 
 
@@ -373,9 +459,10 @@ async def main_async(args):
     # Initialize clients
     claude_client = Anthropic()
     gemini_client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
+    gpt_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-    print(f"\n🚀 NEW SDK: Gemini with thinking_budget=0")
-    print(f"Starting head-to-head comparison with {args.runs} runs per model...")
+    print(f"\n🚀 3-WAY COMPARISON: Claude vs Gemini vs GPT-5 Mini")
+    print(f"Starting benchmark with {args.runs} runs per model...")
     print(f"Input: '{args.input}'")
     if args.context:
         print(f"Context: '{args.context}'")
@@ -384,6 +471,7 @@ async def main_async(args):
     # Run tests
     claude_results = []
     gemini_results = []
+    gpt_results = []
 
     for i in range(args.runs):
         print(f"Run {i+1}/{args.runs}...")
@@ -400,15 +488,22 @@ async def main_async(args):
         gemini_results.append(gemini_result)
         print(f"{gemini_result['total_ms']:.0f}ms {'✓' if gemini_result['success'] else '✗'}")
 
+        # GPT test
+        print(f"  GPT-5...", end=" ", flush=True)
+        gpt_result = await run_gpt_test(gpt_client, args.input, args.context)
+        gpt_results.append(gpt_result)
+        print(f"{gpt_result['total_ms']:.0f}ms {'✓' if gpt_result['success'] else '✗'}")
+
     # Print comparison
     if args.json:
         output = {
             "claude": claude_results,
             "gemini": gemini_results,
+            "gpt": gpt_results,
         }
         print(json.dumps(output, indent=2))
     else:
-        print_comparison(claude_results, gemini_results, args.input, args.context)
+        print_comparison(claude_results, gemini_results, gpt_results, args.input, args.context)
 
 
 def main():

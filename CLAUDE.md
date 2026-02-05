@@ -1,5 +1,13 @@
 # Viraj Keyboard - Project Context
 
+## General rules of behaviour
+1. Before writing any code, describe your approach and wait for approval. Always ask clarifying questions before writing any code if requirements are ambiguous.
+2. If a task requires changes to more than 3 files, stop and break it into smaller tasks first.
+3. After writing code, list what could break and suggest tests to cover it.
+4. When there’s a bug, start by writing a test that reproduces it, then fix it until the test passes.
+5. Every time I correct you, add a new rule to the CLAUDE .md file so it never happens again.
+6. Everytime you start a new feature, create a new branch so we can track and revert if required
+
 ## Overview
 Assistive communication app for Viraj, a non-verbal user with limited fine motor skills who types with his right thumb on a tablet. Goal: increase typing speed from 8 WPM to 30 WPM using AI-powered predictions.
 

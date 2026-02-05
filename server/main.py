@@ -13,6 +13,7 @@ load_dotenv()
 
 from .claude_service import generate_predictions as generate_predictions_claude
 from .gemini_service import generate_predictions_gemini
+from .gpt_service import generate_predictions_gpt
 from .performance_tracker import get_tracker
 
 app = FastAPI(title="Viraj Keyboard API")
@@ -61,7 +62,7 @@ app.add_middleware(
 class PredictionRequest(BaseModel):
     partialInput: str = ""
     conversationContext: str = ""
-    model: str = "claude"  # Default to claude
+    model: str = "claude"  # Options: "claude", "gemini", "gpt" (GPT-5 Mini)
 
 
 class PredictionResponse(BaseModel):
@@ -79,6 +80,10 @@ async def predict(request: PredictionRequest):
 
         if request.model == "gemini":
             predictions = await generate_predictions_gemini(
+                request.partialInput, request.conversationContext
+            )
+        elif request.model == "gpt" or request.model == "gpt-5-mini":
+            predictions = await generate_predictions_gpt(
                 request.partialInput, request.conversationContext
             )
         elif request.model == "claude":
