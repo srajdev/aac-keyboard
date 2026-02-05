@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Standalone benchmark script for GPT-5 Mini predictions.
+Standalone benchmark script for GPT-4.1 predictions (SYNC version).
 Tests latency, token usage, and statistical performance.
 """
 
@@ -10,11 +10,10 @@ import re
 import time
 import statistics
 import os
-import asyncio
 from datetime import datetime
 from pathlib import Path
 from dotenv import load_dotenv
-from openai import AsyncOpenAI
+from openai import OpenAI
 
 # Load environment variables from .env file in parent directory
 env_path = Path(__file__).parent.parent / ".env"
@@ -74,8 +73,8 @@ Return ONLY the JSON object, no other text."""
     return prompt
 
 
-async def run_single_test(client: AsyncOpenAI, partial_input: str, conversation_context: str, model: str = "gpt-4.1-mini") -> dict:
-    """Run a single prediction test and return detailed metrics."""
+def run_single_test(client: OpenAI, partial_input: str, conversation_context: str, model: str = "gpt-4.1-mini") -> dict:
+    """Run a single prediction test and return detailed metrics (SYNC)."""
 
     # Timing: prompt build
     prompt_build_start = time.time()
@@ -85,7 +84,7 @@ async def run_single_test(client: AsyncOpenAI, partial_input: str, conversation_
     # Timing: API call
     api_call_start = time.time()
     try:
-        response = await client.chat.completions.create(
+        response = client.chat.completions.create(
             model=model,  # gpt-4.1-mini or gpt-4.1-nano
             max_tokens=1000,  # GPT-4.1 uses max_tokens (traditional parameter)
             temperature=0.7,  # GPT-4.1 supports temperature
@@ -250,8 +249,8 @@ def print_results(results: list, partial_input: str, conversation_context: str, 
     print()
 
 
-async def main():
-    parser = argparse.ArgumentParser(description="Benchmark GPT-4.1 predictions")
+def main():
+    parser = argparse.ArgumentParser(description="Benchmark GPT-4.1 predictions (SYNC)")
     parser.add_argument("-i", "--input", default="I want to", help="Partial input text")
     parser.add_argument("-c", "--context", default="", help="Conversation context")
     parser.add_argument("-n", "--runs", type=int, default=5, help="Number of test runs")
@@ -262,8 +261,8 @@ async def main():
 
     args = parser.parse_args()
 
-    # Initialize client
-    client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    # Initialize client (SYNC)
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
     print(f"\nStarting {args.model} benchmark with {args.runs} runs...")
     print(f"Input: '{args.input}'")
@@ -275,7 +274,7 @@ async def main():
     results = []
     for i in range(args.runs):
         print(f"Run {i+1}/{args.runs}...", end=" ", flush=True)
-        result = await run_single_test(client, args.input, args.context, args.model)
+        result = run_single_test(client, args.input, args.context, args.model)
         results.append(result)
         print(f"{result['timings']['total_ms']:.0f}ms {'✓' if result['success'] else '✗'}")
 
@@ -287,4 +286,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
