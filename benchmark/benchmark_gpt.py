@@ -87,7 +87,7 @@ async def run_single_test(client: AsyncOpenAI, partial_input: str, conversation_
     try:
         response = await client.chat.completions.create(
             model="gpt-5-mini",
-            max_tokens=1000,
+            max_completion_tokens=1000,  # GPT-5 Mini uses max_completion_tokens instead of max_tokens
             temperature=0.7,
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT_WITH_RULES},
