@@ -72,28 +72,28 @@ class PredictionResponse(BaseModel):
 
 
 @app.post("/api/predict", response_model=PredictionResponse)
-async def predict(request: PredictionRequest):
-    """Generate predictions based on partial input and conversation context."""
+def predict(request: PredictionRequest):
+    """Generate predictions based on partial input and conversation context (SYNC)."""
     try:
         # Route to appropriate model service
         start_time = time.time()
 
         if request.model == "gemini":
-            predictions = await generate_predictions_gemini(
+            predictions = generate_predictions_gemini(
                 request.partialInput, request.conversationContext
             )
         elif request.model == "gpt" or request.model == "gpt-5-mini":
-            predictions = await generate_predictions_gpt(
+            predictions = generate_predictions_gpt(
                 request.partialInput, request.conversationContext
             )
         elif request.model == "claude":
-            predictions = await generate_predictions_claude(
+            predictions = generate_predictions_claude(
                 request.partialInput, request.conversationContext
             )
         else:
             # Default to Claude if unknown model
             print(f"Unknown model '{request.model}', defaulting to Claude")
-            predictions = await generate_predictions_claude(
+            predictions = generate_predictions_claude(
                 request.partialInput, request.conversationContext
             )
 
@@ -112,7 +112,7 @@ async def predict(request: PredictionRequest):
             print("Falling back to Claude due to Gemini error")
             try:
                 start_time = time.time()
-                predictions = await generate_predictions_claude(
+                predictions = generate_predictions_claude(
                     request.partialInput, request.conversationContext
                 )
                 duration_ms = (time.time() - start_time) * 1000

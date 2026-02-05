@@ -60,8 +60,8 @@ LOG_FILE = LOG_DIR / "predictions.jsonl"
 perf_tracker = get_tracker(LOG_DIR)
 
 
-async def generate_predictions_gemini(partial_input: str, conversation_context: str) -> dict:
-    """Generate predictions using Gemini 2.5 Flash with NEW SDK, thinking_budget=0, and context caching."""
+def generate_predictions_gemini(partial_input: str, conversation_context: str) -> dict:
+    """Generate predictions using Gemini 2.5 Flash with NEW SDK, thinking_budget=0, and context caching (SYNC)."""
     # Timing: prompt build
     prompt_build_start = time.time()
     user_prompt = build_prediction_prompt(partial_input, conversation_context)
@@ -80,7 +80,7 @@ async def generate_predictions_gemini(partial_input: str, conversation_context: 
 
         # Use cached content if available, otherwise fall back to full prompt
         if cached_content:
-            response = await client.aio.models.generate_content(
+            response = client.models.generate_content(
                 model="gemini-2.5-flash",
                 contents=user_prompt,  # Only send user prompt, system is cached
                 config=types.GenerateContentConfig(
@@ -113,7 +113,7 @@ async def generate_predictions_gemini(partial_input: str, conversation_context: 
         else:
             # Fallback: no caching available, use full prompt
             full_prompt = f"{SYSTEM_PROMPT_WITH_RULES}\n\n{user_prompt}"
-            response = await client.aio.models.generate_content(
+            response = client.models.generate_content(
                 model="gemini-2.5-flash",
                 contents=full_prompt,
                 config=types.GenerateContentConfig(

@@ -3,7 +3,7 @@ import re
 import time
 from datetime import datetime
 from pathlib import Path
-from openai import AsyncOpenAI
+from openai import OpenAI
 from .prompts import SYSTEM_PROMPT_WITH_RULES, build_prediction_prompt
 from .performance_tracker import get_tracker
 
@@ -13,10 +13,10 @@ import os
 _gpt_client = None
 
 def _get_gpt_client():
-    """Lazy initialization of OpenAI client."""
+    """Lazy initialization of OpenAI client (SYNC)."""
     global _gpt_client
     if _gpt_client is None:
-        _gpt_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        _gpt_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     return _gpt_client
 
 # Log file for predictions
@@ -28,8 +28,8 @@ LOG_FILE = LOG_DIR / "predictions.jsonl"
 perf_tracker = get_tracker(LOG_DIR)
 
 
-async def generate_predictions_gpt(partial_input: str, conversation_context: str) -> dict:
-    """Generate predictions using GPT-4.1-nano API (fast, non-reasoning model)."""
+def generate_predictions_gpt(partial_input: str, conversation_context: str) -> dict:
+    """Generate predictions using GPT-4.1-nano API (fast, non-reasoning model, SYNC)."""
     # Timing: prompt build
     prompt_build_start = time.time()
     user_prompt = build_prediction_prompt(partial_input, conversation_context)
@@ -41,8 +41,8 @@ async def generate_predictions_gpt(partial_input: str, conversation_context: str
     try:
         client = _get_gpt_client()
 
-        # Call OpenAI API with GPT-4.1-nano
-        response = await client.chat.completions.create(
+        # Call OpenAI API with GPT-4.1-nano (SYNC)
+        response = client.chat.completions.create(
             model="gpt-4.1-nano",
             max_tokens=1000,  # GPT-4.1 uses traditional max_tokens parameter
             temperature=0.7,  # GPT-4.1 supports temperature (unlike GPT-5 reasoning models)

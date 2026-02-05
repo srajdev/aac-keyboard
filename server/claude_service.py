@@ -19,8 +19,8 @@ LOG_FILE = LOG_DIR / "predictions.jsonl"
 perf_tracker = get_tracker(LOG_DIR)
 
 
-async def generate_predictions(partial_input: str, conversation_context: str) -> dict:
-    """Generate predictions using Claude API with prompt caching."""
+def generate_predictions(partial_input: str, conversation_context: str) -> dict:
+    """Generate predictions using Claude API with prompt caching (SYNC)."""
     # Timing: prompt build
     prompt_build_start = time.time()
     user_prompt = build_prediction_prompt(partial_input, conversation_context)
