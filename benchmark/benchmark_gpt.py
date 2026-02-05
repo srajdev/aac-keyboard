@@ -88,6 +88,7 @@ async def run_single_test(client: AsyncOpenAI, partial_input: str, conversation_
         response = await client.chat.completions.create(
             model="gpt-5-mini",
             max_completion_tokens=1000,  # GPT-5 Mini uses max_completion_tokens instead of max_tokens
+            reasoning_effort="low",  # Use minimal reasoning for speed (autocomplete doesn't need deep thinking)
             # Note: GPT-5 Mini only supports default temperature (1), custom values not allowed
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT_WITH_RULES},
@@ -96,6 +97,12 @@ async def run_single_test(client: AsyncOpenAI, partial_input: str, conversation_
             response_format={"type": "json_object"}
         )
         api_call_ms = (time.time() - api_call_start) * 1000
+
+        # Debug: Check for reasoning tokens
+        usage = response.usage
+        print(f"\n[DEBUG] Token usage: {usage}")
+        if hasattr(usage, 'completion_tokens_details'):
+            print(f"[DEBUG] Completion details: {usage.completion_tokens_details}")
 
         # Timing: parse
         parse_start = time.time()
