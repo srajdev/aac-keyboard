@@ -45,7 +45,7 @@ async def generate_predictions_gpt(partial_input: str, conversation_context: str
         response = await client.chat.completions.create(
             model="gpt-5-mini",
             max_completion_tokens=1000,  # GPT-5 Mini uses max_completion_tokens instead of max_tokens
-            temperature=0.7,
+            # Note: GPT-5 Mini only supports default temperature (1), custom values not allowed
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT_WITH_RULES},
                 {"role": "user", "content": user_prompt}
