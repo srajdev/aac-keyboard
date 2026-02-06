@@ -11,7 +11,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from .claude_service import generate_predictions as generate_predictions_claude
+from .claude_service import (
+    generate_predictions as generate_predictions_claude,
+    generate_phrase_predictions,
+    generate_word_predictions,
+)
 from .gemini_service import generate_predictions_gemini
 from .gpt_service import generate_predictions_gpt
 from .performance_tracker import get_tracker
@@ -70,6 +74,14 @@ class PredictionResponse(BaseModel):
     words: list[str]
 
 
+class PhrasePredictionResponse(BaseModel):
+    phrases: list[str]
+
+
+class WordPredictionResponse(BaseModel):
+    words: list[str]
+
+
 @app.post("/api/predict", response_model=PredictionResponse)
 def predict(request: PredictionRequest):
     """Generate predictions based on partial input and conversation context (SYNC)."""
@@ -122,6 +134,46 @@ def predict(request: PredictionRequest):
                 )
             except Exception as fallback_error:
                 print(f"Claude fallback also failed: {fallback_error}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/predict/phrases", response_model=PhrasePredictionResponse)
+def predict_phrases(request: PredictionRequest):
+    """Generate phrase predictions only (optimized for complete sentences)."""
+    try:
+        start_time = time.time()
+
+        # Only Claude supports split predictions currently
+        phrases = generate_phrase_predictions(
+            request.partialInput, request.conversationContext
+        )
+
+        duration_ms = (time.time() - start_time) * 1000
+        print(f"[Backend] Phrase prediction: {duration_ms:.0f}ms")
+
+        return PhrasePredictionResponse(phrases=phrases)
+    except Exception as e:
+        print(f"Phrase prediction error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/predict/words", response_model=WordPredictionResponse)
+def predict_words(request: PredictionRequest):
+    """Generate word predictions only (optimized for next-word completion)."""
+    try:
+        start_time = time.time()
+
+        # Only Claude supports split predictions currently
+        words = generate_word_predictions(
+            request.partialInput, request.conversationContext
+        )
+
+        duration_ms = (time.time() - start_time) * 1000
+        print(f"[Backend] Word prediction: {duration_ms:.0f}ms")
+
+        return WordPredictionResponse(words=words)
+    except Exception as e:
+        print(f"Word prediction error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

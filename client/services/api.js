@@ -259,6 +259,164 @@ const ApiService = {
         this.performanceTracker.clear();
         console.log('[Metrics] Cleared');
     },
+
+    async getPhrases(partialInput, conversationContext, signal, model = 'claude') {
+        const requestStart = performance.now();
+        let cacheHit = false;
+
+        try {
+            // Check cache first (using phrase-specific key)
+            const cacheKey = `phrases|${partialInput}|${conversationContext}`;
+            const cached = this.cache.get(cacheKey, '');
+            if (cached && cached.phrases) {
+                cacheHit = true;
+                const totalDuration = performance.now() - requestStart;
+
+                this.performanceTracker.recordMetric({
+                    timestamp: Date.now(),
+                    model: `${model}-phrases`,
+                    cacheHit: true,
+                    totalDuration: totalDuration,
+                    networkDuration: 0,
+                    parseDuration: 0,
+                });
+
+                console.log(`[Cache HIT - Phrases] ${totalDuration.toFixed(0)}ms | ${model}`);
+                return cached.phrases;
+            }
+
+            // Cache miss - make API call
+            const networkStart = performance.now();
+            const response = await fetch(`${this.baseUrl}/api/predict/phrases`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    partialInput: partialInput || '',
+                    conversationContext: conversationContext || '',
+                    model: model,
+                }),
+                signal: signal,
+            });
+
+            if (!response.ok) {
+                throw new Error(`API error: ${response.status}`);
+            }
+
+            const networkEnd = performance.now();
+            const parseStart = performance.now();
+            const data = await response.json();
+            const parseEnd = performance.now();
+            const totalDuration = parseEnd - requestStart;
+
+            // Store in cache
+            this.cache.set(cacheKey, '', { phrases: data.phrases });
+
+            // Record metrics
+            this.performanceTracker.recordMetric({
+                timestamp: Date.now(),
+                model: `${model}-phrases`,
+                cacheHit: false,
+                totalDuration: totalDuration,
+                networkDuration: networkEnd - networkStart,
+                parseDuration: parseEnd - parseStart,
+            });
+
+            console.log(`[Cache MISS - Phrases] ${totalDuration.toFixed(0)}ms (network: ${(networkEnd - networkStart).toFixed(0)}ms) | ${model}`);
+
+            return data.phrases;
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                throw error;
+            }
+            console.error('Phrase prediction API error:', error);
+
+            // Return fallback phrases
+            return [
+                'I would like some help please',
+                'Can you please wait a moment',
+                'I want to say something',
+            ];
+        }
+    },
+
+    async getWords(partialInput, conversationContext, signal, model = 'claude') {
+        const requestStart = performance.now();
+        let cacheHit = false;
+
+        try {
+            // Check cache first (using word-specific key)
+            const cacheKey = `words|${partialInput}|${conversationContext}`;
+            const cached = this.cache.get(cacheKey, '');
+            if (cached && cached.words) {
+                cacheHit = true;
+                const totalDuration = performance.now() - requestStart;
+
+                this.performanceTracker.recordMetric({
+                    timestamp: Date.now(),
+                    model: `${model}-words`,
+                    cacheHit: true,
+                    totalDuration: totalDuration,
+                    networkDuration: 0,
+                    parseDuration: 0,
+                });
+
+                console.log(`[Cache HIT - Words] ${totalDuration.toFixed(0)}ms | ${model}`);
+                return cached.words;
+            }
+
+            // Cache miss - make API call
+            const networkStart = performance.now();
+            const response = await fetch(`${this.baseUrl}/api/predict/words`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    partialInput: partialInput || '',
+                    conversationContext: conversationContext || '',
+                    model: model,
+                }),
+                signal: signal,
+            });
+
+            if (!response.ok) {
+                throw new Error(`API error: ${response.status}`);
+            }
+
+            const networkEnd = performance.now();
+            const parseStart = performance.now();
+            const data = await response.json();
+            const parseEnd = performance.now();
+            const totalDuration = parseEnd - requestStart;
+
+            // Store in cache
+            this.cache.set(cacheKey, '', { words: data.words });
+
+            // Record metrics
+            this.performanceTracker.recordMetric({
+                timestamp: Date.now(),
+                model: `${model}-words`,
+                cacheHit: false,
+                totalDuration: totalDuration,
+                networkDuration: networkEnd - networkStart,
+                parseDuration: parseEnd - parseStart,
+            });
+
+            console.log(`[Cache MISS - Words] ${totalDuration.toFixed(0)}ms (network: ${(networkEnd - networkStart).toFixed(0)}ms) | ${model}`);
+
+            return data.words;
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                throw error;
+            }
+            console.error('Word prediction API error:', error);
+
+            // Return fallback words
+            return ['yes', 'no', 'please', 'thanks', 'help'];
+        }
+    },
 };
 
 // Initialize on load

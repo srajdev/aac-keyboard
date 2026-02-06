@@ -64,6 +64,40 @@ const Predictions = {
         console.log(`[Render] Predictions updated: ${renderDuration.toFixed(2)}ms`);
     },
 
+    updatePhrases(phrases) {
+        const renderStart = performance.now();
+
+        this.phraseButtons.forEach((btn, i) => {
+            if (phrases[i]) {
+                btn.textContent = phrases[i];
+                btn.disabled = false;
+            } else {
+                btn.textContent = '...';
+                btn.disabled = true;
+            }
+        });
+
+        const renderDuration = performance.now() - renderStart;
+        console.log(`[Render] Phrases updated: ${renderDuration.toFixed(2)}ms`);
+    },
+
+    updateWords(words) {
+        const renderStart = performance.now();
+
+        this.wordButtons.forEach((btn, i) => {
+            if (words[i]) {
+                btn.textContent = words[i];
+                btn.disabled = false;
+            } else {
+                btn.textContent = '...';
+                btn.disabled = true;
+            }
+        });
+
+        const renderDuration = performance.now() - renderStart;
+        console.log(`[Render] Words updated: ${renderDuration.toFixed(2)}ms`);
+    },
+
     setLoading(isLoading) {
         const section = document.querySelector('.predictions-section-new');
         if (isLoading) {

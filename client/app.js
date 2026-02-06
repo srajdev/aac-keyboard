@@ -219,29 +219,75 @@ const App = {
         Predictions.setLoading(true);
 
         try {
-            const predictions = await ApiService.getPredictions(partialInput, context, signal, this.selectedModel);
+            // Make parallel requests for phrases and words
+            const phrasesPromise = ApiService.getPhrases(partialInput, context, signal, this.selectedModel);
+            const wordsPromise = ApiService.getWords(partialInput, context, signal, this.selectedModel);
 
-            // Inject current word being typed as first word prediction (if it exists)
-            const currentWord = MessageArea.getCurrentWord();
-            if (currentWord && currentWord.length > 0) {
-                // Add current word as first prediction if not already present
-                if (!predictions.words || !predictions.words.includes(currentWord)) {
-                    predictions.words = predictions.words || [];
-                    predictions.words.unshift(currentWord);
-                    // Keep only first 6 words
-                    predictions.words = predictions.words.slice(0, 6);
+            // Track completion for loading state
+            let phrasesComplete = false;
+            let wordsComplete = false;
+
+            const checkComplete = () => {
+                if (phrasesComplete && wordsComplete && !signal.aborted) {
+                    Predictions.setLoading(false);
                 }
-            }
+            };
 
-            Predictions.update(predictions);
+            // Update phrases as soon as they arrive
+            phrasesPromise
+                .then(phrases => {
+                    if (!signal.aborted) {
+                        Predictions.updatePhrases(phrases);
+                        phrasesComplete = true;
+                        checkComplete();
+                    }
+                })
+                .catch(error => {
+                    if (error.name !== 'AbortError') {
+                        console.error('Failed to get phrase predictions:', error);
+                    }
+                    phrasesComplete = true;
+                    checkComplete();
+                });
+
+            // Update words as soon as they arrive
+            wordsPromise
+                .then(words => {
+                    if (!signal.aborted) {
+                        // Inject current word being typed as first word prediction (if it exists)
+                        const currentWord = MessageArea.getCurrentWord();
+                        if (currentWord && currentWord.length > 0) {
+                            // Add current word as first prediction if not already present
+                            if (!words.includes(currentWord)) {
+                                words.unshift(currentWord);
+                                // Keep only first 6 words
+                                words = words.slice(0, 6);
+                            }
+                        }
+
+                        Predictions.updateWords(words);
+                        wordsComplete = true;
+                        checkComplete();
+                    }
+                })
+                .catch(error => {
+                    if (error.name !== 'AbortError') {
+                        console.error('Failed to get word predictions:', error);
+                    }
+                    wordsComplete = true;
+                    checkComplete();
+                });
+
+            // Wait for both to complete (for error handling)
+            await Promise.all([phrasesPromise, wordsPromise]);
+
         } catch (error) {
             // Ignore abort errors - they're expected when canceling
             if (error.name === 'AbortError') {
                 return;
             }
             console.error('Failed to get predictions:', error);
-        } finally {
-            // Only clear loading if this request wasn't aborted
+            // Clear loading state on error
             if (!signal.aborted) {
                 Predictions.setLoading(false);
             }
