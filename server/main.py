@@ -68,7 +68,6 @@ class PredictionRequest(BaseModel):
 class PredictionResponse(BaseModel):
     phrases: list[str]
     words: list[str]
-    letters: list[str]
 
 
 @app.post("/api/predict", response_model=PredictionResponse)
@@ -103,7 +102,6 @@ def predict(request: PredictionRequest):
         return PredictionResponse(
             phrases=predictions.get("phrases", []),
             words=predictions.get("words", []),
-            letters=predictions.get("letters", []),
         )
     except Exception as e:
         print(f"Prediction error ({request.model}): {e}")
@@ -121,7 +119,6 @@ def predict(request: PredictionRequest):
                 return PredictionResponse(
                     phrases=predictions.get("phrases", []),
                     words=predictions.get("words", []),
-                    letters=predictions.get("letters", []),
                 )
             except Exception as fallback_error:
                 print(f"Claude fallback also failed: {fallback_error}")

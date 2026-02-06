@@ -125,5 +125,4 @@ def generate_predictions_gpt(partial_input: str, conversation_context: str) -> d
                 "I want to say something",
             ],
             "words": ["yes", "no", "please", "thanks", "help"],
-            "letters": ["i", "y", "n", "t", "w"],
         }

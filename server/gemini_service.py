@@ -214,5 +214,4 @@ def generate_predictions_gemini(partial_input: str, conversation_context: str) -
                 "I want to say something",
             ],
             "words": ["yes", "no", "please", "thanks", "help"],
-            "letters": ["i", "y", "n", "t", "w"],
         }

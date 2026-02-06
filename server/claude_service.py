@@ -108,5 +108,4 @@ def generate_predictions(partial_input: str, conversation_context: str) -> dict:
                 "I want to say something",
             ],
             "words": ["yes", "no", "please", "thanks", "help"],
-            "letters": ["i", "y", "n", "t", "w"],
         }

@@ -5,8 +5,7 @@ const Keyboard = {
         mode: 'letters',  // 'letters' or 'numbers'
         capsLock: false,
         shift: false,
-        ctrl: false,
-        predictedLetters: []
+        ctrl: false
     },
 
     // Element references
@@ -201,16 +200,12 @@ const Keyboard = {
         this.state.mode = 'numbers';
         this.letterKeyboard.style.display = 'none';
         this.numberKeyboard.style.display = 'flex';
-        this.clearPredictionHighlights();
-        this.updatePredictionHighlights();
     },
 
     switchToLetters() {
         this.state.mode = 'letters';
         this.numberKeyboard.style.display = 'none';
         this.letterKeyboard.style.display = 'flex';
-        this.clearPredictionHighlights();
-        this.updatePredictionHighlights();
     },
 
     showPunctuationModal() {
@@ -219,35 +214,6 @@ const Keyboard = {
 
     hidePunctuationModal() {
         this.punctuationModal.classList.remove('active');
-    },
-
-    setPredictions(letters) {
-        this.clearPredictionHighlights();
-        this.state.predictedLetters = letters || [];
-        this.updatePredictionHighlights();
-    },
-
-    clearPredictionHighlights() {
-        const allKeys = document.querySelectorAll('.key-predicted');
-        allKeys.forEach(key => key.classList.remove('key-predicted'));
-    },
-
-    updatePredictionHighlights() {
-        if (!this.state.predictedLetters || this.state.predictedLetters.length === 0) {
-            return;
-        }
-
-        const targetKeyboard = this.state.mode === 'letters' ? this.letterKeyboard : this.numberKeyboard;
-        if (!targetKeyboard) return;
-
-        this.state.predictedLetters.forEach(letter => {
-            if (!letter) return;
-            const normalizedLetter = letter.toLowerCase();
-            const key = targetKeyboard.querySelector(`[data-key="${normalizedLetter}"]`);
-            if (key && key.classList.contains('key-letter')) {
-                key.classList.add('key-predicted');
-            }
-        });
     },
 
     updateKeyDisplay() {

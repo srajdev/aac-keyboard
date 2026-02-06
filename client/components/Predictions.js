@@ -3,15 +3,12 @@
 const Predictions = {
     phraseButtons: [],
     wordButtons: [],
-    letterButtons: [],
     onPhraseSelect: null,
     onWordSelect: null,
-    onLetterSelect: null,
 
     init() {
         this.phraseButtons = document.querySelectorAll('.phrase-btn-new');
         this.wordButtons = document.querySelectorAll('.word-btn-new');
-        this.letterButtons = document.querySelectorAll('.letter-btn');
 
         // Phrase button handlers
         this.phraseButtons.forEach((btn) => {
@@ -29,16 +26,6 @@ const Predictions = {
                 const word = btn.textContent;
                 if (word && word !== '...' && this.onWordSelect) {
                     this.onWordSelect(word);
-                }
-            });
-        });
-
-        // Letter button handlers
-        this.letterButtons.forEach((btn) => {
-            btn.addEventListener('click', () => {
-                const letter = btn.textContent;
-                if (letter && letter !== '...' && this.onLetterSelect) {
-                    this.onLetterSelect(letter);
                 }
             });
         });
@@ -73,19 +60,6 @@ const Predictions = {
             });
         }
 
-        // Update letter predictions (shown when highlights are OFF)
-        if (predictions.letters) {
-            this.letterButtons.forEach((btn, i) => {
-                if (predictions.letters[i]) {
-                    btn.textContent = predictions.letters[i];
-                    btn.disabled = false;
-                } else {
-                    btn.textContent = '...';
-                    btn.disabled = true;
-                }
-            });
-        }
-
         const renderDuration = performance.now() - renderStart;
         console.log(`[Render] Predictions updated: ${renderDuration.toFixed(2)}ms`);
     },
@@ -103,10 +77,6 @@ const Predictions = {
                 btn.textContent = '...';
                 btn.disabled = true;
             });
-            this.letterButtons.forEach(btn => {
-                btn.textContent = '...';
-                btn.disabled = true;
-            });
         } else {
             section?.classList.remove('loading');
         }
@@ -120,8 +90,7 @@ const Predictions = {
                 'I am feeling good',
                 'Can we talk'
             ],
-            words: ['yes', 'no', 'please', 'thanks', 'help', 'okay'],
-            letters: ['i', 'a', 'e', 'o', 'u']
+            words: ['yes', 'no', 'please', 'thanks', 'help', 'okay']
         };
         this.update(defaults);
     },

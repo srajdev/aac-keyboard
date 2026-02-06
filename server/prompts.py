@@ -14,7 +14,6 @@ Always return valid JSON with exactly the structure requested.
 PREDICTION RULES:
 - phrases: 3 complete sentences (5+ words) Viraj likely wants to say
 - words: 5 single words that could come next (or start a message if no input)
-- letters: 5 most likely next letters (lowercase)
 
 Consider when making predictions:
 1. Viraj's situation (his environment, what room he's in, what activity is happening)
@@ -46,8 +45,7 @@ def build_prediction_prompt(partial_input: str, conversation_context: str) -> st
     prompt += """Provide predictions in this exact JSON format:
 {
   "phrases": ["phrase1", "phrase2", "phrase3"],
-  "words": ["word1", "word2", "word3", "word4", "word5"],
-  "letters": ["a", "b", "c", "d", "e"]
+  "words": ["word1", "word2", "word3", "word4", "word5"]
 }
 
 Return ONLY the JSON object, no other text."""
