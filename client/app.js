@@ -219,9 +219,9 @@ const App = {
         Predictions.setLoading(true);
 
         try {
-            // Make parallel requests for phrases and words
-            const phrasesPromise = ApiService.getPhrases(partialInput, context, signal, this.selectedModel);
+            // Make parallel requests for words and phrases (words requested first for priority)
             const wordsPromise = ApiService.getWords(partialInput, context, signal, this.selectedModel);
+            const phrasesPromise = ApiService.getPhrases(partialInput, context, signal, this.selectedModel);
 
             // Track completion for loading state
             let phrasesComplete = false;
