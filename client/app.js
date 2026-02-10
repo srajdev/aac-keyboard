@@ -15,15 +15,17 @@ const App = {
         console.log('Initializing Viraj Keyboard...');
 
         // Initialize WebSocket first
+        // Listen for connection state changes BEFORE connecting
+        WebSocketService.onConnectionChange((state) => {
+            this.handleConnectionChange(state);
+        });
+
         try {
             console.log('Connecting to WebSocket...');
             await WebSocketService.connect();
             console.log('WebSocket connected successfully');
-
-            // Listen for connection state changes
-            WebSocketService.onConnectionChange((state) => {
-                this.handleConnectionChange(state);
-            });
+            // Manually trigger indicator update in case callback didn't fire
+            this.updateConnectionIndicator('connected');
         } catch (error) {
             console.warn('WebSocket connection failed, will use HTTP fallback:', error);
             this.updateConnectionIndicator('disconnected');
