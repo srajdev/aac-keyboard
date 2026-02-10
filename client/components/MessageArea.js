@@ -21,6 +21,11 @@ const MessageArea = {
     },
 
     appendText(text) {
+        // Auto-capitalize first letter if needed
+        if (text.length > 0 && /^[a-z]$/.test(text[0]) && this.shouldCapitalize()) {
+            text = text[0].toUpperCase() + text.slice(1);
+        }
+
         if (this.cursorPosition === null) {
             // Append at end
             this.currentMessage += text;
@@ -52,11 +57,22 @@ const MessageArea = {
                 wordStart--;
             }
 
+            // Auto-capitalize word if needed at this position
+            const needsCapitalization = this.shouldCapitalizeAtPosition(wordStart);
+            if (needsCapitalization && word.length > 0 && /^[a-z]/.test(word[0])) {
+                word = word[0].toUpperCase() + word.slice(1);
+            }
+
             // Replace the partial word with the predicted word + automatic space
             this.currentMessage = before.slice(0, wordStart) + word + ' ' + after;
             this.cursorPosition = wordStart + word.length + 1; // +1 for the space
         } else {
             // No partial word - just add the word (with space before if needed, and space after)
+            // Auto-capitalize if needed
+            if (this.shouldCapitalize() && word.length > 0 && /^[a-z]/.test(word[0])) {
+                word = word[0].toUpperCase() + word.slice(1);
+            }
+
             let textToAdd = word;
             if (before.length > 0 && !before.endsWith(' ')) {
                 textToAdd = ' ' + word;
@@ -75,6 +91,11 @@ const MessageArea = {
     },
 
     appendPhrase(phrase) {
+        // Auto-capitalize first letter if needed
+        if (this.shouldCapitalize() && phrase.length > 0 && /^[a-z]/.test(phrase[0])) {
+            phrase = phrase[0].toUpperCase() + phrase.slice(1);
+        }
+
         // Replace current message with phrase + automatic space
         this.currentMessage = phrase + ' ';
         this.cursorPosition = null; // Reset cursor to end
@@ -250,5 +271,36 @@ const MessageArea = {
         if (this.onMessageChange) {
             this.onMessageChange(this.currentMessage, textChanged);
         }
+    },
+
+    shouldCapitalize() {
+        // Check if we should capitalize at the current cursor position
+        const pos = this.cursorPosition === null ? this.currentMessage.length : this.cursorPosition;
+        return this.shouldCapitalizeAtPosition(pos);
+    },
+
+    shouldCapitalizeAtPosition(position) {
+        // Capitalize if at the beginning of the message
+        if (position === 0) {
+            return true;
+        }
+
+        // Check the text before this position
+        const before = this.currentMessage.slice(0, position);
+
+        // Look for sentence-ending punctuation (.!?) followed by space(s)
+        // Trim trailing spaces and check if it ends with sentence punctuation
+        const trimmed = before.trimEnd();
+        if (trimmed.length === 0) {
+            return true; // Empty or only spaces - capitalize
+        }
+
+        const lastChar = trimmed[trimmed.length - 1];
+        if (lastChar === '.' || lastChar === '!' || lastChar === '?') {
+            // Check if there's at least one space after the punctuation
+            return before.length > trimmed.length; // Has trailing space(s)
+        }
+
+        return false;
     },
 };
