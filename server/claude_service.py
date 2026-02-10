@@ -13,6 +13,8 @@ from .prompts import (
     build_prediction_prompt,
     build_phrase_prompt,
     build_word_prompt,
+    build_word_prompt_streaming,
+    build_phrase_prompt_streaming,
 )
 from .performance_tracker import get_tracker
 
@@ -298,7 +300,7 @@ def generate_word_predictions(partial_input: str, conversation_context: str) -> 
 
 def generate_word_predictions_stream(partial_input: str, conversation_context: str):
     """Stream word predictions as pipe-delimited chunks (generator)."""
-    user_prompt = build_word_prompt(partial_input, conversation_context)
+    user_prompt = build_word_prompt_streaming(partial_input, conversation_context)
 
     # Use Claude streaming API
     with client.messages.stream(
@@ -314,22 +316,39 @@ def generate_word_predictions_stream(partial_input: str, conversation_context: s
         messages=[{"role": "user", "content": user_prompt}]
     ) as stream:
         buffer = ""
+        full_response = ""  # Track full response for debugging
         for text in stream.text_stream:
             buffer += text
+            full_response += text
+
             # Check if we have complete predictions (pipe delimiters)
             while "|" in buffer:
                 prediction, buffer = buffer.split("|", 1)
                 prediction = prediction.strip()
-                if prediction:  # Only yield non-empty predictions
+
+                # Validate prediction is a single word (no spaces, reasonable length)
+                if prediction and " " not in prediction and len(prediction) <= 20:
                     yield prediction
-        # Yield remaining buffer if any
-        if buffer.strip():
-            yield buffer.strip()
+                elif prediction:
+                    # Log invalid prediction but don't yield it
+                    print(f"[Words] Skipping invalid prediction: '{prediction}'")
+
+        # Yield remaining buffer if valid
+        remaining = buffer.strip()
+
+        # Log full response for debugging if no valid predictions
+        if not remaining and not full_response.count("|"):
+            print(f"[Words] Full response (no pipes found): '{full_response[:100]}...'")
+
+        if remaining and " " not in remaining and len(remaining) <= 20:
+            yield remaining
+        elif remaining:
+            print(f"[Words] Skipping invalid final prediction: '{remaining}'")
 
 
 def generate_phrase_predictions_stream(partial_input: str, conversation_context: str):
     """Stream phrase predictions as pipe-delimited chunks (generator)."""
-    user_prompt = build_phrase_prompt(partial_input, conversation_context)
+    user_prompt = build_phrase_prompt_streaming(partial_input, conversation_context)
 
     # Use Claude streaming API
     with client.messages.stream(

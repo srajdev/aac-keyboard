@@ -240,6 +240,18 @@ async def handle_prediction_request(websocket: WebSocket, message: dict, active_
         duration_ms = (time.time() - start_time) * 1000
         logger.info(f"[WebSocket] {request_type} streaming completed: {duration_ms:.0f}ms ({len(predictions)} predictions)")
 
+        # Fallback to defaults if no predictions received
+        if not predictions:
+            logger.warning(f"[WebSocket] No predictions received for {request_type}, using fallbacks")
+            if request_type == "words":
+                predictions = ["yes", "no", "please", "thanks", "help", "okay"]
+            elif request_type == "phrases":
+                predictions = [
+                    "I would like some help please",
+                    "Can you please wait a moment",
+                    "Thanks for your patience"
+                ]
+
         # Send completion message
         await websocket.send_json({
             "type": "stream_complete",

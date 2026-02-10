@@ -158,28 +158,53 @@ Return ONLY the JSON array of 5 single words, no other text."""
 
 
 # System prompt for streaming word predictions (pipe-delimited format)
-SYSTEM_PROMPT_WORDS_STREAMING = """You are an assistive word prediction system for Viraj, who types with his thumb.
+SYSTEM_PROMPT_WORDS_STREAMING = """You help Viraj (non-verbal, types with thumb) predict his next words.
 
-TASK: Return 6 single words he might type next.
+Task: Return 6 single words he might type, separated by pipes.
 
-CRITICAL RULES:
-1. Output MUST be EXACTLY: word1|word2|word3|word4|word5|word6
-2. NO explanations, NO JSON, NO brackets, NO quotes
-3. NO spaces around pipes
-4. ONLY the 6 words separated by pipes
-5. If you add ANY other text, the system will break
+Format: word1|word2|word3|word4|word5|word6
 
-Prediction guidelines:
-- Natural conversational words
-- Appropriate for the context provided
-- Varied and practical
-- Consider what was said to Viraj and what he's typing
+Requirements:
+- ONLY single words (no multi-word phrases)
+- Separated by pipe character |
+- No JSON, brackets, quotes, or other formatting
+- No explanatory text before or after
+- Natural conversational words appropriate for context
 
-CORRECT output: eat|drink|play|rest|help|thanks
-WRONG output: Here are predictions: eat, drink, play
-WRONG output: ["eat", "drink", "play", "rest", "help", "thanks"]
+Good output: eat|drink|help|rest|thanks|please
+Bad output: I want to eat|drink some water|help me
 
-ONLY output the pipe-delimited words. Nothing else."""
+Return only the 6 pipe-separated words now:"""
+
+
+def build_word_prompt_streaming(partial_input: str, conversation_context: str) -> str:
+    """Build the user prompt for streaming word predictions (pipe-delimited format)."""
+    prompt = ""
+
+    if conversation_context and conversation_context.strip():
+        prompt += f'Context: {conversation_context}\n\n'
+
+    if partial_input and partial_input.strip():
+        prompt += f'Viraj typed: "{partial_input}"\n\n'
+
+    prompt += "6 words:"
+
+    return prompt
+
+
+def build_phrase_prompt_streaming(partial_input: str, conversation_context: str) -> str:
+    """Build the user prompt for streaming phrase predictions (pipe-delimited format)."""
+    prompt = ""
+
+    if conversation_context and conversation_context.strip():
+        prompt += f'Context: {conversation_context}\n\n'
+
+    if partial_input and partial_input.strip():
+        prompt += f'Viraj typed: "{partial_input}"\n\n'
+
+    prompt += "3 phrases:"
+
+    return prompt
 
 
 # System prompt for streaming phrase predictions (pipe-delimited format)

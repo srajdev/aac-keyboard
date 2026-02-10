@@ -49,7 +49,10 @@ async def test_streaming():
 
                     elif message["type"] == "stream_complete":
                         print(f"\n✓ Stream complete ({elapsed_ms:.0f}ms)")
-                        print(f"  First chunk: {first_chunk_time:.0f}ms")
+                        if first_chunk_time:
+                            print(f"  First chunk: {first_chunk_time:.0f}ms")
+                        else:
+                            print(f"  No chunks received (all at once)")
                         print(f"  Total chunks: {chunks_received}")
                         print(f"  Final predictions: {message['predictions']}")
                         break
@@ -100,7 +103,10 @@ async def test_streaming():
 
                     elif message["type"] == "stream_complete":
                         print(f"\n✓ Stream complete ({elapsed_ms:.0f}ms)")
-                        print(f"  First chunk: {first_chunk_time:.0f}ms")
+                        if first_chunk_time:
+                            print(f"  First chunk: {first_chunk_time:.0f}ms")
+                        else:
+                            print(f"  No chunks received (all at once)")
                         print(f"  Total chunks: {chunks_received}")
                         print(f"  Final predictions:")
                         for i, phrase in enumerate(message['predictions'], 1):
