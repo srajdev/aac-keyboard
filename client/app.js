@@ -237,6 +237,17 @@ const App = {
         }, 500);
     },
 
+    countWords(text) {
+        if (!text || !text.trim()) return 0;
+        return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+    },
+
+    shouldRequestPhrases(partialInput, context) {
+        const hasContext = context && context.trim().length > 0;
+        const wordCount = this.countWords(partialInput);
+        return hasContext || wordCount >= 3;
+    },
+
     async requestPredictions() {
         // Skip if predictions are disabled
         if (!this.predictionsEnabled) {
@@ -246,8 +257,12 @@ const App = {
         const partialInput = MessageArea.getMessage();
         const context = ListenToggle.getContext();
 
-        // Skip if same request
-        const requestKey = `${partialInput}|${context}`;
+        // Check if we should request phrases
+        const shouldRequestPhrases = this.shouldRequestPhrases(partialInput, context);
+        const wordCount = this.countWords(partialInput);
+
+        // Skip if same request (include phrase gating state in key)
+        const requestKey = `${partialInput}|${context}|${shouldRequestPhrases}`;
         if (requestKey === this.lastPredictionRequest) {
             return;
         }
@@ -282,7 +297,18 @@ const App = {
         try {
             // Make parallel requests for words and phrases (words requested first for priority)
             const wordsPromise = ApiService.getWords(partialInput, context, signal, this.selectedModel);
-            const phrasesPromise = ApiService.getPhrases(partialInput, context, signal, this.selectedModel);
+
+            // Gate phrase requests based on context availability and word count
+            let phrasesPromise;
+            if (shouldRequestPhrases) {
+                phrasesPromise = ApiService.getPhrases(partialInput, context, signal, this.selectedModel);
+            } else {
+                // Show placeholder immediately
+                const hasContext = context && context.trim().length > 0;
+                Predictions.showPhrasePlaceholder(wordCount, hasContext);
+                // Return resolved promise with empty array
+                phrasesPromise = Promise.resolve([]);
+            }
 
             // Track completion for loading state
             let phrasesComplete = false;
@@ -298,7 +324,10 @@ const App = {
             phrasesPromise
                 .then(phrases => {
                     if (!signal.aborted) {
-                        Predictions.updatePhrases(phrases);
+                        // Only update if we actually requested phrases
+                        if (shouldRequestPhrases) {
+                            Predictions.updatePhrases(phrases);
+                        }
                         phrasesComplete = true;
                         checkComplete();
                     }

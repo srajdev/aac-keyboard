@@ -68,6 +68,7 @@ const Predictions = {
         const renderStart = performance.now();
 
         this.phraseButtons.forEach((btn, i) => {
+            btn.classList.remove('placeholder');
             if (phrases[i]) {
                 btn.textContent = phrases[i];
                 btn.disabled = false;
@@ -79,6 +80,25 @@ const Predictions = {
 
         const renderDuration = performance.now() - renderStart;
         console.log(`[Render] Phrases updated: ${renderDuration.toFixed(2)}ms`);
+    },
+
+    showPhrasePlaceholder(wordCount, hasContext) {
+        let placeholderText;
+
+        if (wordCount === 0 && !hasContext) {
+            placeholderText = 'Type to get phrases';
+        } else if (wordCount < 3 && !hasContext) {
+            const wordsNeeded = 3 - wordCount;
+            placeholderText = `Type ${wordsNeeded} more word${wordsNeeded > 1 ? 's' : ''}...`;
+        } else {
+            placeholderText = '...';
+        }
+
+        this.phraseButtons.forEach(btn => {
+            btn.textContent = placeholderText;
+            btn.disabled = true;
+            btn.classList.add('placeholder');
+        });
     },
 
     updateWords(words) {
@@ -106,6 +126,7 @@ const Predictions = {
             this.phraseButtons.forEach(btn => {
                 btn.textContent = 'Loading...';
                 btn.disabled = true;
+                btn.classList.remove('placeholder');
             });
             this.wordButtons.forEach(btn => {
                 btn.textContent = '...';
