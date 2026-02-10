@@ -9,8 +9,26 @@ const App = {
     predictionsToggleBtn: null,
     modelSelector: null,
     currentPredictionController: null,
+    currentRequestIds: [], // For WebSocket request cancellation
 
-    init() {
+    async init() {
+        console.log('Initializing Viraj Keyboard...');
+
+        // Initialize WebSocket first
+        try {
+            console.log('Connecting to WebSocket...');
+            await WebSocketService.connect();
+            console.log('WebSocket connected successfully');
+
+            // Listen for connection state changes
+            WebSocketService.onConnectionChange((state) => {
+                this.handleConnectionChange(state);
+            });
+        } catch (error) {
+            console.warn('WebSocket connection failed, will use HTTP fallback:', error);
+            this.updateConnectionIndicator('disconnected');
+        }
+
         // Initialize all components
         MessageArea.init();
         Keyboard.init();
@@ -45,6 +63,33 @@ const App = {
         } else {
             Predictions.showDefaults();
         }
+    },
+
+    handleConnectionChange(state) {
+        console.log('Connection state changed:', state);
+        this.updateConnectionIndicator(state);
+
+        // If disconnected, predictions will automatically fall back to HTTP
+        if (state === 'error') {
+            console.warn('WebSocket permanently failed, using HTTP for this session');
+        }
+    },
+
+    updateConnectionIndicator(state) {
+        const indicator = document.getElementById('ws-status');
+        if (!indicator) return;
+
+        const stateConfig = {
+            connected: { text: 'WS', color: '#4ade80', title: 'WebSocket connected' },
+            connecting: { text: '...', color: '#fbbf24', title: 'WebSocket connecting...' },
+            disconnected: { text: '!', color: '#f87171', title: 'WebSocket disconnected, using HTTP' },
+            error: { text: 'HTTP', color: '#f87171', title: 'WebSocket failed, using HTTP' }
+        };
+
+        const config = stateConfig[state] || stateConfig.disconnected;
+        indicator.textContent = config.text;
+        indicator.style.color = config.color;
+        indicator.title = config.title;
     },
 
     setupCallbacks() {
@@ -206,12 +251,26 @@ const App = {
         }
         this.lastPredictionRequest = requestKey;
 
-        // Cancel any in-flight prediction request
-        if (this.currentPredictionController) {
-            this.currentPredictionController.abort();
+        // Cancel previous requests
+        if (WebSocketService.isConnected()) {
+            // Cancel via WebSocket
+            if (this.currentRequestIds && this.currentRequestIds.length > 0) {
+                WebSocketService.cancelRequests(this.currentRequestIds);
+                this.currentRequestIds = [];
+            }
+        } else {
+            // Cancel via AbortController (HTTP fallback)
+            if (this.currentPredictionController) {
+                this.currentPredictionController.abort();
+            }
         }
 
-        // Create new abort controller for this request
+        // Generate new request IDs for WebSocket tracking
+        const wordsRequestId = this._generateRequestId();
+        const phrasesRequestId = this._generateRequestId();
+        this.currentRequestIds = [wordsRequestId, phrasesRequestId];
+
+        // Create new AbortController for HTTP fallback
         this.currentPredictionController = new AbortController();
         const signal = this.currentPredictionController.signal;
 
@@ -292,6 +351,10 @@ const App = {
                 Predictions.setLoading(false);
             }
         }
+    },
+
+    _generateRequestId() {
+        return crypto.randomUUID();
     },
 };
 

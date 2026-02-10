@@ -1,5 +1,8 @@
 // API Service - handles communication with the backend
 
+// WebSocket is default, with HTTP fallback
+const USE_WEBSOCKET = true;
+
 // LRU Cache for prediction responses
 class PredictionCache {
     constructor(maxSize = 500, ttlMs = 5 * 60 * 1000) {
@@ -262,14 +265,12 @@ const ApiService = {
 
     async getPhrases(partialInput, conversationContext, signal, model = 'claude') {
         const requestStart = performance.now();
-        let cacheHit = false;
 
         try {
             // Check cache first (using phrase-specific key)
             const cacheKey = `phrases|${partialInput}|${conversationContext}`;
             const cached = this.cache.get(cacheKey, '');
             if (cached && cached.phrases) {
-                cacheHit = true;
                 const totalDuration = performance.now() - requestStart;
 
                 this.performanceTracker.recordMetric({
@@ -285,47 +286,40 @@ const ApiService = {
                 return cached.phrases;
             }
 
-            // Cache miss - make API call
-            const networkStart = performance.now();
-            const response = await fetch(`${this.baseUrl}/api/predict/phrases`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    partialInput: partialInput || '',
-                    conversationContext: conversationContext || '',
-                    model: model,
-                }),
-                signal: signal,
-            });
+            // Route based on mode
+            if (USE_WEBSOCKET && window.WebSocketService && window.WebSocketService.isConnected()) {
+                try {
+                    const startTime = performance.now();
+                    const phrases = await window.WebSocketService.sendRequest(
+                        'phrases',
+                        partialInput,
+                        conversationContext,
+                        model
+                    );
+                    const duration = performance.now() - startTime;
 
-            if (!response.ok) {
-                throw new Error(`API error: ${response.status}`);
+                    // Cache and track performance
+                    this.cache.set(cacheKey, '', { phrases });
+                    this.performanceTracker.recordMetric({
+                        timestamp: Date.now(),
+                        model: `${model}-phrases`,
+                        cacheHit: false,
+                        totalDuration: duration,
+                        networkDuration: duration,
+                        parseDuration: 0,
+                        source: 'websocket',
+                    });
+
+                    console.log(`[WebSocket - Phrases] ${duration.toFixed(0)}ms | ${model}`);
+                    return phrases;
+                } catch (error) {
+                    console.warn('WebSocket request failed, falling back to HTTP:', error);
+                    // Fall through to HTTP
+                }
             }
 
-            const networkEnd = performance.now();
-            const parseStart = performance.now();
-            const data = await response.json();
-            const parseEnd = performance.now();
-            const totalDuration = parseEnd - requestStart;
-
-            // Store in cache
-            this.cache.set(cacheKey, '', { phrases: data.phrases });
-
-            // Record metrics
-            this.performanceTracker.recordMetric({
-                timestamp: Date.now(),
-                model: `${model}-phrases`,
-                cacheHit: false,
-                totalDuration: totalDuration,
-                networkDuration: networkEnd - networkStart,
-                parseDuration: parseEnd - parseStart,
-            });
-
-            console.log(`[Cache MISS - Phrases] ${totalDuration.toFixed(0)}ms (network: ${(networkEnd - networkStart).toFixed(0)}ms) | ${model}`);
-
-            return data.phrases;
+            // HTTP fallback
+            return await this._fetchPhrasesHTTP(partialInput, conversationContext, signal, model, cacheKey, requestStart);
         } catch (error) {
             if (error.name === 'AbortError') {
                 throw error;
@@ -341,16 +335,59 @@ const ApiService = {
         }
     },
 
+    async _fetchPhrasesHTTP(partialInput, conversationContext, signal, model, cacheKey, requestStart) {
+        // Cache miss - make HTTP API call
+        const networkStart = performance.now();
+        const response = await fetch(`${this.baseUrl}/api/predict/phrases`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                partialInput: partialInput || '',
+                conversationContext: conversationContext || '',
+                model: model,
+            }),
+            signal: signal,
+        });
+
+        if (!response.ok) {
+            throw new Error(`API error: ${response.status}`);
+        }
+
+        const networkEnd = performance.now();
+        const parseStart = performance.now();
+        const data = await response.json();
+        const parseEnd = performance.now();
+        const totalDuration = parseEnd - requestStart;
+
+        // Store in cache
+        this.cache.set(cacheKey, '', { phrases: data.phrases });
+
+        // Record metrics
+        this.performanceTracker.recordMetric({
+            timestamp: Date.now(),
+            model: `${model}-phrases`,
+            cacheHit: false,
+            totalDuration: totalDuration,
+            networkDuration: networkEnd - networkStart,
+            parseDuration: parseEnd - parseStart,
+            source: 'http',
+        });
+
+        console.log(`[HTTP - Phrases] ${totalDuration.toFixed(0)}ms (network: ${(networkEnd - networkStart).toFixed(0)}ms) | ${model}`);
+
+        return data.phrases;
+    },
+
     async getWords(partialInput, conversationContext, signal, model = 'claude') {
         const requestStart = performance.now();
-        let cacheHit = false;
 
         try {
             // Check cache first (using word-specific key)
             const cacheKey = `words|${partialInput}|${conversationContext}`;
             const cached = this.cache.get(cacheKey, '');
             if (cached && cached.words) {
-                cacheHit = true;
                 const totalDuration = performance.now() - requestStart;
 
                 this.performanceTracker.recordMetric({
@@ -366,47 +403,40 @@ const ApiService = {
                 return cached.words;
             }
 
-            // Cache miss - make API call
-            const networkStart = performance.now();
-            const response = await fetch(`${this.baseUrl}/api/predict/words`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    partialInput: partialInput || '',
-                    conversationContext: conversationContext || '',
-                    model: model,
-                }),
-                signal: signal,
-            });
+            // Route based on mode
+            if (USE_WEBSOCKET && window.WebSocketService && window.WebSocketService.isConnected()) {
+                try {
+                    const startTime = performance.now();
+                    const words = await window.WebSocketService.sendRequest(
+                        'words',
+                        partialInput,
+                        conversationContext,
+                        model
+                    );
+                    const duration = performance.now() - startTime;
 
-            if (!response.ok) {
-                throw new Error(`API error: ${response.status}`);
+                    // Cache and track performance
+                    this.cache.set(cacheKey, '', { words });
+                    this.performanceTracker.recordMetric({
+                        timestamp: Date.now(),
+                        model: `${model}-words`,
+                        cacheHit: false,
+                        totalDuration: duration,
+                        networkDuration: duration,
+                        parseDuration: 0,
+                        source: 'websocket',
+                    });
+
+                    console.log(`[WebSocket - Words] ${duration.toFixed(0)}ms | ${model}`);
+                    return words;
+                } catch (error) {
+                    console.warn('WebSocket request failed, falling back to HTTP:', error);
+                    // Fall through to HTTP
+                }
             }
 
-            const networkEnd = performance.now();
-            const parseStart = performance.now();
-            const data = await response.json();
-            const parseEnd = performance.now();
-            const totalDuration = parseEnd - requestStart;
-
-            // Store in cache
-            this.cache.set(cacheKey, '', { words: data.words });
-
-            // Record metrics
-            this.performanceTracker.recordMetric({
-                timestamp: Date.now(),
-                model: `${model}-words`,
-                cacheHit: false,
-                totalDuration: totalDuration,
-                networkDuration: networkEnd - networkStart,
-                parseDuration: parseEnd - parseStart,
-            });
-
-            console.log(`[Cache MISS - Words] ${totalDuration.toFixed(0)}ms (network: ${(networkEnd - networkStart).toFixed(0)}ms) | ${model}`);
-
-            return data.words;
+            // HTTP fallback
+            return await this._fetchWordsHTTP(partialInput, conversationContext, signal, model, cacheKey, requestStart);
         } catch (error) {
             if (error.name === 'AbortError') {
                 throw error;
@@ -416,6 +446,51 @@ const ApiService = {
             // Return fallback words
             return ['yes', 'no', 'please', 'thanks', 'help'];
         }
+    },
+
+    async _fetchWordsHTTP(partialInput, conversationContext, signal, model, cacheKey, requestStart) {
+        // Cache miss - make HTTP API call
+        const networkStart = performance.now();
+        const response = await fetch(`${this.baseUrl}/api/predict/words`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                partialInput: partialInput || '',
+                conversationContext: conversationContext || '',
+                model: model,
+            }),
+            signal: signal,
+        });
+
+        if (!response.ok) {
+            throw new Error(`API error: ${response.status}`);
+        }
+
+        const networkEnd = performance.now();
+        const parseStart = performance.now();
+        const data = await response.json();
+        const parseEnd = performance.now();
+        const totalDuration = parseEnd - requestStart;
+
+        // Store in cache
+        this.cache.set(cacheKey, '', { words: data.words });
+
+        // Record metrics
+        this.performanceTracker.recordMetric({
+            timestamp: Date.now(),
+            model: `${model}-words`,
+            cacheHit: false,
+            totalDuration: totalDuration,
+            networkDuration: networkEnd - networkStart,
+            parseDuration: parseEnd - parseStart,
+            source: 'http',
+        });
+
+        console.log(`[HTTP - Words] ${totalDuration.toFixed(0)}ms (network: ${(networkEnd - networkStart).toFixed(0)}ms) | ${model}`);
+
+        return data.words;
     },
 };
 

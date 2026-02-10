@@ -21,12 +21,16 @@
     </div>
 
     <div id="app" style="display: none;">
-        <!-- Header with Settings Button and Context -->
+        <!-- Header with Settings Button, Connection Status, and Context -->
         <header class="header">
             <button id="settings-btn" class="settings-btn" aria-label="Open settings">
                 <span class="settings-icon">⚙️</span>
                 <span class="settings-text">Settings</span>
             </button>
+            <div class="connection-status">
+                <span class="connection-label">Connection:</span>
+                <span class="connection-indicator" id="ws-status" title="Connecting...">...</span>
+            </div>
             <input type="text" id="explicit-context-input" class="context-input" placeholder="Add context..." aria-label="Additional context">
         </header>
 
@@ -259,6 +263,7 @@
     </div>
 
     <script src="/static/services/auth.js?v=3"></script>
+    <script src="/static/services/websocket.js?v=3"></script>
     <script src="/static/services/api.js?v=3"></script>
     <script src="/static/services/speech.js?v=3"></script>
     <script src="/static/services/storage.js?v=3"></script>

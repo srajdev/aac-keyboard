@@ -1,7 +1,9 @@
 import os
 import time
+import asyncio
+import logging
 from pathlib import Path
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, Response
@@ -19,6 +21,10 @@ from .claude_service import (
 from .gemini_service import generate_predictions_gemini
 from .gpt_service import generate_predictions_gpt
 from .performance_tracker import get_tracker
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Viraj Keyboard API")
 
@@ -175,6 +181,123 @@ def predict_words(request: PredictionRequest):
     except Exception as e:
         print(f"Word prediction error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+async def handle_prediction_request(websocket: WebSocket, message: dict, active_tasks: dict):
+    """Handle a single prediction request over WebSocket."""
+    request_id = message["requestId"]
+    request_type = message["type"]
+
+    try:
+        # Extract request data
+        partial_input = message.get("partialInput", "")
+        conversation_context = message.get("conversationContext", "")
+        model = message.get("model", "claude")
+
+        start_time = time.time()
+
+        # Route to appropriate service based on type
+        if request_type == "words":
+            # Wrap sync function in thread to avoid blocking
+            result = await asyncio.to_thread(
+                generate_word_predictions,
+                partial_input,
+                conversation_context,
+                model
+            )
+        elif request_type == "phrases":
+            result = await asyncio.to_thread(
+                generate_phrase_predictions,
+                partial_input,
+                conversation_context,
+                model
+            )
+        else:
+            raise ValueError(f"Unknown request type: {request_type}")
+
+        duration_ms = (time.time() - start_time) * 1000
+        logger.info(f"[WebSocket] {request_type} prediction: {duration_ms:.0f}ms")
+
+        # Send success response
+        await websocket.send_json({
+            "type": request_type,
+            "requestId": request_id,
+            "success": True,
+            "data": result,
+            "timestamp": int(time.time() * 1000)
+        })
+
+    except asyncio.CancelledError:
+        logger.info(f"Request {request_id} cancelled")
+        # Don't send response for cancelled requests
+
+    except Exception as e:
+        logger.error(f"Error processing {request_type} request: {e}")
+        # Send error response
+        try:
+            await websocket.send_json({
+                "type": "error",
+                "requestId": request_id,
+                "error": str(type(e).__name__),
+                "message": str(e),
+                "timestamp": int(time.time() * 1000)
+            })
+        except Exception as send_error:
+            logger.error(f"Failed to send error response: {send_error}")
+
+    finally:
+        # Clean up from active tasks
+        if request_id in active_tasks:
+            del active_tasks[request_id]
+
+
+@app.websocket("/ws/predictions")
+async def websocket_predictions(websocket: WebSocket):
+    """WebSocket endpoint for real-time prediction requests."""
+    await websocket.accept()
+    logger.info("WebSocket connection established")
+    active_tasks = {}  # requestId -> Task mapping
+
+    try:
+        while True:
+            message = await websocket.receive_json()
+
+            if message["type"] == "cancel":
+                # Cancel tasks by requestId
+                request_ids = message.get("requestIds", [])
+                logger.info(f"Cancelling {len(request_ids)} requests")
+                for req_id in request_ids:
+                    if req_id in active_tasks:
+                        active_tasks[req_id].cancel()
+                        del active_tasks[req_id]
+
+            elif message["type"] in ["words", "phrases"]:
+                # Create async task for prediction
+                request_id = message["requestId"]
+                task = asyncio.create_task(
+                    handle_prediction_request(websocket, message, active_tasks)
+                )
+                active_tasks[request_id] = task
+
+            elif message["type"] == "ping":
+                # Respond to heartbeat
+                await websocket.send_json({
+                    "type": "pong",
+                    "timestamp": int(time.time() * 1000)
+                })
+
+            else:
+                logger.warning(f"Unknown message type: {message.get('type')}")
+
+    except WebSocketDisconnect:
+        logger.info("WebSocket disconnected")
+    except Exception as e:
+        logger.error(f"WebSocket error: {e}")
+    finally:
+        # Clean up active tasks
+        for task in active_tasks.values():
+            task.cancel()
+        logger.info("WebSocket connection closed, cleaned up active tasks")
 
 
 # Serve static files from client directory

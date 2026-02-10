@@ -99,6 +99,40 @@ body {
     color: #666;
 }
 
+/* Connection Status Indicator */
+.connection-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.connection-label {
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+.connection-indicator {
+    font-weight: 700;
+    font-family: monospace;
+    font-size: 16px;
+    min-width: 40px;
+    text-align: center;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.3);
+    transition: color 0.3s ease, background 0.3s ease;
+}
+
+/* Connection states are set via inline styles in JS for dynamic colors */
+/* Green (#4ade80) = connected (WS) */
+/* Yellow (#fbbf24) = connecting/reconnecting (...) */
+/* Red (#f87171) = disconnected/error (! or HTTP) */
+
 /* Keyboard Width Control */
 .keyboard-width-control {
     display: flex;
