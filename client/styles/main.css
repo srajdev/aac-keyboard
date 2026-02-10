@@ -447,6 +447,23 @@ body {
     transform: scale(0.95);
 }
 
+/* Streaming Animations */
+.phrase-btn-new.streaming,
+.word-btn-new.streaming {
+    animation: pulse-glow 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        opacity: 1;
+        box-shadow: 0 0 5px rgba(139, 92, 246, 0.3);
+    }
+    50% {
+        opacity: 0.85;
+        box-shadow: 0 0 15px rgba(139, 92, 246, 0.6);
+    }
+}
+
 /* Letter Predictions */
 .letter-section {
     flex-shrink: 0;

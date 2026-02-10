@@ -148,6 +148,9 @@ const ApiService = {
     baseUrl: '',
     cache: new PredictionCache(),
     performanceTracker: new PerformanceTracker(),
+    // Streaming callbacks - set by the app for incremental updates
+    onWordsUpdate: null,
+    onPhrasesUpdate: null,
 
     init() {
         this.performanceTracker.loadFromStorage();
@@ -290,10 +293,29 @@ const ApiService = {
             if (USE_WEBSOCKET && window.WebSocketService && window.WebSocketService.isConnected()) {
                 try {
                     const startTime = performance.now();
-                    const phrases = await window.WebSocketService.sendRequest(
+                    let firstChunkTime = null;
+
+                    // Use streaming WebSocket request
+                    const phrases = await window.WebSocketService.sendRequestWithStreaming(
                         'phrases',
                         partialInput,
                         conversationContext,
+                        (partialPhrases) => {
+                            // Record time to first prediction
+                            if (!firstChunkTime && partialPhrases.length > 0) {
+                                firstChunkTime = performance.now() - startTime;
+                                console.log(`[WebSocket - Phrases] First prediction at ${firstChunkTime.toFixed(0)}ms`);
+                            }
+
+                            // Call streaming update callback if set
+                            if (this.onPhrasesUpdate) {
+                                try {
+                                    this.onPhrasesUpdate(partialPhrases);
+                                } catch (error) {
+                                    console.error('Error in onPhrasesUpdate callback:', error);
+                                }
+                            }
+                        },
                         model
                     );
                     const duration = performance.now() - startTime;
@@ -305,12 +327,13 @@ const ApiService = {
                         model: `${model}-phrases`,
                         cacheHit: false,
                         totalDuration: duration,
+                        firstChunkTime: firstChunkTime,
                         networkDuration: duration,
                         parseDuration: 0,
-                        source: 'websocket',
+                        source: 'websocket-stream',
                     });
 
-                    console.log(`[WebSocket - Phrases] ${duration.toFixed(0)}ms | ${model}`);
+                    console.log(`[WebSocket - Phrases] Complete at ${duration.toFixed(0)}ms (first: ${firstChunkTime?.toFixed(0) || 'N/A'}ms) | ${model}`);
                     return phrases;
                 } catch (error) {
                     console.warn('WebSocket request failed, falling back to HTTP:', error);
@@ -407,10 +430,29 @@ const ApiService = {
             if (USE_WEBSOCKET && window.WebSocketService && window.WebSocketService.isConnected()) {
                 try {
                     const startTime = performance.now();
-                    const words = await window.WebSocketService.sendRequest(
+                    let firstChunkTime = null;
+
+                    // Use streaming WebSocket request
+                    const words = await window.WebSocketService.sendRequestWithStreaming(
                         'words',
                         partialInput,
                         conversationContext,
+                        (partialWords) => {
+                            // Record time to first prediction
+                            if (!firstChunkTime && partialWords.length > 0) {
+                                firstChunkTime = performance.now() - startTime;
+                                console.log(`[WebSocket - Words] First prediction at ${firstChunkTime.toFixed(0)}ms`);
+                            }
+
+                            // Call streaming update callback if set
+                            if (this.onWordsUpdate) {
+                                try {
+                                    this.onWordsUpdate(partialWords);
+                                } catch (error) {
+                                    console.error('Error in onWordsUpdate callback:', error);
+                                }
+                            }
+                        },
                         model
                     );
                     const duration = performance.now() - startTime;
@@ -422,12 +464,13 @@ const ApiService = {
                         model: `${model}-words`,
                         cacheHit: false,
                         totalDuration: duration,
+                        firstChunkTime: firstChunkTime,
                         networkDuration: duration,
                         parseDuration: 0,
-                        source: 'websocket',
+                        source: 'websocket-stream',
                     });
 
-                    console.log(`[WebSocket - Words] ${duration.toFixed(0)}ms | ${model}`);
+                    console.log(`[WebSocket - Words] Complete at ${duration.toFixed(0)}ms (first: ${firstChunkTime?.toFixed(0) || 'N/A'}ms) | ${model}`);
                     return words;
                 } catch (error) {
                     console.warn('WebSocket request failed, falling back to HTTP:', error);

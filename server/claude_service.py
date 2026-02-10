@@ -8,6 +8,8 @@ from .prompts import (
     SYSTEM_PROMPT_WITH_RULES,
     SYSTEM_PROMPT_PHRASES,
     SYSTEM_PROMPT_WORDS,
+    SYSTEM_PROMPT_WORDS_STREAMING,
+    SYSTEM_PROMPT_PHRASES_STREAMING,
     build_prediction_prompt,
     build_phrase_prompt,
     build_word_prompt,
@@ -292,3 +294,65 @@ def generate_word_predictions(partial_input: str, conversation_context: str) -> 
         print(f"Failed to parse Claude word response: {response_text}")
         # Return fallback words
         return ["yes", "no", "please", "thanks", "help"]
+
+
+def generate_word_predictions_stream(partial_input: str, conversation_context: str):
+    """Stream word predictions as pipe-delimited chunks (generator)."""
+    user_prompt = build_word_prompt(partial_input, conversation_context)
+
+    # Use Claude streaming API
+    with client.messages.stream(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=50,
+        system=[
+            {
+                "type": "text",
+                "text": SYSTEM_PROMPT_WORDS_STREAMING,
+                "cache_control": {"type": "ephemeral"}
+            }
+        ],
+        messages=[{"role": "user", "content": user_prompt}]
+    ) as stream:
+        buffer = ""
+        for text in stream.text_stream:
+            buffer += text
+            # Check if we have complete predictions (pipe delimiters)
+            while "|" in buffer:
+                prediction, buffer = buffer.split("|", 1)
+                prediction = prediction.strip()
+                if prediction:  # Only yield non-empty predictions
+                    yield prediction
+        # Yield remaining buffer if any
+        if buffer.strip():
+            yield buffer.strip()
+
+
+def generate_phrase_predictions_stream(partial_input: str, conversation_context: str):
+    """Stream phrase predictions as pipe-delimited chunks (generator)."""
+    user_prompt = build_phrase_prompt(partial_input, conversation_context)
+
+    # Use Claude streaming API
+    with client.messages.stream(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=200,
+        system=[
+            {
+                "type": "text",
+                "text": SYSTEM_PROMPT_PHRASES_STREAMING,
+                "cache_control": {"type": "ephemeral"}
+            }
+        ],
+        messages=[{"role": "user", "content": user_prompt}]
+    ) as stream:
+        buffer = ""
+        for text in stream.text_stream:
+            buffer += text
+            # Check if we have complete predictions (pipe delimiters)
+            while "|" in buffer:
+                prediction, buffer = buffer.split("|", 1)
+                prediction = prediction.strip()
+                if prediction:  # Only yield non-empty predictions
+                    yield prediction
+        # Yield remaining buffer if any
+        if buffer.strip():
+            yield buffer.strip()

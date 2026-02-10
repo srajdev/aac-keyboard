@@ -352,6 +352,19 @@ const App = {
         // Show loading state
         Predictions.setLoading(true);
 
+        // Set up streaming callbacks for incremental updates
+        ApiService.onWordsUpdate = (words) => {
+            if (!signal.aborted) {
+                Predictions.updateWordsIncremental(words);
+            }
+        };
+
+        ApiService.onPhrasesUpdate = (phrases) => {
+            if (!signal.aborted) {
+                Predictions.updatePhrasesIncremental(phrases);
+            }
+        };
+
         try {
             // Make parallel requests for words and phrases (words requested first for priority)
             const wordsPromise = ApiService.getWords(partialInput, context, signal, this.selectedModel);
@@ -375,6 +388,8 @@ const App = {
             const checkComplete = () => {
                 if (phrasesComplete && wordsComplete && !signal.aborted) {
                     Predictions.setLoading(false);
+                    // Finalize streaming animations
+                    Predictions.finalizeStreaming();
                 }
             };
 

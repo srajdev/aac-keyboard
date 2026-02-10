@@ -17,6 +17,8 @@ from .claude_service import (
     generate_predictions as generate_predictions_claude,
     generate_phrase_predictions,
     generate_word_predictions,
+    generate_word_predictions_stream,
+    generate_phrase_predictions_stream,
 )
 from .gemini_service import generate_predictions_gemini
 from .gpt_service import generate_predictions_gpt
@@ -183,8 +185,22 @@ def predict_words(request: PredictionRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+async def async_generator_from_sync(sync_gen):
+    """Convert a sync generator to async by running each iteration in a thread."""
+    loop = asyncio.get_event_loop()
+    while True:
+        try:
+            # Get next value from sync generator in thread pool
+            value = await loop.run_in_executor(None, next, sync_gen, StopIteration)
+            if value is StopIteration:
+                break
+            yield value
+        except StopIteration:
+            break
+
+
 async def handle_prediction_request(websocket: WebSocket, message: dict, active_tasks: dict):
-    """Handle a single prediction request over WebSocket."""
+    """Handle a single prediction request over WebSocket with streaming support."""
     request_id = message["requestId"]
     request_type = message["type"]
 
@@ -195,34 +211,41 @@ async def handle_prediction_request(websocket: WebSocket, message: dict, active_
         model = message.get("model", "claude")
 
         start_time = time.time()
+        predictions = []
 
-        # Route to appropriate service based on type
-        # Note: Only Claude is supported for WebSocket predictions currently
+        # Route to appropriate streaming service based on type
         if request_type == "words":
-            # Wrap sync function in thread to avoid blocking
-            result = await asyncio.to_thread(
-                generate_word_predictions,
-                partial_input,
-                conversation_context
-            )
+            stream_fn = generate_word_predictions_stream
         elif request_type == "phrases":
-            result = await asyncio.to_thread(
-                generate_phrase_predictions,
-                partial_input,
-                conversation_context
-            )
+            stream_fn = generate_phrase_predictions_stream
         else:
             raise ValueError(f"Unknown request type: {request_type}")
 
-        duration_ms = (time.time() - start_time) * 1000
-        logger.info(f"[WebSocket] {request_type} prediction: {duration_ms:.0f}ms")
+        # Create sync generator and convert to async
+        sync_gen = stream_fn(partial_input, conversation_context)
 
-        # Send success response
+        # Stream predictions as they arrive
+        async for chunk in async_generator_from_sync(sync_gen):
+            predictions.append(chunk)
+
+            # Send chunk update
+            await websocket.send_json({
+                "type": "stream_chunk",
+                "requestId": request_id,
+                "predictionType": request_type,
+                "predictions": predictions.copy(),
+                "timestamp": int(time.time() * 1000)
+            })
+
+        duration_ms = (time.time() - start_time) * 1000
+        logger.info(f"[WebSocket] {request_type} streaming completed: {duration_ms:.0f}ms ({len(predictions)} predictions)")
+
+        # Send completion message
         await websocket.send_json({
-            "type": request_type,
+            "type": "stream_complete",
             "requestId": request_id,
-            "success": True,
-            "data": result,
+            "predictionType": request_type,
+            "predictions": predictions,
             "timestamp": int(time.time() * 1000)
         })
 
@@ -232,13 +255,15 @@ async def handle_prediction_request(websocket: WebSocket, message: dict, active_
 
     except Exception as e:
         logger.error(f"Error processing {request_type} request: {e}")
-        # Send error response
+        # Send error response with partial results
         try:
             await websocket.send_json({
-                "type": "error",
+                "type": "stream_error",
                 "requestId": request_id,
+                "predictionType": request_type,
                 "error": str(type(e).__name__),
                 "message": str(e),
+                "predictions": predictions if 'predictions' in locals() else [],
                 "timestamp": int(time.time() * 1000)
             })
         except Exception as send_error:

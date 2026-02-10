@@ -26,6 +26,7 @@ const WebSocketService = {
     reconnectTimeout: null,
 
     pendingRequests: new Map(), // requestId -> { resolve, reject, timeout }
+    streamCallbacks: new Map(), // requestId -> callback function for streaming updates
     connectionChangeCallbacks: [],
     heartbeatInterval: null,
     heartbeatTimeout: null,
@@ -157,6 +158,57 @@ const WebSocketService = {
     },
 
     /**
+     * Send a prediction request with streaming support
+     * @param {string} type - "words" or "phrases"
+     * @param {string} partialInput - Current text
+     * @param {string} conversationContext - Conversation context
+     * @param {Function} onChunk - Callback for streaming chunks (receives array of predictions)
+     * @param {string} model - Model to use (claude/gemini/gpt)
+     * @returns {Promise<Array>} - Final prediction results
+     */
+    async sendRequestWithStreaming(type, partialInput, conversationContext, onChunk, model = 'claude') {
+        if (!this.isConnected()) {
+            throw new Error('WebSocket not connected');
+        }
+
+        const requestId = this._generateRequestId();
+
+        return new Promise((resolve, reject) => {
+            // Set up streaming callback
+            this.streamCallbacks.set(requestId, onChunk);
+
+            // Set timeout for request (10 seconds)
+            const timeout = setTimeout(() => {
+                this.streamCallbacks.delete(requestId);
+                this.pendingRequests.delete(requestId);
+                reject(new Error(`Request timeout: ${requestId}`));
+            }, 10000);
+
+            // Store promise handlers
+            this.pendingRequests.set(requestId, { resolve, reject, timeout });
+
+            // Send request
+            try {
+                const message = {
+                    type,
+                    requestId,
+                    partialInput,
+                    conversationContext,
+                    model
+                };
+
+                this.ws.send(JSON.stringify(message));
+                console.log(`[WebSocket] Sent ${type} streaming request:`, requestId);
+            } catch (error) {
+                clearTimeout(timeout);
+                this.streamCallbacks.delete(requestId);
+                this.pendingRequests.delete(requestId);
+                reject(error);
+            }
+        });
+    },
+
+    /**
      * Cancel pending requests
      * @param {Array<string>} requestIds - Request IDs to cancel
      */
@@ -238,6 +290,55 @@ const WebSocketService = {
                 return;
             }
 
+            // Handle streaming messages
+            if (message.type === 'stream_chunk') {
+                // Streaming chunk - call callback but don't resolve promise yet
+                const callback = this.streamCallbacks.get(message.requestId);
+                if (callback) {
+                    try {
+                        callback(message.predictions);
+                    } catch (error) {
+                        console.error('[WebSocket] Error in stream callback:', error);
+                    }
+                }
+                return;
+            }
+
+            if (message.type === 'stream_complete') {
+                // Stream finished successfully
+                const pending = this.pendingRequests.get(message.requestId);
+                if (pending) {
+                    clearTimeout(pending.timeout);
+                    this.pendingRequests.delete(message.requestId);
+                    this.streamCallbacks.delete(message.requestId);
+                    console.log(`[WebSocket] Stream complete (${message.predictionType}):`, message.requestId);
+                    pending.resolve(message.predictions);
+                }
+                return;
+            }
+
+            if (message.type === 'stream_error') {
+                // Stream error - resolve with partial results if available
+                const pending = this.pendingRequests.get(message.requestId);
+                if (pending) {
+                    clearTimeout(pending.timeout);
+                    this.pendingRequests.delete(message.requestId);
+                    this.streamCallbacks.delete(message.requestId);
+
+                    console.error(`[WebSocket] Stream error (${message.predictionType}):`, message.message);
+
+                    // If we have partial predictions, resolve with those
+                    if (message.predictions && message.predictions.length > 0) {
+                        console.log('[WebSocket] Resolving with partial predictions:', message.predictions);
+                        pending.resolve(message.predictions);
+                    } else {
+                        pending.reject(new Error(message.message));
+                    }
+                }
+                return;
+            }
+
+            // Handle legacy non-streaming messages (for backward compatibility)
             const requestId = message.requestId;
             const pending = this.pendingRequests.get(requestId);
 

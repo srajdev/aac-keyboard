@@ -118,6 +118,54 @@ const Predictions = {
         console.log(`[Render] Words updated: ${renderDuration.toFixed(2)}ms`);
     },
 
+    /**
+     * Update words incrementally as they stream in
+     * @param {Array<string>} words - Partial list of words received so far
+     */
+    updateWordsIncremental(words) {
+        // Update only the word buttons we have so far
+        this.wordButtons.forEach((btn, i) => {
+            if (i < words.length) {
+                btn.textContent = words[i];
+                btn.disabled = false;
+                btn.classList.add('streaming');
+            } else {
+                btn.textContent = '...';
+                btn.disabled = true;
+                btn.classList.remove('streaming');
+            }
+        });
+    },
+
+    /**
+     * Update phrases incrementally as they stream in
+     * @param {Array<string>} phrases - Partial list of phrases received so far
+     */
+    updatePhrasesIncremental(phrases) {
+        // Update only the phrase buttons we have so far
+        this.phraseButtons.forEach((btn, i) => {
+            if (i < phrases.length) {
+                btn.textContent = phrases[i];
+                btn.disabled = false;
+                btn.classList.add('streaming');
+                btn.classList.remove('placeholder');
+            } else {
+                btn.textContent = '...';
+                btn.disabled = true;
+                btn.classList.remove('streaming');
+            }
+        });
+    },
+
+    /**
+     * Finalize streaming - remove animations when complete
+     */
+    finalizeStreaming() {
+        // Remove streaming animations
+        this.phraseButtons.forEach(btn => btn.classList.remove('streaming'));
+        this.wordButtons.forEach(btn => btn.classList.remove('streaming'));
+    },
+
     setLoading(isLoading) {
         const section = document.querySelector('.predictions-section-new');
         if (isLoading) {

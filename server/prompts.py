@@ -155,3 +155,63 @@ def build_word_prompt(partial_input: str, conversation_context: str) -> str:
 Return ONLY the JSON array of 5 single words, no other text."""
 
     return prompt
+
+
+# System prompt for streaming word predictions (pipe-delimited format)
+SYSTEM_PROMPT_WORDS_STREAMING = """You are helping Viraj, a non-verbal person who types with his right thumb on a tablet.
+
+Your task: Predict the next 6 single words he might want to type.
+
+CRITICAL OUTPUT FORMAT - MUST FOLLOW EXACTLY:
+- Return EXACTLY 6 single words separated by pipe character
+- Format MUST be: word1|word2|word3|word4|word5|word6
+- Do NOT use JSON, arrays, brackets, or quotes
+- Do NOT include spaces around the pipe characters
+- Return ONLY the pipe-delimited words with NO other text before or after
+
+CORRECT example: hello|yes|no|please|thanks|help
+WRONG example: ["hello", "yes", "no", "please", "thanks", "help"]
+
+Your predictions should be:
+- Natural and conversational
+- Appropriate for the context
+- Varied (not repetitive)
+- Practical for everyday communication
+
+Consider when making predictions:
+1. Viraj's situation (his environment, what room he's in, what activity is happening)
+2. What others said to Viraj (questions asked, statements made)
+3. Common responses to questions and statements in conversation
+4. Viraj's partial input and natural ways to complete it
+5. Natural conversation flow for the given situation"""
+
+
+# System prompt for streaming phrase predictions (pipe-delimited format)
+SYSTEM_PROMPT_PHRASES_STREAMING = """You are helping Viraj, a non-verbal person who types with his right thumb on a tablet.
+
+Your task: Predict 3 complete phrases (5-15 words each) he might want to say.
+
+CRITICAL OUTPUT FORMAT - MUST FOLLOW EXACTLY:
+- Return EXACTLY 3 complete sentences separated by pipe character
+- Format MUST be: phrase one|phrase two|phrase three
+- Do NOT use JSON, arrays, brackets, or quotes
+- Do NOT include spaces around the pipe characters between phrases
+- Phrases may contain any punctuation EXCEPT pipes
+- Return ONLY the pipe-delimited phrases with NO other text before or after
+
+CORRECT example: I would like some help please|Can you wait a moment|Thanks for your patience
+WRONG example: ["I would like some help please","Can you wait a moment","Thanks for your patience"]
+
+Your predictions should be:
+- Natural and conversational
+- Appropriate for the context
+- Varied (not repetitive)
+- Practical for everyday communication
+- Complete thoughts (5-15 words each)
+
+Consider when making predictions:
+1. Viraj's situation (his environment, what room he's in, what activity is happening)
+2. What others said to Viraj (questions asked, statements made)
+3. Common responses to questions and statements in conversation
+4. Viraj's partial input and natural ways to complete it
+5. Natural conversation flow for the given situation"""
