@@ -3,18 +3,14 @@
 const Keyboard = {
     state: {
         mode: 'letters',  // 'letters' or 'numbers'
-        capsLock: false,
-        shift: false,
-        ctrl: false
+        shift: false
     },
 
     // Element references
     letterKeyboard: null,
     numberKeyboard: null,
     punctuationModal: null,
-    capsKey: null,
     shiftKey: null,
-    ctrlKey: null,
     numKey: null,
     letterKeys: [],
 
@@ -26,9 +22,7 @@ const Keyboard = {
         this.numberKeyboard = document.getElementById('number-keyboard');
         this.punctuationModal = document.getElementById('punctuation-modal');
 
-        this.capsKey = document.getElementById('caps-key');
         this.shiftKey = document.getElementById('shift-key');
-        this.ctrlKey = document.getElementById('ctrl-key');
         this.numKey = document.getElementById('num-key');
 
         // Get all letter keys for visual updates
@@ -91,14 +85,8 @@ const Keyboard = {
         // Handle different key types
         switch (keyValue) {
             // Modifiers
-            case 'caps':
-                this.toggleCaps();
-                break;
             case 'shift':
                 this.toggleShift();
-                break;
-            case 'ctrl':
-                this.toggleCtrl();
                 break;
             case '123':
                 this.switchToNumbers();
@@ -113,12 +101,6 @@ const Keyboard = {
                 break;
             case 'del-word':
                 this.onKeyPress(null, 'del-word', this.state);
-                break;
-            case 'enter':
-                this.onKeyPress('\n', 'enter', this.state);
-                break;
-            case 'tab':
-                this.onKeyPress('\t', 'tab', this.state);
                 break;
             case 'space':
                 this.onKeyPress(' ', 'space', this.state);
@@ -166,7 +148,7 @@ const Keyboard = {
 
         // Apply case transformation for letters
         if (this.state.mode === 'letters' && /^[a-z]$/.test(char)) {
-            if (this.state.capsLock || this.state.shift) {
+            if (this.state.shift) {
                 char = char.toUpperCase();
             }
 
@@ -179,11 +161,6 @@ const Keyboard = {
         this.onKeyPress(char, 'letter', this.state);
     },
 
-    toggleCaps() {
-        this.state.capsLock = !this.state.capsLock;
-        this.updateKeyDisplay();
-    },
-
     toggleShift() {
         this.state.shift = !this.state.shift;
         this.updateKeyDisplay();
@@ -191,11 +168,6 @@ const Keyboard = {
 
     resetShift() {
         this.state.shift = false;
-        this.updateKeyDisplay();
-    },
-
-    toggleCtrl() {
-        this.state.ctrl = !this.state.ctrl;
         this.updateKeyDisplay();
     },
 
@@ -220,15 +192,6 @@ const Keyboard = {
     },
 
     updateKeyDisplay() {
-        // Update CAPS key visual state
-        if (this.capsKey) {
-            if (this.state.capsLock) {
-                this.capsKey.classList.add('active');
-            } else {
-                this.capsKey.classList.remove('active');
-            }
-        }
-
         // Update SHIFT key visual state
         if (this.shiftKey) {
             if (this.state.shift) {
@@ -238,24 +201,11 @@ const Keyboard = {
             }
         }
 
-        // Update CTRL key visual state
-        if (this.ctrlKey) {
-            if (this.state.ctrl) {
-                this.ctrlKey.classList.add('active');
-            } else {
-                this.ctrlKey.classList.remove('active');
-            }
-        }
-
-        // Update letter key display (uppercase/lowercase)
+        // Letter keys always display as uppercase in UI
         this.letterKeys.forEach(key => {
             const keyValue = key.dataset.key;
             if (/^[a-z]$/.test(keyValue)) {
-                if (this.state.capsLock || this.state.shift) {
-                    key.textContent = keyValue.toUpperCase();
-                } else {
-                    key.textContent = keyValue.toUpperCase(); // Always display uppercase in UI
-                }
+                key.textContent = keyValue.toUpperCase();
             }
         });
     },
