@@ -197,20 +197,19 @@ async def handle_prediction_request(websocket: WebSocket, message: dict, active_
         start_time = time.time()
 
         # Route to appropriate service based on type
+        # Note: Only Claude is supported for WebSocket predictions currently
         if request_type == "words":
             # Wrap sync function in thread to avoid blocking
             result = await asyncio.to_thread(
                 generate_word_predictions,
                 partial_input,
-                conversation_context,
-                model
+                conversation_context
             )
         elif request_type == "phrases":
             result = await asyncio.to_thread(
                 generate_phrase_predictions,
                 partial_input,
-                conversation_context,
-                model
+                conversation_context
             )
         else:
             raise ValueError(f"Unknown request type: {request_type}")

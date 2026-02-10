@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket UI Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a2e;
+            color: #fff;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .connected { background: #4ade80; color: #000; }
+        .disconnected { background: #f87171; color: #000; }
+        .connecting { background: #fbbf24; color: #000; }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #results {
+            margin-top: 20px;
+            padding: 10px;
+            background: #16213e;
+            border-radius: 5px;
+            min-height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <h1>WebSocket UI Test</h1>
+
+    <div id="status" class="status connecting">Connecting...</div>
+
+    <button onclick="testWords()">Test Words</button>
+    <button onclick="testPhrases()">Test Phrases</button>
+    <button onclick="testBoth()">Test Both (Parallel)</button>
+    <button onclick="testCancel()">Test Cancel</button>
+
+    <div id="results"></div>
+
+    <script src="/static/services/websocket.js?v=3"></script>
+    <script>
+        const statusEl = document.getElementById('status');
+        const resultsEl = document.getElementById('results');
+
+        function log(msg) {
+            const timestamp = new Date().toLocaleTimeString();
+            resultsEl.innerHTML += `[${timestamp}] ${msg}<br>`;
+            resultsEl.scrollTop = resultsEl.scrollHeight;
+        }
+
+        // Initialize WebSocket
+        async function init() {
+            try {
+                await WebSocketService.connect();
+                log('✓ WebSocket connected');
+            } catch (error) {
+                log(`✗ Connection failed: ${error.message}`);
+            }
+        }
+
+        // Listen to connection changes
+        WebSocketService.onConnectionChange((state) => {
+            statusEl.textContent = `Connection: ${state}`;
+            statusEl.className = 'status ' + state;
+            log(`Connection state: ${state}`);
+        });
+
+        async function testWords() {
+            log('→ Testing words...');
+            try {
+                const words = await WebSocketService.sendRequest(
+                    'words',
+                    'I wan',
+                    'Mom asked: What do you want for lunch?',
+                    'claude'
+                );
+                log(`✓ Words: ${words.join(', ')}`);
+            } catch (error) {
+                log(`✗ Words failed: ${error.message}`);
+            }
+        }
+
+        async function testPhrases() {
+            log('→ Testing phrases...');
+            try {
+                const phrases = await WebSocketService.sendRequest(
+                    'phrases',
+                    'I wan',
+                    'Mom asked: What do you want for lunch?',
+                    'claude'
+                );
+                log(`✓ Phrases: ${phrases.join(' | ')}`);
+            } catch (error) {
+                log(`✗ Phrases failed: ${error.message}`);
+            }
+        }
+
+        async function testBoth() {
+            log('→ Testing parallel requests...');
+            try {
+                const [words, phrases] = await Promise.all([
+                    WebSocketService.sendRequest('words', 'I wan', 'Mom asked: What do you want for lunch?', 'claude'),
+                    WebSocketService.sendRequest('phrases', 'I wan', 'Mom asked: What do you want for lunch?', 'claude')
+                ]);
+                log(`✓ Words: ${words.join(', ')}`);
+                log(`✓ Phrases: ${phrases.join(' | ')}`);
+            } catch (error) {
+                log(`✗ Parallel test failed: ${error.message}`);
+            }
+        }
+
+        async function testCancel() {
+            log('→ Testing cancellation...');
+            const requestId = crypto.randomUUID();
+
+            // Send a request but don't await it
+            const promise = WebSocketService.sendRequest('words', 'test', '', 'claude');
+
+            // Cancel it immediately
+            WebSocketService.cancelRequests([requestId]);
+            log('✓ Cancel message sent');
+
+            try {
+                await promise;
+                log('✗ Request should have been cancelled but completed');
+            } catch (error) {
+                log(`✓ Request cancelled: ${error.message}`);
+            }
+        }
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>
