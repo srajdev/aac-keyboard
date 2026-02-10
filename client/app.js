@@ -6,8 +6,10 @@ const App = {
     lastPredictionRequest: '',
     predictionsEnabled: true, // Default to ON
     selectedModel: 'claude', // Default to Claude
+    ttsMode: 'manual', // Default to manual mode
     predictionsToggleBtn: null,
     modelSelector: null,
+    ttsModeSelector: null,
     currentPredictionController: null,
     currentRequestIds: [], // For WebSocket request cancellation
 
@@ -44,6 +46,7 @@ const App = {
         // Get UI elements
         this.predictionsToggleBtn = document.getElementById('predictions-toggle');
         this.modelSelector = document.getElementById('model-selector');
+        this.ttsModeSelector = document.getElementById('tts-mode-selector');
 
         // Load saved preferences
         const saved = StorageService.getPreferences();
@@ -53,8 +56,12 @@ const App = {
         if (saved.selectedModel !== undefined) {
             this.selectedModel = saved.selectedModel;
         }
+        if (saved.ttsMode !== undefined) {
+            this.ttsMode = saved.ttsMode;
+        }
         this.updatePredictionsToggleUI();
         this.updateModelSelectorUI();
+        this.updateTtsModeUI();
 
         // Wire up component callbacks
         this.setupCallbacks();
@@ -115,6 +122,18 @@ const App = {
             });
         }
 
+        // TTS Mode Selector
+        if (this.ttsModeSelector) {
+            this.ttsModeSelector.addEventListener('change', (e) => {
+                this.ttsMode = e.target.value;
+                SpeakButton.setTtsMode(this.ttsMode);
+                // Save preference
+                const prefs = StorageService.getPreferences();
+                prefs.ttsMode = this.ttsMode;
+                StorageService.savePreferences(prefs);
+            });
+        }
+
         // Explicit context input
         const contextInput = document.getElementById('explicit-context-input');
         if (contextInput) {
@@ -140,13 +159,26 @@ const App = {
                     MessageArea.deleteWord();
                     break;
                 case 'letter':
-                case 'space':
                 case 'enter':
                 case 'tab':
                     MessageArea.appendText(char);
-                    // Auto-speak on sentence delimiters (. or ?)
-                    if (char === '.' || char === '?') {
+                    // Auto-speak on sentence delimiters in sentence mode
+                    if (this.ttsMode === 'sentence' && (char === '.' || char === '?')) {
                         SpeakButton.speak();
+                    }
+                    break;
+                case 'space':
+                    MessageArea.appendText(char);
+                    // Auto-speak on sentence delimiters in sentence mode
+                    if (this.ttsMode === 'sentence' && (char === '.' || char === '?')) {
+                        SpeakButton.speak();
+                    }
+                    // In word mode, speak the completed word when spacebar is pressed
+                    else if (this.ttsMode === 'word') {
+                        const completedWord = this.getLastCompletedWord();
+                        if (completedWord) {
+                            SpeakButton.speakWord(completedWord);
+                        }
                     }
                     break;
                 case 'phrase':
@@ -180,10 +212,18 @@ const App = {
         // Prediction selections
         Predictions.onPhraseSelect = (phrase) => {
             MessageArea.appendPhrase(phrase);
+            // In word mode, speak the phrase
+            if (this.ttsMode === 'word') {
+                SpeakButton.speakWord(phrase);
+            }
         };
 
         Predictions.onWordSelect = (word) => {
             MessageArea.appendWord(word);
+            // In word mode, speak the word
+            if (this.ttsMode === 'word') {
+                SpeakButton.speakWord(word);
+            }
         };
 
         // Speak button gets message
@@ -227,6 +267,24 @@ const App = {
     updateModelSelectorUI() {
         if (!this.modelSelector) return;
         this.modelSelector.value = this.selectedModel;
+    },
+
+    updateTtsModeUI() {
+        if (!this.ttsModeSelector) return;
+        this.ttsModeSelector.value = this.ttsMode;
+    },
+
+    getLastCompletedWord() {
+        // Get the word that was just completed (before the space that was just typed)
+        const message = MessageArea.getMessage();
+        if (!message || message.length === 0) return '';
+
+        // Remove trailing space(s) and get the last word
+        const trimmed = message.trimEnd();
+        if (trimmed.length === 0) return '';
+
+        const words = trimmed.split(/\s+/);
+        return words[words.length - 1] || '';
     },
 
     debouncedPredictions(message) {

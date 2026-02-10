@@ -74,9 +74,10 @@ const StorageService = {
                 : {
                       speechRate: 0.9,
                       speechPitch: 1,
+                      ttsMode: 'manual', // 'sentence', 'word', or 'manual'
                   };
         } catch (e) {
-            return { speechRate: 0.9, speechPitch: 1 };
+            return { speechRate: 0.9, speechPitch: 1, ttsMode: 'manual' };
         }
     },
 

@@ -233,6 +233,18 @@
             </div>
 
             <div class="settings-section">
+                <h3>Speech</h3>
+                <div class="setting-row">
+                    <label for="tts-mode-selector" class="model-label">Auto-speak:</label>
+                    <select id="tts-mode-selector" class="model-selector">
+                        <option value="sentence">Sentence (on . or ?)</option>
+                        <option value="word">Word (after each word)</option>
+                        <option value="manual">Manual (button only)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="settings-section">
                 <h3>Performance Stats</h3>
                 <div id="performance-dashboard" class="performance-dashboard">
                     <div class="perf-loading">Use the keyboard to see performance stats...</div>
