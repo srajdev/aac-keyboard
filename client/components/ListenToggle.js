@@ -2,6 +2,7 @@
 
 const ListenToggle = {
     button: null,
+    quickButton: null,
     contextText: null,
     contextSection: null,
     contextToggle: null,
@@ -12,13 +13,21 @@ const ListenToggle = {
 
     init() {
         this.button = document.getElementById('listen-toggle');
+        this.quickButton = document.getElementById('quick-listen-toggle');
         this.contextText = document.getElementById('context-text');
         this.contextSection = document.getElementById('context-section');
         this.contextToggle = document.getElementById('context-toggle');
 
-        // Toggle listening
+        // Toggle listening (settings button)
         if (this.button) {
             this.button.addEventListener('click', () => {
+                this.toggle();
+            });
+        }
+
+        // Toggle listening (quick access button)
+        if (this.quickButton) {
+            this.quickButton.addEventListener('click', () => {
                 this.toggle();
             });
         }
@@ -42,6 +51,10 @@ const ListenToggle = {
                 this.button.disabled = true;
                 this.button.querySelector('.toggle-text').textContent = 'Not Supported';
             }
+            if (this.quickButton) {
+                this.quickButton.disabled = true;
+                this.quickButton.querySelector('.settings-text').textContent = 'Not Supported';
+            }
         }
     },
 
@@ -56,9 +69,15 @@ const ListenToggle = {
     startListening() {
         if (SpeechService.startListening()) {
             this.isListening = true;
+            // Update settings button
             if (this.button) {
                 this.button.classList.add('active', 'listening');
                 this.button.querySelector('.toggle-text').textContent = 'Listen: ON';
+            }
+            // Update quick access button
+            if (this.quickButton) {
+                this.quickButton.classList.add('active', 'listening');
+                this.quickButton.querySelector('.settings-text').textContent = 'Listen: ON';
             }
             // Expand context panel
             if (this.contextSection) {
@@ -70,9 +89,15 @@ const ListenToggle = {
     stopListening() {
         SpeechService.stopListening();
         this.isListening = false;
+        // Update settings button
         if (this.button) {
             this.button.classList.remove('active', 'listening');
             this.button.querySelector('.toggle-text').textContent = 'Listen: OFF';
+        }
+        // Update quick access button
+        if (this.quickButton) {
+            this.quickButton.classList.remove('active', 'listening');
+            this.quickButton.querySelector('.settings-text').textContent = 'Listen: OFF';
         }
     },
 

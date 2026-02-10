@@ -43,6 +43,12 @@ body {
     gap: 8px;
 }
 
+.header-left {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
 .toggle-btn {
     display: flex;
     align-items: center;
@@ -911,6 +917,15 @@ body {
 
 .settings-btn:active {
     transform: scale(0.95);
+}
+
+.settings-btn.active {
+    background: linear-gradient(135deg, #4361ee, #7209b7);
+    border-color: #f72585;
+}
+
+.settings-btn.listening {
+    animation: pulse 1.5s infinite;
 }
 
 .settings-icon {

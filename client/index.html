@@ -23,10 +23,16 @@
     <div id="app" style="display: none;">
         <!-- Header with Settings Button, Connection Status, and Context -->
         <header class="header">
-            <button id="settings-btn" class="settings-btn" aria-label="Open settings">
-                <span class="settings-icon">⚙️</span>
-                <span class="settings-text">Settings</span>
-            </button>
+            <div class="header-left">
+                <button id="settings-btn" class="settings-btn" aria-label="Open settings">
+                    <span class="settings-icon">⚙️</span>
+                    <span class="settings-text">Settings</span>
+                </button>
+                <button id="quick-listen-toggle" class="settings-btn" aria-label="Toggle listening">
+                    <span class="settings-icon">🎤</span>
+                    <span class="settings-text">Listen: OFF</span>
+                </button>
+            </div>
             <div class="connection-status">
                 <span class="connection-label">Connection:</span>
                 <span class="connection-indicator" id="ws-status" title="Connecting...">...</span>
