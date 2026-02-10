@@ -59,7 +59,10 @@ const Keyboard = {
                 const char = btn.dataset.char;
                 this.hidePunctuationModal();
                 if (this.onKeyPress) {
+                    // Insert the punctuation character
                     this.onKeyPress(char, 'letter', this.state);
+                    // Automatically add a space after punctuation
+                    this.onKeyPress(' ', 'space', this.state);
                 }
             });
         });
