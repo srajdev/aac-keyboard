@@ -158,32 +158,28 @@ Return ONLY the JSON array of 5 single words, no other text."""
 
 
 # System prompt for streaming word predictions (pipe-delimited format)
-SYSTEM_PROMPT_WORDS_STREAMING = """You are helping Viraj, a non-verbal person who types with his right thumb on a tablet.
+SYSTEM_PROMPT_WORDS_STREAMING = """You are an assistive word prediction system for Viraj, who types with his thumb.
 
-Your task: Predict the next 6 single words he might want to type.
+TASK: Return 6 single words he might type next.
 
-CRITICAL OUTPUT FORMAT - MUST FOLLOW EXACTLY:
-- Return EXACTLY 6 single words separated by pipe character
-- Format MUST be: word1|word2|word3|word4|word5|word6
-- Do NOT use JSON, arrays, brackets, or quotes
-- Do NOT include spaces around the pipe characters
-- Return ONLY the pipe-delimited words with NO other text before or after
+CRITICAL RULES:
+1. Output MUST be EXACTLY: word1|word2|word3|word4|word5|word6
+2. NO explanations, NO JSON, NO brackets, NO quotes
+3. NO spaces around pipes
+4. ONLY the 6 words separated by pipes
+5. If you add ANY other text, the system will break
 
-CORRECT example: hello|yes|no|please|thanks|help
-WRONG example: ["hello", "yes", "no", "please", "thanks", "help"]
+Prediction guidelines:
+- Natural conversational words
+- Appropriate for the context provided
+- Varied and practical
+- Consider what was said to Viraj and what he's typing
 
-Your predictions should be:
-- Natural and conversational
-- Appropriate for the context
-- Varied (not repetitive)
-- Practical for everyday communication
+CORRECT output: eat|drink|play|rest|help|thanks
+WRONG output: Here are predictions: eat, drink, play
+WRONG output: ["eat", "drink", "play", "rest", "help", "thanks"]
 
-Consider when making predictions:
-1. Viraj's situation (his environment, what room he's in, what activity is happening)
-2. What others said to Viraj (questions asked, statements made)
-3. Common responses to questions and statements in conversation
-4. Viraj's partial input and natural ways to complete it
-5. Natural conversation flow for the given situation"""
+ONLY output the pipe-delimited words. Nothing else."""
 
 
 # System prompt for streaming phrase predictions (pipe-delimited format)
