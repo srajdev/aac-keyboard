@@ -45,18 +45,19 @@ const SpeechService = {
         }
     },
 
-    // Text-to-Speech
-    speak(text) {
-        if (!text) return;
+    // Get all available voices
+    getAvailableVoices() {
+        return this.synthesis.getVoices();
+    },
 
-        // Cancel any ongoing speech
-        this.synthesis.cancel();
+    // Get voice by name
+    getVoiceByName(name) {
+        const voices = this.getAvailableVoices();
+        return voices.find(v => v.name === name);
+    },
 
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 0.9;
-        utterance.pitch = 1;
-
-        // Select best available male voice
+    // Auto-select best male voice (fallback when no preference set)
+    selectBestMaleVoice() {
         const voices = this.synthesis.getVoices();
         const englishVoices = voices.filter(v => v.lang.startsWith('en'));
 
@@ -75,14 +76,56 @@ const SpeechService = {
             englishVoices.find(v => v.name.includes('James')) ||
             englishVoices.find(v => v.name.includes('Male'));
 
-        if (maleVoice) {
-            utterance.voice = maleVoice;
-            console.log('Using voice:', maleVoice.name);
+        return maleVoice;
+    },
+
+    // Text-to-Speech with preferences
+    speak(text, customPrefs = null) {
+        if (!text) return;
+
+        // Cancel any ongoing speech
+        this.synthesis.cancel();
+
+        // Get preferences (use custom if provided, otherwise load from storage)
+        const prefs = customPrefs || (typeof StorageService !== 'undefined' ? StorageService.getPreferences() : {
+            speechRate: 0.9,
+            speechPitch: 1,
+            voiceName: null
+        });
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = prefs.speechRate || 0.9;
+        utterance.pitch = prefs.speechPitch || 1;
+
+        // Select voice based on preference
+        let selectedVoice = null;
+        if (prefs.voiceName) {
+            selectedVoice = this.getVoiceByName(prefs.voiceName);
+        }
+
+        // Fallback to auto-selected male voice if no preference or voice not found
+        if (!selectedVoice) {
+            selectedVoice = this.selectBestMaleVoice();
+        }
+
+        if (selectedVoice) {
+            utterance.voice = selectedVoice;
+            console.log('Using voice:', selectedVoice.name);
         } else {
-            console.log('No male voice found, using default');
+            console.log('No voice found, using default');
         }
 
         this.synthesis.speak(utterance);
+    },
+
+    // Test voice with sample text
+    testVoice(voiceName, rate, pitch) {
+        const sampleText = "Hi, this is how I sound. I'm excited to communicate with you.";
+        this.speak(sampleText, {
+            voiceName: voiceName,
+            speechRate: rate,
+            speechPitch: pitch
+        });
     },
 
     // Speech-to-Text

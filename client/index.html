@@ -345,6 +345,26 @@
                         <option value="manual">Manual (button only)</option>
                     </select>
                 </div>
+                <div class="setting-row">
+                    <label for="voice-selector" class="model-label">Voice:</label>
+                    <select id="voice-selector" class="model-selector">
+                        <option value="">Auto (Best Male Voice)</option>
+                        <!-- Voices populated dynamically -->
+                    </select>
+                </div>
+                <div class="setting-row slider-row">
+                    <label for="speech-rate-slider" class="model-label">Speed:</label>
+                    <input type="range" id="speech-rate-slider" class="slider" min="0.5" max="2.0" step="0.1" value="0.9">
+                    <span id="speech-rate-value" class="slider-value">0.9x</span>
+                </div>
+                <div class="setting-row slider-row">
+                    <label for="speech-pitch-slider" class="model-label">Pitch:</label>
+                    <input type="range" id="speech-pitch-slider" class="slider" min="0.5" max="2.0" step="0.1" value="1.0">
+                    <span id="speech-pitch-value" class="slider-value">1.0x</span>
+                </div>
+                <div class="setting-row">
+                    <button id="test-voice-btn" class="test-voice-btn">🔊 Test Voice</button>
+                </div>
             </div>
 
             <div class="settings-section">
@@ -376,20 +396,20 @@
         </div>
     </div>
 
-    <script src="/static/services/auth.js?v=15"></script>
-    <script src="/static/services/websocket.js?v=15"></script>
-    <script src="/static/services/api.js?v=15"></script>
-    <script src="/static/services/speech.js?v=15"></script>
-    <script src="/static/services/storage.js?v=15"></script>
-    <script src="/static/components/MessageArea.js?v=15"></script>
-    <script src="/static/components/Keyboard.js?v=15"></script>
-    <script src="/static/components/Predictions.js?v=15"></script>
-    <script src="/static/components/SpeakButton.js?v=15"></script>
-    <script src="/static/components/ListenToggle.js?v=15"></script>
-    <script src="/static/components/KeyboardWidthControl.js?v=15"></script>
-    <script src="/static/components/KeyboardHeightControl.js?v=15"></script>
-    <script src="/static/components/PredictionWidthControl.js?v=15"></script>
-    <script src="/static/components/SettingsModal.js?v=15"></script>
-    <script src="/static/app.js?v=15"></script>
+    <script src="/static/services/auth.js?v=16"></script>
+    <script src="/static/services/websocket.js?v=16"></script>
+    <script src="/static/services/api.js?v=16"></script>
+    <script src="/static/services/speech.js?v=16"></script>
+    <script src="/static/services/storage.js?v=16"></script>
+    <script src="/static/components/MessageArea.js?v=16"></script>
+    <script src="/static/components/Keyboard.js?v=16"></script>
+    <script src="/static/components/Predictions.js?v=16"></script>
+    <script src="/static/components/SpeakButton.js?v=16"></script>
+    <script src="/static/components/ListenToggle.js?v=16"></script>
+    <script src="/static/components/KeyboardWidthControl.js?v=16"></script>
+    <script src="/static/components/KeyboardHeightControl.js?v=16"></script>
+    <script src="/static/components/PredictionWidthControl.js?v=16"></script>
+    <script src="/static/components/SettingsModal.js?v=16"></script>
+    <script src="/static/app.js?v=16"></script>
 </body>
 </html>

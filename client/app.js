@@ -146,6 +146,134 @@ const App = {
             });
         }
 
+        // Voice Selector
+        const voiceSelector = document.getElementById('voice-selector');
+        if (voiceSelector) {
+            // Populate voices (need to wait for voices to load)
+            const populateVoices = () => {
+                const voices = SpeechService.getAvailableVoices();
+                if (voices.length === 0) {
+                    // Voices not loaded yet, try again
+                    setTimeout(populateVoices, 100);
+                    return;
+                }
+
+                // Clear existing options (except first "Auto" option)
+                while (voiceSelector.options.length > 1) {
+                    voiceSelector.remove(1);
+                }
+
+                // Group voices by language
+                const englishVoices = voices.filter(v => v.lang.startsWith('en'));
+                const otherVoices = voices.filter(v => !v.lang.startsWith('en'));
+
+                // Add English voices first
+                if (englishVoices.length > 0) {
+                    const englishGroup = document.createElement('optgroup');
+                    englishGroup.label = 'English Voices';
+                    englishVoices.forEach(voice => {
+                        const option = document.createElement('option');
+                        option.value = voice.name;
+                        option.textContent = `${voice.name} (${voice.lang})`;
+                        englishGroup.appendChild(option);
+                    });
+                    voiceSelector.appendChild(englishGroup);
+                }
+
+                // Add other languages
+                if (otherVoices.length > 0) {
+                    const otherGroup = document.createElement('optgroup');
+                    otherGroup.label = 'Other Languages';
+                    otherVoices.forEach(voice => {
+                        const option = document.createElement('option');
+                        option.value = voice.name;
+                        option.textContent = `${voice.name} (${voice.lang})`;
+                        otherGroup.appendChild(option);
+                    });
+                    voiceSelector.appendChild(otherGroup);
+                }
+
+                // Load saved preference
+                const prefs = StorageService.getPreferences();
+                if (prefs.voiceName) {
+                    voiceSelector.value = prefs.voiceName;
+                }
+            };
+
+            // Start populating voices
+            populateVoices();
+
+            // Also listen for voiceschanged event (some browsers load voices async)
+            if (window.speechSynthesis.onvoiceschanged !== undefined) {
+                window.speechSynthesis.onvoiceschanged = populateVoices;
+            }
+
+            // Handle voice selection change
+            voiceSelector.addEventListener('change', (e) => {
+                const prefs = StorageService.getPreferences();
+                prefs.voiceName = e.target.value || null;
+                StorageService.savePreferences(prefs);
+            });
+        }
+
+        // Speech Rate Slider
+        const rateSlider = document.getElementById('speech-rate-slider');
+        const rateValue = document.getElementById('speech-rate-value');
+        if (rateSlider && rateValue) {
+            // Load saved value
+            const prefs = StorageService.getPreferences();
+            rateSlider.value = prefs.speechRate || 0.9;
+            rateValue.textContent = `${rateSlider.value}x`;
+
+            // Handle changes
+            rateSlider.addEventListener('input', (e) => {
+                rateValue.textContent = `${e.target.value}x`;
+            });
+
+            rateSlider.addEventListener('change', (e) => {
+                const prefs = StorageService.getPreferences();
+                prefs.speechRate = parseFloat(e.target.value);
+                StorageService.savePreferences(prefs);
+            });
+        }
+
+        // Speech Pitch Slider
+        const pitchSlider = document.getElementById('speech-pitch-slider');
+        const pitchValue = document.getElementById('speech-pitch-value');
+        if (pitchSlider && pitchValue) {
+            // Load saved value
+            const prefs = StorageService.getPreferences();
+            pitchSlider.value = prefs.speechPitch || 1.0;
+            pitchValue.textContent = `${pitchSlider.value}x`;
+
+            // Handle changes
+            pitchSlider.addEventListener('input', (e) => {
+                pitchValue.textContent = `${e.target.value}x`;
+            });
+
+            pitchSlider.addEventListener('change', (e) => {
+                const prefs = StorageService.getPreferences();
+                prefs.speechPitch = parseFloat(e.target.value);
+                StorageService.savePreferences(prefs);
+            });
+        }
+
+        // Test Voice Button
+        const testVoiceBtn = document.getElementById('test-voice-btn');
+        if (testVoiceBtn) {
+            testVoiceBtn.addEventListener('click', () => {
+                const voiceSelector = document.getElementById('voice-selector');
+                const rateSlider = document.getElementById('speech-rate-slider');
+                const pitchSlider = document.getElementById('speech-pitch-slider');
+
+                const voiceName = voiceSelector.value || null;
+                const rate = parseFloat(rateSlider.value);
+                const pitch = parseFloat(pitchSlider.value);
+
+                SpeechService.testVoice(voiceName, rate, pitch);
+            });
+        }
+
         // Layout selector (in Settings Modal)
         const layoutSelector = document.getElementById('layout-selector');
         if (layoutSelector) {
