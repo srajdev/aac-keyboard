@@ -495,9 +495,9 @@ body {
 }
 
 .prediction-action-btn {
-    background: var(--swiftkey-accent);
-    border: none;
-    color: #000;
+    background: rgba(30, 40, 60, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--swiftkey-text);
     font-size: 0.95rem;
     font-weight: 600;
     height: 45px;
@@ -523,7 +523,7 @@ body {
 
 .prediction-action-btn:active {
     transform: scale(0.95);
-    background: #00bfe6;
+    background: rgba(50, 60, 80, 0.9);
 }
 
 /* Letter Predictions */
@@ -576,6 +576,14 @@ body {
     display: flex;
     gap: 5px;
     justify-content: stretch;
+}
+
+/* Small row (last row with arrows) */
+.keyboard-row-small .key-new {
+    height: 45px;
+    min-height: 45px;
+    font-size: 0.85rem;
+    padding: 4px;
 }
 
 .key-new {
