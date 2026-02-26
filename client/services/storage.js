@@ -118,6 +118,23 @@ const StorageService = {
             console.error('Failed to save prediction width:', e);
         }
     },
+
+    // Keyboard Height
+    getKeyboardHeight() {
+        try {
+            return localStorage.getItem('viraj_keyboard_height') || '1.0';
+        } catch (e) {
+            return '1.0';
+        }
+    },
+
+    setKeyboardHeight(scale) {
+        try {
+            localStorage.setItem('viraj_keyboard_height', scale);
+        } catch (e) {
+            console.error('Failed to save keyboard height:', e);
+        }
+    },
 };
 
 // Global alias for convenience

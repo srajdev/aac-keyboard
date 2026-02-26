@@ -20,6 +20,7 @@ body {
 
 :root {
     --keyboard-max-width: 14cm;  /* Default keyboard width, dynamically adjustable */
+    --keyboard-height-scale: 1.0;  /* Default height scale (50% to 150%) */
     --swiftkey-bg: #1a2332;
     --swiftkey-accent: #00d4ff;
     --swiftkey-text: #e0e0e0;
@@ -487,7 +488,7 @@ body {
     color: #000;
     font-size: 0.95rem;
     font-weight: 600;
-    height: 45px;
+    height: calc(45px * var(--keyboard-height-scale));
     flex: 1;
     border-radius: 6px;
     cursor: pointer;
@@ -500,7 +501,7 @@ body {
     color: var(--swiftkey-text);
     font-size: 0.95rem;
     font-weight: 600;
-    height: 45px;
+    height: calc(45px * var(--keyboard-height-scale));
     flex: 1;
     border-radius: 6px;
     cursor: pointer;
@@ -580,15 +581,15 @@ body {
 
 /* Small row (last row with arrows) */
 .keyboard-row-small .key-new {
-    height: 35px;
-    min-height: 35px;
+    height: calc(45px * var(--keyboard-height-scale));
+    min-height: calc(45px * var(--keyboard-height-scale));
     font-size: 0.85rem;
     padding: 4px;
 }
 
 .key-new {
     flex: 1;
-    min-height: 65px;
+    min-height: calc(65px * var(--keyboard-height-scale));
     padding: 8px 4px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;
@@ -763,7 +764,7 @@ body {
     color: var(--swiftkey-text);
     font-size: 1.3rem;
     font-weight: 500;
-    height: 65px;
+    height: calc(65px * var(--keyboard-height-scale));
     flex: 1;
     border-radius: 6px;
     transition: background 0.15s;
@@ -780,7 +781,7 @@ body {
     color: #000;
     font-size: 1.2rem;
     font-weight: 600;
-    height: 65px;
+    height: calc(65px * var(--keyboard-height-scale));
     flex: 1.2;
     border-radius: 6px;
 }
@@ -791,7 +792,7 @@ body {
     color: #000;
     font-size: 1.1rem;
     font-weight: 600;
-    height: 65px;
+    height: calc(65px * var(--keyboard-height-scale));
     flex: 1.2;
     border-radius: 6px;
 }
@@ -811,7 +812,7 @@ body {
     border: none;
     color: var(--swiftkey-accent);
     font-size: 1.4rem;
-    height: 65px;
+    height: calc(65px * var(--keyboard-height-scale));
     flex: 1;
     border-radius: 6px;
 }
@@ -821,7 +822,7 @@ body {
     border: none;
     color: var(--swiftkey-text);
     font-size: 0.9rem;
-    height: 65px;
+    height: calc(65px * var(--keyboard-height-scale));
     flex: 1.5;
     border-radius: 6px;
 }
@@ -831,7 +832,7 @@ body {
     border: none;
     color: var(--swiftkey-text);
     font-size: 1.2rem;
-    height: 65px;
+    height: calc(65px * var(--keyboard-height-scale));
     flex: 1;
     border-radius: 6px;
 }

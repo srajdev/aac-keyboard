@@ -40,6 +40,7 @@ const App = {
         SpeakButton.init();
         ListenToggle.init();
         KeyboardWidthControl.init();
+        KeyboardHeightControl.init();
         PredictionWidthControl.init();
         SettingsModal.init();
 

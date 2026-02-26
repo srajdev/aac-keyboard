@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <title>Viraj Keyboard</title>
-    <link rel="stylesheet" href="/static/styles/main.css?v=11">
+    <link rel="stylesheet" href="/static/styles/main.css?v=12">
 </head>
 <body>
     <!-- Password Gate -->
@@ -349,13 +349,20 @@
             </div>
 
             <div class="settings-section">
-                <h3>Width Controls</h3>
+                <h3>Size Controls</h3>
                 <div class="setting-row width-control-row">
-                    <label>Keyboard:</label>
+                    <label>Width:</label>
                     <button id="width-decrease" class="width-btn" aria-label="Decrease keyboard width">◄</button>
                     <span id="width-display" class="width-display">14cm</span>
                     <button id="width-increase" class="width-btn" aria-label="Increase keyboard width">►</button>
                     <button id="width-reset" class="width-reset">Reset</button>
+                </div>
+                <div class="setting-row width-control-row">
+                    <label>Height:</label>
+                    <button id="height-decrease" class="width-btn" aria-label="Decrease keyboard height">▼</button>
+                    <span id="height-display" class="width-display">100%</span>
+                    <button id="height-increase" class="width-btn" aria-label="Increase keyboard height">▲</button>
+                    <button id="height-reset" class="width-reset">Reset</button>
                 </div>
                 <div class="setting-row width-control-row">
                     <label>Predictions:</label>
@@ -370,19 +377,20 @@
         </div>
     </div>
 
-    <script src="/static/services/auth.js?v=11"></script>
-    <script src="/static/services/websocket.js?v=11"></script>
-    <script src="/static/services/api.js?v=11"></script>
-    <script src="/static/services/speech.js?v=11"></script>
-    <script src="/static/services/storage.js?v=11"></script>
-    <script src="/static/components/MessageArea.js?v=11"></script>
-    <script src="/static/components/Keyboard.js?v=11"></script>
-    <script src="/static/components/Predictions.js?v=11"></script>
-    <script src="/static/components/SpeakButton.js?v=11"></script>
-    <script src="/static/components/ListenToggle.js?v=11"></script>
-    <script src="/static/components/KeyboardWidthControl.js?v=11"></script>
-    <script src="/static/components/PredictionWidthControl.js?v=11"></script>
-    <script src="/static/components/SettingsModal.js?v=11"></script>
-    <script src="/static/app.js?v=11"></script>
+    <script src="/static/services/auth.js?v=12"></script>
+    <script src="/static/services/websocket.js?v=12"></script>
+    <script src="/static/services/api.js?v=12"></script>
+    <script src="/static/services/speech.js?v=12"></script>
+    <script src="/static/services/storage.js?v=12"></script>
+    <script src="/static/components/MessageArea.js?v=12"></script>
+    <script src="/static/components/Keyboard.js?v=12"></script>
+    <script src="/static/components/Predictions.js?v=12"></script>
+    <script src="/static/components/SpeakButton.js?v=12"></script>
+    <script src="/static/components/ListenToggle.js?v=12"></script>
+    <script src="/static/components/KeyboardWidthControl.js?v=12"></script>
+    <script src="/static/components/KeyboardHeightControl.js?v=12"></script>
+    <script src="/static/components/PredictionWidthControl.js?v=12"></script>
+    <script src="/static/components/SettingsModal.js?v=12"></script>
+    <script src="/static/app.js?v=12"></script>
 </body>
 </html>
