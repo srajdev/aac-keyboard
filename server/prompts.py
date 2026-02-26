@@ -65,19 +65,32 @@ Your predictions should be:
 - Appropriate for the context
 - Varied (not repetitive)
 - Practical for everyday communication
+- Include contractions (can't, won't, don't) and possessives (dad's, mom's, Viraj's)
 
 Always return valid JSON with exactly the structure requested.
 
-PREDICTION RULES:
-- Generate 5 single words that could come next (or start a message if no input)
-- Focus on high-frequency conversational words
-- Prioritize words that help Viraj communicate quickly (yes, no, please, help, I, want, need, can, etc.)
+PREDICTION RULES FOR WORD COMPLETION:
+1. If the input ends with INCOMPLETE LETTERS (partial word), PRIORITIZE completing that word first:
+   - Example: "How much longer wi" → ["will", "with", "winter", "wish", "win"]
+   - Example: "The f" → ["first", "for", "family", "fast", "few"]
+   - Example: "dad" → ["dad's", "daddy", "dads"]
+   - Example: "can" → ["can't", "can", "cannot"]
+
+2. Include contractions naturally:
+   - Use: can't, won't, don't, didn't, isn't, aren't, I'll, he's, she's, they're, we're, you're
+
+3. Include possessives when relevant:
+   - Use: dad's, mom's, Viraj's, brother's, sister's, etc.
+
+4. After completing partial words, predict likely NEXT words based on context
+
+5. Focus on high-frequency conversational words (yes, no, please, help, I, want, need)
 
 Consider when making predictions:
 1. Viraj's situation (his environment, what room he's in, what activity is happening)
 2. What others said to Viraj (questions asked, statements made)
 3. Common responses to questions and statements in conversation
-4. Viraj's partial input and natural ways to complete it
+4. Viraj's partial input - COMPLETE the partial word first if present
 5. Natural conversation flow for the given situation
 
 Use BOTH the situational context and conversational context to generate relevant predictions.
@@ -145,7 +158,15 @@ def build_word_prompt(partial_input: str, conversation_context: str) -> str:
         prompt += f'Context:\n{conversation_context}\n\n'
 
     if partial_input and partial_input.strip():
-        prompt += f'Viraj has typed so far: "{partial_input}"\n\n'
+        prompt += f'Viraj has typed so far: "{partial_input}"\n'
+
+        # Check if input ends with a partial word (letters without space after)
+        if not partial_input.endswith(' '):
+            last_space = partial_input.rfind(' ')
+            partial_word = partial_input[last_space + 1:] if last_space != -1 else partial_input
+            if partial_word and partial_word.replace("'", "").isalpha():
+                prompt += f'IMPORTANT: The input ends with the partial word "{partial_word}" - complete this word first in your predictions!\n'
+        prompt += '\n'
     else:
         prompt += "Viraj hasn't typed anything yet.\n\n"
 
@@ -162,6 +183,16 @@ SYSTEM_PROMPT_WORDS_STREAMING = """You help Viraj (non-verbal, types with thumb)
 
 Task: Return 6 single words he might type, separated by pipes.
 
+CRITICAL RULES:
+1. If input ends with INCOMPLETE LETTERS (partial word), COMPLETE it first:
+   - "wi" at end → complete to: will|with|winter|wish|win|wild
+   - "f" at end → complete to: first|for|family|fast|few|from
+   - "can" at end → complete to: can't|can|cannot|cane
+
+2. Include contractions: can't, won't, don't, I'll, he's, she's
+3. Include possessives: dad's, mom's, Viraj's (when relevant)
+4. Natural conversational words for context
+
 Format: word1|word2|word3|word4|word5|word6
 
 Requirements:
@@ -169,10 +200,9 @@ Requirements:
 - Separated by pipe character |
 - No JSON, brackets, quotes, or other formatting
 - No explanatory text before or after
-- Natural conversational words appropriate for context
 
-Good output: eat|drink|help|rest|thanks|please
-Bad output: I want to eat|drink some water|help me
+Good output: will|with|winter|wish|can't|won't
+Bad output: I will go|with him|help me
 
 Return only the 6 pipe-separated words now:"""
 
@@ -185,7 +215,15 @@ def build_word_prompt_streaming(partial_input: str, conversation_context: str) -
         prompt += f'Context: {conversation_context}\n\n'
 
     if partial_input and partial_input.strip():
-        prompt += f'Viraj typed: "{partial_input}"\n\n'
+        prompt += f'Viraj typed: "{partial_input}"\n'
+
+        # Check if input ends with a partial word (letters without space after)
+        if partial_input and not partial_input.endswith(' '):
+            last_space = partial_input.rfind(' ')
+            partial_word = partial_input[last_space + 1:] if last_space != -1 else partial_input
+            if partial_word and partial_word.isalpha():
+                prompt += f'NOTE: Complete the partial word "{partial_word}" first!\n'
+        prompt += '\n'
 
     prompt += "6 words:"
 
