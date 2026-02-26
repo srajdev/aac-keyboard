@@ -580,8 +580,8 @@ body {
 
 /* Small row (last row with arrows) */
 .keyboard-row-small .key-new {
-    height: 45px;
-    min-height: 45px;
+    height: 35px;
+    min-height: 35px;
     font-size: 0.85rem;
     padding: 4px;
 }
@@ -1061,7 +1061,7 @@ body {
     }
 
     .key-new {
-        min-height: 70px;
+        min-height: 50px;
         font-size: 1.1rem;
     }
 }
