@@ -776,9 +776,9 @@ body {
 }
 
 .key-modifier-swiftkey {
-    background: var(--swiftkey-accent);
+    background: rgba(0, 212, 255, 0.3);
     border: none;
-    color: #000;
+    color: var(--swiftkey-accent);
     font-size: 1.2rem;
     font-weight: 600;
     height: calc(65px * var(--keyboard-height-scale));
@@ -787,9 +787,9 @@ body {
 }
 
 .key-action-swiftkey {
-    background: var(--swiftkey-accent);
+    background: rgba(0, 212, 255, 0.3);
     border: none;
-    color: #000;
+    color: var(--swiftkey-accent);
     font-size: 1.1rem;
     font-weight: 600;
     height: calc(65px * var(--keyboard-height-scale));
