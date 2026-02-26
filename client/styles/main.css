@@ -20,6 +20,10 @@ body {
 
 :root {
     --keyboard-max-width: 14cm;  /* Default keyboard width, dynamically adjustable */
+    --swiftkey-bg: #1a2332;
+    --swiftkey-accent: #00d4ff;
+    --swiftkey-text: #e0e0e0;
+    --swiftkey-key-bg: rgba(255, 255, 255, 0.05);
 }
 
 #app {
@@ -379,6 +383,11 @@ body {
     display: flex;
 }
 
+/* Make phrases full width in SwiftKey mode */
+.predictions-section-new.swiftkey-mode .phrases-container {
+    flex: 1;
+}
+
 .words-container {
     flex: 4;
     display: flex;
@@ -462,6 +471,59 @@ body {
         opacity: 0.85;
         box-shadow: 0 0 15px rgba(139, 92, 246, 0.6);
     }
+}
+
+/* SwiftKey Integrated Prediction Rows (part of keyboard) */
+.prediction-top-row-swiftkey,
+.prediction-word-row-swiftkey {
+    display: flex;
+    gap: 6px;
+    justify-content: stretch;
+}
+
+.word-btn-swiftkey {
+    background: var(--swiftkey-accent);
+    border: none;
+    color: #000;
+    font-size: 0.95rem;
+    font-weight: 600;
+    height: 45px;
+    flex: 1;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.prediction-action-btn {
+    background: var(--swiftkey-accent);
+    border: none;
+    color: #000;
+    font-size: 0.95rem;
+    font-weight: 600;
+    height: 45px;
+    flex: 1;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.word-btn-swiftkey:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.word-btn-swiftkey:active:not(:disabled) {
+    transform: scale(0.95);
+    background: #00bfe6;
+}
+
+.word-btn-swiftkey.streaming {
+    animation: pulse-glow 1.5s ease-in-out infinite;
+}
+
+.prediction-action-btn:active {
+    transform: scale(0.95);
+    background: #00bfe6;
 }
 
 /* Letter Predictions */
@@ -677,6 +739,104 @@ body {
 
 .number-keyboard.active {
     display: flex;
+}
+
+/* SwiftKey Keyboard Layout */
+.keyboard-swiftkey {
+    background: var(--swiftkey-bg);
+    padding: 8px;
+    border-radius: 8px;
+    gap: 6px;
+}
+
+.key-letter-swiftkey {
+    background: transparent;
+    border: none;
+    color: var(--swiftkey-text);
+    font-size: 1.3rem;
+    font-weight: 500;
+    height: 65px;
+    flex: 1;
+    border-radius: 6px;
+    transition: background 0.15s;
+}
+
+.key-letter-swiftkey:active {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(0.95);
+}
+
+.key-modifier-swiftkey {
+    background: var(--swiftkey-accent);
+    border: none;
+    color: #000;
+    font-size: 1.2rem;
+    font-weight: 600;
+    height: 65px;
+    flex: 1.2;
+    border-radius: 6px;
+}
+
+.key-action-swiftkey {
+    background: var(--swiftkey-accent);
+    border: none;
+    color: #000;
+    font-size: 1.1rem;
+    font-weight: 600;
+    height: 65px;
+    flex: 1.2;
+    border-radius: 6px;
+}
+
+.key-space-swiftkey {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--swiftkey-text);
+    flex: 3;
+}
+
+.key-space-wide {
+    flex: 3.5;
+}
+
+.key-arrow-swiftkey {
+    background: rgba(0, 212, 255, 0.3);
+    border: none;
+    color: var(--swiftkey-accent);
+    font-size: 1.4rem;
+    height: 65px;
+    flex: 1;
+    border-radius: 6px;
+}
+
+.key-phrase-swiftkey {
+    background: rgba(0, 150, 255, 0.4);
+    border: none;
+    color: var(--swiftkey-text);
+    font-size: 0.9rem;
+    height: 65px;
+    flex: 1.5;
+    border-radius: 6px;
+}
+
+.key-punct-swiftkey {
+    background: rgba(255, 255, 255, 0.08);
+    border: none;
+    color: var(--swiftkey-text);
+    font-size: 1.2rem;
+    height: 65px;
+    flex: 1;
+    border-radius: 6px;
+}
+
+/* Row 3 offset (A-L alignment) */
+.swiftkey-offset {
+    margin-left: 5%;
+}
+
+/* SwiftKey shift active state */
+#shift-key-swiftkey.active {
+    background: #00ff88;
+    color: #000;
 }
 
 /* Context Section */

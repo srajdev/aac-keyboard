@@ -63,6 +63,17 @@ const App = {
         this.updateModelSelectorUI();
         this.updateTtsModeUI();
 
+        // Apply saved keyboard layout
+        if (saved.keyboardLayout === 'swiftkey') {
+            Keyboard.switchToSwiftKey();
+        }
+
+        // Update layout selector UI
+        const layoutSelector = document.getElementById('layout-selector');
+        if (layoutSelector) {
+            layoutSelector.value = saved.keyboardLayout || 'traditional';
+        }
+
         // Wire up component callbacks
         this.setupCallbacks();
 
@@ -131,6 +142,42 @@ const App = {
                 const prefs = StorageService.getPreferences();
                 prefs.ttsMode = this.ttsMode;
                 StorageService.savePreferences(prefs);
+            });
+        }
+
+        // Layout selector (in Settings Modal)
+        const layoutSelector = document.getElementById('layout-selector');
+        if (layoutSelector) {
+            layoutSelector.addEventListener('change', (e) => {
+                const layout = e.target.value;
+
+                // Switch keyboard layout
+                if (layout === 'swiftkey') {
+                    Keyboard.switchToSwiftKey();
+                } else {
+                    Keyboard.switchToTraditional();
+                }
+
+                // Save preference
+                const prefs = StorageService.getPreferences();
+                prefs.keyboardLayout = layout;
+                StorageService.savePreferences(prefs);
+            });
+        }
+
+        // SwiftKey Delete button
+        const swiftkeyDeleteBtn = document.getElementById('swiftkey-delete');
+        if (swiftkeyDeleteBtn) {
+            swiftkeyDeleteBtn.addEventListener('click', () => {
+                MessageArea.clear();
+            });
+        }
+
+        // SwiftKey Speak button
+        const swiftkeySpeakBtn = document.getElementById('swiftkey-speak');
+        if (swiftkeySpeakBtn) {
+            swiftkeySpeakBtn.addEventListener('click', () => {
+                SpeakButton.speak();
             });
         }
 

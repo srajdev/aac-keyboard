@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <title>Viraj Keyboard</title>
-    <link rel="stylesheet" href="/static/styles/main.css?v=3">
+    <link rel="stylesheet" href="/static/styles/main.css?v=8">
 </head>
 <body>
     <!-- Password Gate -->
@@ -54,7 +54,7 @@
 
         <!-- Predictions Section (side-by-side: phrases left 60%, words right 40%) -->
         <section class="predictions-section-new">
-            <!-- Phrase Predictions (Left 60%) -->
+            <!-- Phrase Predictions (Left 60%) - SHARED by both layouts -->
             <div class="phrases-container">
                 <div id="phrase-predictions" class="phrase-predictions-new">
                     <button class="phrase-btn-new" data-index="0">Loading...</button>
@@ -63,8 +63,8 @@
                 </div>
             </div>
 
-            <!-- Word Predictions (Right 40%, 2x3 grid) -->
-            <div class="words-container">
+            <!-- Word Predictions (Right 40%) - Traditional Layout -->
+            <div class="words-container words-traditional">
                 <div id="word-predictions" class="word-predictions-new">
                     <button class="word-btn-new" data-index="0">...</button>
                     <button class="word-btn-new" data-index="1">...</button>
@@ -166,6 +166,99 @@
                     <button class="key-new key-modifier" data-key="abc">ABC</button>
                 </div>
             </div>
+
+            <!-- SwiftKey QWERTY Keyboard (hidden by default) -->
+            <div id="keyboard-swiftkey" class="keyboard-new keyboard-swiftkey" style="display: none;">
+                <!-- Row 1: Top prediction row (Delete | WP 4 | WP 5 | Speak) -->
+                <div class="keyboard-row-new prediction-top-row-swiftkey">
+                    <button class="key-new prediction-action-btn" id="swiftkey-delete" aria-label="Clear message">Delete</button>
+                    <button class="key-new word-btn-swiftkey" data-index="3">...</button>
+                    <button class="key-new word-btn-swiftkey" data-index="4">...</button>
+                    <button class="key-new prediction-action-btn" id="swiftkey-speak" aria-label="Speak message">Speak</button>
+                </div>
+
+                <!-- Row 2: Word predictions (Word 1 | Word 2 | Word 3) -->
+                <div class="keyboard-row-new prediction-word-row-swiftkey">
+                    <button class="key-new word-btn-swiftkey" data-index="0">...</button>
+                    <button class="key-new word-btn-swiftkey" data-index="1">...</button>
+                    <button class="key-new word-btn-swiftkey" data-index="2">...</button>
+                </div>
+
+                <!-- Row 3: Numbers 1-0 -->
+                <div class="keyboard-row-new">
+                    <button class="key-new key-letter-swiftkey" data-key="1">1</button>
+                    <button class="key-new key-letter-swiftkey" data-key="2">2</button>
+                    <button class="key-new key-letter-swiftkey" data-key="3">3</button>
+                    <button class="key-new key-letter-swiftkey" data-key="4">4</button>
+                    <button class="key-new key-letter-swiftkey" data-key="5">5</button>
+                    <button class="key-new key-letter-swiftkey" data-key="6">6</button>
+                    <button class="key-new key-letter-swiftkey" data-key="7">7</button>
+                    <button class="key-new key-letter-swiftkey" data-key="8">8</button>
+                    <button class="key-new key-letter-swiftkey" data-key="9">9</button>
+                    <button class="key-new key-letter-swiftkey" data-key="0">0</button>
+                </div>
+
+                <!-- Row 2: Q-P -->
+                <div class="keyboard-row-new">
+                    <button class="key-new key-letter-swiftkey" data-key="q">Q</button>
+                    <button class="key-new key-letter-swiftkey" data-key="w">W</button>
+                    <button class="key-new key-letter-swiftkey" data-key="e">E</button>
+                    <button class="key-new key-letter-swiftkey" data-key="r">R</button>
+                    <button class="key-new key-letter-swiftkey" data-key="t">T</button>
+                    <button class="key-new key-letter-swiftkey" data-key="y">Y</button>
+                    <button class="key-new key-letter-swiftkey" data-key="u">U</button>
+                    <button class="key-new key-letter-swiftkey" data-key="i">I</button>
+                    <button class="key-new key-letter-swiftkey" data-key="o">O</button>
+                    <button class="key-new key-letter-swiftkey" data-key="p">P</button>
+                </div>
+
+                <!-- Row 3: A-L (offset to align A with W) -->
+                <div class="keyboard-row-new swiftkey-offset">
+                    <button class="key-new key-letter-swiftkey" data-key="a">A</button>
+                    <button class="key-new key-letter-swiftkey" data-key="s">S</button>
+                    <button class="key-new key-letter-swiftkey" data-key="d">D</button>
+                    <button class="key-new key-letter-swiftkey" data-key="f">F</button>
+                    <button class="key-new key-letter-swiftkey" data-key="g">G</button>
+                    <button class="key-new key-letter-swiftkey" data-key="h">H</button>
+                    <button class="key-new key-letter-swiftkey" data-key="j">J</button>
+                    <button class="key-new key-letter-swiftkey" data-key="k">K</button>
+                    <button class="key-new key-letter-swiftkey" data-key="l">L</button>
+                </div>
+
+                <!-- Row 4: SHIFT Z-M BACKSPACE -->
+                <div class="keyboard-row-new">
+                    <button class="key-new key-modifier-swiftkey" id="shift-key-swiftkey" data-key="shift">⇧</button>
+                    <button class="key-new key-letter-swiftkey" data-key="z">Z</button>
+                    <button class="key-new key-letter-swiftkey" data-key="x">X</button>
+                    <button class="key-new key-letter-swiftkey" data-key="c">C</button>
+                    <button class="key-new key-letter-swiftkey" data-key="v">V</button>
+                    <button class="key-new key-letter-swiftkey" data-key="b">B</button>
+                    <button class="key-new key-letter-swiftkey" data-key="n">N</button>
+                    <button class="key-new key-letter-swiftkey" data-key="m">M</button>
+                    <button class="key-new key-action-swiftkey" data-key="backspace">⌫</button>
+                </div>
+
+                <!-- Row 5: 123 , ? SPACE DW Emoji ENTER -->
+                <div class="keyboard-row-new">
+                    <button class="key-new key-modifier-swiftkey" data-key="123">123</button>
+                    <button class="key-new key-letter-swiftkey" data-key=",",</button>
+                    <button class="key-new key-letter-swiftkey" data-key="?">?</button>
+                    <button class="key-new key-space-swiftkey key-space-wide" data-key="space">SPACE</button>
+                    <button class="key-new key-action-swiftkey" data-key="del-word">DW</button>
+                    <button class="key-new key-punct-swiftkey" data-key="punct-menu">😊</button>
+                    <button class="key-new key-action-swiftkey" data-key="enter">↵</button>
+                </div>
+
+                <!-- Row 6: Sorry | Punct | Arrows -->
+                <div class="keyboard-row-new">
+                    <button class="key-new key-phrase-swiftkey" data-key="phrase-goof">Sorry</button>
+                    <button class="key-new key-punct-swiftkey" data-key="punct-menu">•</button>
+                    <button class="key-new key-arrow-swiftkey" data-key="arrow-up">↑</button>
+                    <button class="key-new key-arrow-swiftkey" data-key="arrow-down">↓</button>
+                    <button class="key-new key-arrow-swiftkey" data-key="arrow-left">←</button>
+                    <button class="key-new key-arrow-swiftkey" data-key="arrow-right">→</button>
+                </div>
+            </div>
         </section>
 
         <!-- Context Panel (Collapsible) -->
@@ -233,6 +326,17 @@
             </div>
 
             <div class="settings-section">
+                <h3>Keyboard Layout</h3>
+                <div class="setting-row">
+                    <label for="layout-selector" class="model-label">Layout:</label>
+                    <select id="layout-selector" class="model-selector">
+                        <option value="traditional">Traditional (6-row)</option>
+                        <option value="swiftkey">SwiftKey (QWERTY)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="settings-section">
                 <h3>Speech</h3>
                 <div class="setting-row">
                     <label for="tts-mode-selector" class="model-label">Auto-speak:</label>
@@ -277,19 +381,19 @@
         </div>
     </div>
 
-    <script src="/static/services/auth.js?v=3"></script>
-    <script src="/static/services/websocket.js?v=3"></script>
-    <script src="/static/services/api.js?v=3"></script>
-    <script src="/static/services/speech.js?v=3"></script>
-    <script src="/static/services/storage.js?v=3"></script>
-    <script src="/static/components/MessageArea.js?v=3"></script>
-    <script src="/static/components/Keyboard.js?v=3"></script>
-    <script src="/static/components/Predictions.js?v=3"></script>
-    <script src="/static/components/SpeakButton.js?v=3"></script>
-    <script src="/static/components/ListenToggle.js?v=3"></script>
-    <script src="/static/components/KeyboardWidthControl.js?v=3"></script>
-    <script src="/static/components/PredictionWidthControl.js?v=3"></script>
-    <script src="/static/components/SettingsModal.js?v=3"></script>
-    <script src="/static/app.js?v=3"></script>
+    <script src="/static/services/auth.js?v=8"></script>
+    <script src="/static/services/websocket.js?v=8"></script>
+    <script src="/static/services/api.js?v=8"></script>
+    <script src="/static/services/speech.js?v=8"></script>
+    <script src="/static/services/storage.js?v=8"></script>
+    <script src="/static/components/MessageArea.js?v=8"></script>
+    <script src="/static/components/Keyboard.js?v=8"></script>
+    <script src="/static/components/Predictions.js?v=8"></script>
+    <script src="/static/components/SpeakButton.js?v=8"></script>
+    <script src="/static/components/ListenToggle.js?v=8"></script>
+    <script src="/static/components/KeyboardWidthControl.js?v=8"></script>
+    <script src="/static/components/PredictionWidthControl.js?v=8"></script>
+    <script src="/static/components/SettingsModal.js?v=8"></script>
+    <script src="/static/app.js?v=8"></script>
 </body>
 </html>
