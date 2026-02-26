@@ -156,6 +156,12 @@ const Keyboard = {
                 this.onKeyPress('.', 'letter', this.state);
                 break;
 
+            // Enter key - placeholder (disabled for now)
+            case 'enter':
+                // TODO: Implement enter key functionality
+                // For now, do nothing
+                break;
+
             // Letters and numbers
             default:
                 this.handleLetterOrNumber(keyValue);
