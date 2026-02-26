@@ -351,7 +351,7 @@ body {
 
 .clear-btn-new {
     padding: 16px 20px;
-    background: linear-gradient(135deg, #f72585, #b5179e);
+    background: linear-gradient(135deg, #06b6d4, #00d4ff);
     border: none;
     border-radius: 12px;
     color: #ffffff;
@@ -364,7 +364,7 @@ body {
 
 .clear-btn-new:active {
     transform: scale(0.98);
-    box-shadow: 0 0 20px rgba(247, 37, 133, 0.5);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
 }
 
 /* Predictions Section (side-by-side: phrases 60%, words 40%) */
