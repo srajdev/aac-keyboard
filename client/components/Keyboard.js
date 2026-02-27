@@ -198,8 +198,6 @@ const Keyboard = {
     },
 
     switchToNumbers() {
-        this.state.mode = 'numbers';
-
         if (this.state.layout === 'swiftkey') {
             // SwiftKey already has numbers on row 1, no-op
             return;
@@ -208,30 +206,37 @@ const Keyboard = {
         // Toggle number row visibility
         const numberRow = document.getElementById('number-row');
         if (numberRow) {
-            if (numberRow.style.display === 'none') {
+            const isHidden = numberRow.style.display === 'none' || !numberRow.style.display;
+
+            if (isHidden) {
+                // Show number row
                 numberRow.style.display = 'flex';
-                // Update button text to indicate toggle state
+                this.state.mode = 'numbers';
+                // Add active class to show it's "on"
                 if (this.numKey) {
-                    this.numKey.textContent = 'ABC';
+                    this.numKey.classList.add('active');
                 }
             } else {
+                // Hide number row
                 numberRow.style.display = 'none';
+                this.state.mode = 'letters';
+                // Remove active class to show it's "off"
                 if (this.numKey) {
-                    this.numKey.textContent = '123';
+                    this.numKey.classList.remove('active');
                 }
             }
         }
     },
 
     switchToLetters() {
-        // This is no longer needed with the toggle, but keep for compatibility
+        // Hide number row when switching back to letters
         this.state.mode = 'letters';
         const numberRow = document.getElementById('number-row');
         if (numberRow) {
             numberRow.style.display = 'none';
         }
         if (this.numKey) {
-            this.numKey.textContent = '123';
+            this.numKey.classList.remove('active');
         }
     },
 
