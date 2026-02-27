@@ -5,7 +5,6 @@ const ListenToggle = {
     quickButton: null,
     contextText: null,
     contextSection: null,
-    contextToggle: null,
     isListening: false,
     conversationContext: '',
     explicitContext: '',
@@ -16,7 +15,6 @@ const ListenToggle = {
         this.quickButton = document.getElementById('quick-listen-toggle');
         this.contextText = document.getElementById('context-text');
         this.contextSection = document.getElementById('context-section');
-        this.contextToggle = document.getElementById('context-toggle');
 
         // Toggle listening (settings button)
         if (this.button) {
@@ -29,13 +27,6 @@ const ListenToggle = {
         if (this.quickButton) {
             this.quickButton.addEventListener('click', () => {
                 this.toggle();
-            });
-        }
-
-        // Toggle context panel visibility
-        if (this.contextToggle) {
-            this.contextToggle.addEventListener('click', () => {
-                this.contextSection.classList.toggle('collapsed');
             });
         }
 
@@ -78,10 +69,6 @@ const ListenToggle = {
             if (this.quickButton) {
                 this.quickButton.classList.add('active', 'listening');
                 this.quickButton.querySelector('.settings-text').textContent = 'Listen: ON';
-            }
-            // Expand context panel
-            if (this.contextSection) {
-                this.contextSection.classList.remove('collapsed');
             }
         }
     },
