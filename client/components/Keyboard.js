@@ -226,10 +226,8 @@ const Keyboard = {
                 char = char.toUpperCase();
             }
 
-            // Reset shift after letter press
-            if (this.state.shift) {
-                this.resetShift();
-            }
+            // SHIFT now works like CAPS LOCK - stays on until manually toggled off
+            // No auto-reset after letter press
         }
 
         this.onKeyPress(char, 'letter', this.state);
