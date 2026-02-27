@@ -382,6 +382,8 @@ const App = {
         MessageArea.onMessageChange = (message, textChanged) => {
             if (textChanged) {
                 this.debouncedPredictions(message);
+                // Update keyboard display to reflect auto-capitalization state
+                Keyboard.updateKeyDisplay();
             }
         };
 

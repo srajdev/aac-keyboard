@@ -102,6 +102,8 @@ const Keyboard = {
         // Use setTimeout to ensure DOM is fully rendered
         setTimeout(() => {
             this.syncNumberRowState();
+            // Also sync key display (letter case) on init
+            this.updateKeyDisplay();
         }, 0);
     },
 
@@ -331,12 +333,16 @@ const Keyboard = {
             }
         }
 
-        // Letter keys toggle between uppercase and lowercase based on shift state
+        // Check if auto-capitalization will happen (first letter or after punctuation)
+        const willAutoCapitalize = window.MessageArea ? window.MessageArea.shouldCapitalize() : false;
+        const shouldShowUppercase = this.state.shift || willAutoCapitalize;
+
+        // Letter keys toggle between uppercase and lowercase based on shift state or auto-cap
         this.letterKeys.forEach(key => {
             const keyValue = key.dataset.key;
             if (/^[a-z]$/.test(keyValue)) {
-                // Show uppercase when shift is active, lowercase otherwise
-                key.textContent = this.state.shift ? keyValue.toUpperCase() : keyValue.toLowerCase();
+                // Show uppercase when shift is active OR auto-capitalization will happen
+                key.textContent = shouldShowUppercase ? keyValue.toUpperCase() : keyValue.toLowerCase();
             }
         });
 
@@ -345,8 +351,8 @@ const Keyboard = {
         swiftkeyLetterKeys.forEach(key => {
             const keyValue = key.dataset.key;
             if (/^[a-z]$/.test(keyValue)) {
-                // Show uppercase when shift is active, lowercase otherwise
-                key.textContent = this.state.shift ? keyValue.toUpperCase() : keyValue.toLowerCase();
+                // Show uppercase when shift is active OR auto-capitalization will happen
+                key.textContent = shouldShowUppercase ? keyValue.toUpperCase() : keyValue.toLowerCase();
             }
         });
     },
