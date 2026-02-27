@@ -5,6 +5,7 @@ const StorageService = {
         MESSAGE_HISTORY: 'viraj_message_history',
         PREFERENCES: 'viraj_preferences',
         FREQUENT_PHRASES: 'viraj_frequent_phrases',
+        USER_PROFILE: 'viraj_user_profile',
     },
 
     // Message History
@@ -134,6 +135,53 @@ const StorageService = {
             localStorage.setItem('viraj_keyboard_height', scale);
         } catch (e) {
             console.error('Failed to save keyboard height:', e);
+        }
+    },
+
+    // User Profile
+    getUserProfile() {
+        try {
+            const profile = localStorage.getItem(this.KEYS.USER_PROFILE);
+            return profile
+                ? JSON.parse(profile)
+                : {
+                      name: '',
+                      age: '',
+                      interests: [],
+                      topics: [],
+                      lastUpdated: null,
+                  };
+        } catch (e) {
+            console.error('Failed to load user profile:', e);
+            return {
+                name: '',
+                age: '',
+                interests: [],
+                topics: [],
+                lastUpdated: null,
+            };
+        }
+    },
+
+    saveUserProfile(profile) {
+        try {
+            // Validate profile structure
+            const validProfile = {
+                name: (profile.name || '').trim().slice(0, 100),
+                age: (profile.age || '').trim().slice(0, 20),
+                interests: Array.isArray(profile.interests)
+                    ? profile.interests.map((i) => i.trim()).filter(Boolean).slice(0, 20)
+                    : [],
+                topics: Array.isArray(profile.topics)
+                    ? profile.topics.map((t) => t.trim()).filter(Boolean).slice(0, 20)
+                    : [],
+                lastUpdated: Date.now(),
+            };
+            localStorage.setItem(this.KEYS.USER_PROFILE, JSON.stringify(validProfile));
+            return validProfile;
+        } catch (e) {
+            console.error('Failed to save user profile:', e);
+            throw e;
         }
     },
 };

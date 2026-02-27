@@ -28,6 +28,10 @@
                     <span class="settings-icon">⚙️</span>
                     <span class="settings-text">Settings</span>
                 </button>
+                <button id="profile-btn" class="settings-btn" aria-label="Open profile">
+                    <span class="settings-icon">👤</span>
+                    <span class="settings-text">Profile</span>
+                </button>
                 <button id="quick-listen-toggle" class="settings-btn" aria-label="Toggle listening">
                     <span class="settings-icon">🎤</span>
                     <span class="settings-text">Listen: OFF</span>
@@ -309,6 +313,49 @@
         </div>
     </div>
 
+    <!-- Profile Modal -->
+    <div id="profile-modal" class="modal" style="display: none;">
+        <div class="modal-overlay"></div>
+        <div class="modal-content settings-panel">
+            <h2 class="settings-title">User Profile</h2>
+
+            <div class="settings-section">
+                <h3>Basic Information</h3>
+                <div class="setting-row">
+                    <label for="profile-name" class="model-label">Name:</label>
+                    <input type="text" id="profile-name" class="profile-input" placeholder="Your name" maxlength="100">
+                </div>
+                <div class="setting-row">
+                    <label for="profile-age" class="model-label">Age:</label>
+                    <input type="text" id="profile-age" class="profile-input" placeholder="Your age (optional)" maxlength="20">
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3>Interests</h3>
+                <p class="profile-help">What do you enjoy? (e.g., Basketball, Movies, Video games)</p>
+                <div class="tag-input-container">
+                    <div id="interests-tags" class="tags-display"></div>
+                    <input type="text" id="interests-input" class="tag-input" placeholder="Type and press Enter">
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3>Frequent Topics</h3>
+                <p class="profile-help">What do you often talk about? (e.g., Food, Weekend plans, Help requests)</p>
+                <div class="tag-input-container">
+                    <div id="topics-tags" class="tags-display"></div>
+                    <input type="text" id="topics-input" class="tag-input" placeholder="Type and press Enter">
+                </div>
+            </div>
+
+            <div class="profile-actions">
+                <button id="profile-save" class="settings-close-btn">Save Profile</button>
+                <button id="profile-cancel" class="settings-close-btn profile-cancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Settings Modal -->
     <div id="settings-modal" class="modal" style="display: none;">
         <div class="modal-overlay"></div>
@@ -433,6 +480,7 @@
     <script src="/static/components/KeyboardHeightControl.js?v=20"></script>
     <script src="/static/components/PredictionWidthControl.js?v=20"></script>
     <script src="/static/components/SettingsModal.js?v=20"></script>
+    <script src="/static/components/ProfileModal.js?v=20"></script>
     <script src="/static/app.js?v=20"></script>
 </body>
 </html>

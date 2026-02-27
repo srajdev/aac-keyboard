@@ -1,3 +1,32 @@
+def format_user_profile(profile: dict) -> str:
+    """Format user profile into a string for system prompt."""
+    if not profile:
+        return ""
+
+    sections = []
+    if profile.get("name"):
+        sections.append(f"USER NAME: {profile['name']}")
+    if profile.get("age"):
+        sections.append(f"AGE: {profile['age']}")
+    if profile.get("interests") and len(profile["interests"]) > 0:
+        sections.append(f"INTERESTS: {', '.join(profile['interests'])}")
+    if profile.get("topics") and len(profile["topics"]) > 0:
+        sections.append(f"FREQUENT TOPICS: {', '.join(profile['topics'])}")
+
+    if not sections:
+        return ""
+
+    return "\n\nUSER PROFILE:\n" + "\n".join(sections)
+
+
+def build_system_prompt_with_profile(base_prompt: str, profile: dict) -> str:
+    """Build system prompt with user profile appended."""
+    profile_section = format_user_profile(profile)
+    if profile_section:
+        return base_prompt + profile_section
+    return base_prompt
+
+
 # Restructured for Claude prompt caching
 # Static system prompt with rules will be cached for 5 minutes
 SYSTEM_PROMPT_WITH_RULES = """You are an assistive communication AI helping Viraj communicate faster.

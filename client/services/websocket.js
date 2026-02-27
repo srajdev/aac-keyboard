@@ -166,7 +166,7 @@ const WebSocketService = {
      * @param {string} model - Model to use (claude/gemini/gpt)
      * @returns {Promise<Array>} - Final prediction results
      */
-    async sendRequestWithStreaming(type, partialInput, conversationContext, onChunk, model = 'claude') {
+    async sendRequestWithStreaming(type, partialInput, conversationContext, onChunk, model = 'claude', userProfile = {}) {
         if (!this.isConnected()) {
             throw new Error('WebSocket not connected');
         }
@@ -194,7 +194,8 @@ const WebSocketService = {
                     requestId,
                     partialInput,
                     conversationContext,
-                    model
+                    model,
+                    userProfile
                 };
 
                 this.ws.send(JSON.stringify(message));

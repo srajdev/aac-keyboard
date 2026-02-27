@@ -82,6 +82,7 @@ class PredictionRequest(BaseModel):
     partialInput: str = ""
     conversationContext: str = ""
     model: str = "claude"  # Options: "claude", "gemini", "gpt" (GPT-5 Mini)
+    userProfile: dict = {}  # User profile (name, age, interests, topics)
 
 
 class PredictionResponse(BaseModel):
@@ -106,21 +107,21 @@ def predict(request: PredictionRequest):
 
         if request.model == "gemini":
             predictions = generate_predictions_gemini(
-                request.partialInput, request.conversationContext
+                request.partialInput, request.conversationContext, request.userProfile
             )
         elif request.model == "gpt" or request.model == "gpt-5-mini":
             predictions = generate_predictions_gpt(
-                request.partialInput, request.conversationContext
+                request.partialInput, request.conversationContext, request.userProfile
             )
         elif request.model == "claude":
             predictions = generate_predictions_claude(
-                request.partialInput, request.conversationContext
+                request.partialInput, request.conversationContext, request.userProfile
             )
         else:
             # Default to Claude if unknown model
             print(f"Unknown model '{request.model}', defaulting to Claude")
             predictions = generate_predictions_claude(
-                request.partialInput, request.conversationContext
+                request.partialInput, request.conversationContext, request.userProfile
             )
 
         duration_ms = (time.time() - start_time) * 1000
@@ -138,7 +139,7 @@ def predict(request: PredictionRequest):
             try:
                 start_time = time.time()
                 predictions = generate_predictions_claude(
-                    request.partialInput, request.conversationContext
+                    request.partialInput, request.conversationContext, request.userProfile
                 )
                 duration_ms = (time.time() - start_time) * 1000
                 print(f"[Backend] Prediction generation (claude-fallback): {duration_ms:.0f}ms")
@@ -160,7 +161,7 @@ def predict_phrases(request: PredictionRequest):
 
         # Only Claude supports split predictions currently
         phrases = generate_phrase_predictions(
-            request.partialInput, request.conversationContext
+            request.partialInput, request.conversationContext, request.userProfile
         )
 
         duration_ms = (time.time() - start_time) * 1000
@@ -180,7 +181,7 @@ def predict_words(request: PredictionRequest):
 
         # Only Claude supports split predictions currently
         words = generate_word_predictions(
-            request.partialInput, request.conversationContext
+            request.partialInput, request.conversationContext, request.userProfile
         )
 
         duration_ms = (time.time() - start_time) * 1000
@@ -216,6 +217,7 @@ async def handle_prediction_request(websocket: WebSocket, message: dict, active_
         partial_input = message.get("partialInput", "")
         conversation_context = message.get("conversationContext", "")
         model = message.get("model", "claude")
+        user_profile = message.get("userProfile", {})
 
         start_time = time.time()
         predictions = []
@@ -229,7 +231,7 @@ async def handle_prediction_request(websocket: WebSocket, message: dict, active_
             raise ValueError(f"Unknown request type: {request_type}")
 
         # Create sync generator and convert to async
-        sync_gen = stream_fn(partial_input, conversation_context)
+        sync_gen = stream_fn(partial_input, conversation_context, user_profile)
 
         # Stream predictions as they arrive
         async for chunk in async_generator_from_sync(sync_gen):

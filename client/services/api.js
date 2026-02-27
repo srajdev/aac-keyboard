@@ -11,12 +11,27 @@ class PredictionCache {
         this.ttlMs = ttlMs;
     }
 
-    makeKey(partialInput, conversationContext) {
-        return `${partialInput}|${conversationContext}`;
+    makeKey(partialInput, conversationContext, profileHash = '') {
+        return `${partialInput}|${conversationContext}|${profileHash}`;
     }
 
-    get(partialInput, conversationContext) {
-        const key = this.makeKey(partialInput, conversationContext);
+    // Helper to generate profile hash for cache key
+    _hashProfile(profile) {
+        if (!profile || Object.keys(profile).length === 0) {
+            return '';
+        }
+        const str = JSON.stringify(profile);
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32bit integer
+        }
+        return hash.toString(36);
+    }
+
+    get(partialInput, conversationContext, profileHash = '') {
+        const key = this.makeKey(partialInput, conversationContext, profileHash);
         const entry = this.cache.get(key);
 
         if (!entry) {
@@ -36,8 +51,8 @@ class PredictionCache {
         return entry.data;
     }
 
-    set(partialInput, conversationContext, data) {
-        const key = this.makeKey(partialInput, conversationContext);
+    set(partialInput, conversationContext, data, profileHash = '') {
+        const key = this.makeKey(partialInput, conversationContext, profileHash);
 
         // Evict oldest if at capacity
         if (this.cache.size >= this.maxSize) {
@@ -270,9 +285,13 @@ const ApiService = {
         const requestStart = performance.now();
 
         try {
-            // Check cache first (using phrase-specific key)
+            // Get user profile
+            const userProfile = StorageService.getUserProfile();
+            const profileHash = this.cache._hashProfile(userProfile);
+
+            // Check cache first (using phrase-specific key with profile hash)
             const cacheKey = `phrases|${partialInput}|${conversationContext}`;
-            const cached = this.cache.get(cacheKey, '');
+            const cached = this.cache.get(cacheKey, '', profileHash);
             if (cached && cached.phrases) {
                 const totalDuration = performance.now() - requestStart;
 
@@ -316,12 +335,13 @@ const ApiService = {
                                 }
                             }
                         },
-                        model
+                        model,
+                        userProfile
                     );
                     const duration = performance.now() - startTime;
 
                     // Cache and track performance
-                    this.cache.set(cacheKey, '', { phrases });
+                    this.cache.set(cacheKey, '', { phrases }, profileHash);
                     this.performanceTracker.recordMetric({
                         timestamp: Date.now(),
                         model: `${model}-phrases`,
@@ -342,7 +362,7 @@ const ApiService = {
             }
 
             // HTTP fallback
-            return await this._fetchPhrasesHTTP(partialInput, conversationContext, signal, model, cacheKey, requestStart);
+            return await this._fetchPhrasesHTTP(partialInput, conversationContext, signal, model, cacheKey, requestStart, userProfile, profileHash);
         } catch (error) {
             if (error.name === 'AbortError') {
                 throw error;
@@ -358,7 +378,7 @@ const ApiService = {
         }
     },
 
-    async _fetchPhrasesHTTP(partialInput, conversationContext, signal, model, cacheKey, requestStart) {
+    async _fetchPhrasesHTTP(partialInput, conversationContext, signal, model, cacheKey, requestStart, userProfile = {}, profileHash = '') {
         // Cache miss - make HTTP API call
         const networkStart = performance.now();
         const response = await fetch(`${this.baseUrl}/api/predict/phrases`, {
@@ -370,6 +390,7 @@ const ApiService = {
                 partialInput: partialInput || '',
                 conversationContext: conversationContext || '',
                 model: model,
+                userProfile: userProfile,
             }),
             signal: signal,
         });
@@ -385,7 +406,7 @@ const ApiService = {
         const totalDuration = parseEnd - requestStart;
 
         // Store in cache
-        this.cache.set(cacheKey, '', { phrases: data.phrases });
+        this.cache.set(cacheKey, '', { phrases: data.phrases }, profileHash);
 
         // Record metrics
         this.performanceTracker.recordMetric({
@@ -407,9 +428,13 @@ const ApiService = {
         const requestStart = performance.now();
 
         try {
-            // Check cache first (using word-specific key)
+            // Get user profile
+            const userProfile = StorageService.getUserProfile();
+            const profileHash = this.cache._hashProfile(userProfile);
+
+            // Check cache first (using word-specific key with profile hash)
             const cacheKey = `words|${partialInput}|${conversationContext}`;
-            const cached = this.cache.get(cacheKey, '');
+            const cached = this.cache.get(cacheKey, '', profileHash);
             if (cached && cached.words) {
                 const totalDuration = performance.now() - requestStart;
 
@@ -453,12 +478,13 @@ const ApiService = {
                                 }
                             }
                         },
-                        model
+                        model,
+                        userProfile
                     );
                     const duration = performance.now() - startTime;
 
                     // Cache and track performance
-                    this.cache.set(cacheKey, '', { words });
+                    this.cache.set(cacheKey, '', { words }, profileHash);
                     this.performanceTracker.recordMetric({
                         timestamp: Date.now(),
                         model: `${model}-words`,
@@ -479,7 +505,7 @@ const ApiService = {
             }
 
             // HTTP fallback
-            return await this._fetchWordsHTTP(partialInput, conversationContext, signal, model, cacheKey, requestStart);
+            return await this._fetchWordsHTTP(partialInput, conversationContext, signal, model, cacheKey, requestStart, userProfile, profileHash);
         } catch (error) {
             if (error.name === 'AbortError') {
                 throw error;
@@ -491,7 +517,7 @@ const ApiService = {
         }
     },
 
-    async _fetchWordsHTTP(partialInput, conversationContext, signal, model, cacheKey, requestStart) {
+    async _fetchWordsHTTP(partialInput, conversationContext, signal, model, cacheKey, requestStart, userProfile = {}, profileHash = '') {
         // Cache miss - make HTTP API call
         const networkStart = performance.now();
         const response = await fetch(`${this.baseUrl}/api/predict/words`, {
@@ -503,6 +529,7 @@ const ApiService = {
                 partialInput: partialInput || '',
                 conversationContext: conversationContext || '',
                 model: model,
+                userProfile: userProfile,
             }),
             signal: signal,
         });
@@ -518,7 +545,7 @@ const ApiService = {
         const totalDuration = parseEnd - requestStart;
 
         // Store in cache
-        this.cache.set(cacheKey, '', { words: data.words });
+        this.cache.set(cacheKey, '', { words: data.words }, profileHash);
 
         // Record metrics
         this.performanceTracker.recordMetric({

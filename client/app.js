@@ -43,6 +43,7 @@ const App = {
         KeyboardHeightControl.init();
         PredictionWidthControl.init();
         SettingsModal.init();
+        ProfileModal.init();
 
         // Get UI elements
         this.predictionsToggleBtn = document.getElementById('predictions-toggle');
@@ -410,6 +411,25 @@ const App = {
         // Context updates trigger predictions
         ListenToggle.onContextUpdate = (context) => {
             this.requestPredictions();
+        };
+
+        // Profile button
+        const profileBtn = document.getElementById('profile-btn');
+        if (profileBtn) {
+            profileBtn.addEventListener('click', () => {
+                ProfileModal.open();
+            });
+        }
+
+        // Profile changes trigger cache clear and new predictions
+        ProfileModal.onProfileChange = (profile) => {
+            console.log('Profile updated, clearing cache and refreshing predictions');
+            // Clear the last request key to force new predictions
+            this.lastPredictionRequest = '';
+            // Request new predictions
+            if (this.predictionsEnabled) {
+                this.requestPredictions();
+            }
         };
     },
 

@@ -15,6 +15,7 @@ from .prompts import (
     build_word_prompt,
     build_word_prompt_streaming,
     build_phrase_prompt_streaming,
+    build_system_prompt_with_profile,
 )
 from .performance_tracker import get_tracker
 
@@ -30,11 +31,12 @@ LOG_FILE = LOG_DIR / "predictions.jsonl"
 perf_tracker = get_tracker(LOG_DIR)
 
 
-def generate_predictions(partial_input: str, conversation_context: str) -> dict:
+def generate_predictions(partial_input: str, conversation_context: str, user_profile: dict = None) -> dict:
     """Generate predictions using Claude API with prompt caching (SYNC)."""
     # Timing: prompt build
     prompt_build_start = time.time()
     user_prompt = build_prediction_prompt(partial_input, conversation_context)
+    system_prompt = build_system_prompt_with_profile(SYSTEM_PROMPT_WITH_RULES, user_profile or {})
     prompt_build_ms = (time.time() - prompt_build_start) * 1000
 
     # Timing: API call
@@ -45,7 +47,7 @@ def generate_predictions(partial_input: str, conversation_context: str) -> dict:
         system=[
             {
                 "type": "text",
-                "text": SYSTEM_PROMPT_WITH_RULES,
+                "text": system_prompt,
                 "cache_control": {"type": "ephemeral"}
             }
         ],
@@ -122,11 +124,12 @@ def generate_predictions(partial_input: str, conversation_context: str) -> dict:
         }
 
 
-def generate_phrase_predictions(partial_input: str, conversation_context: str) -> list[str]:
+def generate_phrase_predictions(partial_input: str, conversation_context: str, user_profile: dict = None) -> list[str]:
     """Generate phrase predictions using Claude API (optimized for complete sentences)."""
     # Timing: prompt build
     prompt_build_start = time.time()
     user_prompt = build_phrase_prompt(partial_input, conversation_context)
+    system_prompt = build_system_prompt_with_profile(SYSTEM_PROMPT_PHRASES, user_profile or {})
     prompt_build_ms = (time.time() - prompt_build_start) * 1000
 
     # Timing: API call
@@ -137,7 +140,7 @@ def generate_phrase_predictions(partial_input: str, conversation_context: str) -
         system=[
             {
                 "type": "text",
-                "text": SYSTEM_PROMPT_PHRASES,
+                "text": system_prompt,
                 "cache_control": {"type": "ephemeral"}
             }
         ],
@@ -212,11 +215,12 @@ def generate_phrase_predictions(partial_input: str, conversation_context: str) -
         ]
 
 
-def generate_word_predictions(partial_input: str, conversation_context: str) -> list[str]:
+def generate_word_predictions(partial_input: str, conversation_context: str, user_profile: dict = None) -> list[str]:
     """Generate word predictions using Claude API (optimized for next-word completion)."""
     # Timing: prompt build
     prompt_build_start = time.time()
     user_prompt = build_word_prompt(partial_input, conversation_context)
+    system_prompt = build_system_prompt_with_profile(SYSTEM_PROMPT_WORDS, user_profile or {})
     prompt_build_ms = (time.time() - prompt_build_start) * 1000
 
     # Timing: API call
@@ -227,7 +231,7 @@ def generate_word_predictions(partial_input: str, conversation_context: str) -> 
         system=[
             {
                 "type": "text",
-                "text": SYSTEM_PROMPT_WORDS,
+                "text": system_prompt,
                 "cache_control": {"type": "ephemeral"}
             }
         ],
@@ -298,9 +302,10 @@ def generate_word_predictions(partial_input: str, conversation_context: str) -> 
         return ["yes", "no", "please", "thanks", "help"]
 
 
-def generate_word_predictions_stream(partial_input: str, conversation_context: str):
+def generate_word_predictions_stream(partial_input: str, conversation_context: str, user_profile: dict = None):
     """Stream word predictions as pipe-delimited chunks (generator)."""
     user_prompt = build_word_prompt_streaming(partial_input, conversation_context)
+    system_prompt = build_system_prompt_with_profile(SYSTEM_PROMPT_WORDS_STREAMING, user_profile or {})
 
     # Use Claude streaming API
     with client.messages.stream(
@@ -309,7 +314,7 @@ def generate_word_predictions_stream(partial_input: str, conversation_context: s
         system=[
             {
                 "type": "text",
-                "text": SYSTEM_PROMPT_WORDS_STREAMING,
+                "text": system_prompt,
                 "cache_control": {"type": "ephemeral"}
             }
         ],
@@ -346,9 +351,10 @@ def generate_word_predictions_stream(partial_input: str, conversation_context: s
             print(f"[Words] Skipping invalid final prediction: '{remaining}'")
 
 
-def generate_phrase_predictions_stream(partial_input: str, conversation_context: str):
+def generate_phrase_predictions_stream(partial_input: str, conversation_context: str, user_profile: dict = None):
     """Stream phrase predictions as pipe-delimited chunks (generator)."""
     user_prompt = build_phrase_prompt_streaming(partial_input, conversation_context)
+    system_prompt = build_system_prompt_with_profile(SYSTEM_PROMPT_PHRASES_STREAMING, user_profile or {})
 
     # Use Claude streaming API
     with client.messages.stream(
@@ -357,7 +363,7 @@ def generate_phrase_predictions_stream(partial_input: str, conversation_context:
         system=[
             {
                 "type": "text",
-                "text": SYSTEM_PROMPT_PHRASES_STREAMING,
+                "text": system_prompt,
                 "cache_control": {"type": "ephemeral"}
             }
         ],
