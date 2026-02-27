@@ -99,7 +99,10 @@ const Keyboard = {
         });
 
         // Initialize 123 button state based on number row visibility
-        this.syncNumberRowState();
+        // Use setTimeout to ensure DOM is fully rendered
+        setTimeout(() => {
+            this.syncNumberRowState();
+        }, 0);
     },
 
     syncNumberRowState() {
@@ -115,20 +118,29 @@ const Keyboard = {
             numButton = this.numKey;
         }
 
+        console.log('[Keyboard] syncNumberRowState - layout:', this.state.layout);
+        console.log('[Keyboard] numberRow:', numberRow);
+        console.log('[Keyboard] numButton:', numButton);
+
         if (numberRow && numButton) {
             // Check computed style, not just inline style
             const computedDisplay = window.getComputedStyle(numberRow).display;
             const isVisible = computedDisplay !== 'none';
 
-            console.log('[Keyboard] Synced number row state - display:', computedDisplay, 'visible:', isVisible);
+            console.log('[Keyboard] computedDisplay:', computedDisplay, 'isVisible:', isVisible);
 
+            // Force the button and row to match expected state
             if (isVisible) {
                 numButton.classList.add('active');
                 this.state.mode = 'numbers';
+                console.log('[Keyboard] Set button to active (numbers visible)');
             } else {
                 numButton.classList.remove('active');
                 this.state.mode = 'letters';
+                console.log('[Keyboard] Set button to inactive (numbers hidden)');
             }
+        } else {
+            console.warn('[Keyboard] Could not find number row or button for sync');
         }
     },
 
