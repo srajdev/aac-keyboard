@@ -11,6 +11,9 @@ __pycache__/
 .env.local
 .env.*.local
 
+# Client-side secrets
+client/config.js
+
 # IDE
 .idea/
 .vscode/

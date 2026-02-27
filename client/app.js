@@ -275,6 +275,42 @@ const App = {
             });
         }
 
+        // ElevenLabs Toggle
+        const elevenLabsToggle = document.getElementById('elevenlabs-toggle');
+        if (elevenLabsToggle) {
+            // Load saved state
+            const prefs = StorageService.getPreferences();
+            this.updateElevenLabsToggleUI(elevenLabsToggle, prefs.elevenLabsEnabled);
+
+            // Handle toggle
+            elevenLabsToggle.addEventListener('click', () => {
+                const prefs = StorageService.getPreferences();
+                prefs.elevenLabsEnabled = !prefs.elevenLabsEnabled;
+                StorageService.savePreferences(prefs);
+                this.updateElevenLabsToggleUI(elevenLabsToggle, prefs.elevenLabsEnabled);
+            });
+        }
+
+        // ElevenLabs API Key Input
+        const elevenLabsApiKeyInput = document.getElementById('elevenlabs-api-key');
+        if (elevenLabsApiKeyInput) {
+            // Load saved API key
+            const prefs = StorageService.getPreferences();
+            elevenLabsApiKeyInput.value = prefs.elevenLabsApiKey || '';
+
+            // Save API key on change (debounced)
+            let apiKeyTimeout;
+            elevenLabsApiKeyInput.addEventListener('input', (e) => {
+                clearTimeout(apiKeyTimeout);
+                apiKeyTimeout = setTimeout(() => {
+                    const prefs = StorageService.getPreferences();
+                    prefs.elevenLabsApiKey = e.target.value.trim();
+                    StorageService.savePreferences(prefs);
+                    console.log('ElevenLabs API key saved');
+                }, 500);
+            });
+        }
+
         // Layout selector (in Settings Modal)
         const layoutSelector = document.getElementById('layout-selector');
         if (layoutSelector) {
@@ -470,6 +506,18 @@ const App = {
     updateTtsModeUI() {
         if (!this.ttsModeSelector) return;
         this.ttsModeSelector.value = this.ttsMode;
+    },
+
+    updateElevenLabsToggleUI(toggleBtn, enabled) {
+        if (!toggleBtn) return;
+
+        if (enabled) {
+            toggleBtn.classList.add('active');
+            toggleBtn.querySelector('.toggle-text').textContent = 'ElevenLabs: ON';
+        } else {
+            toggleBtn.classList.remove('active');
+            toggleBtn.querySelector('.toggle-text').textContent = 'ElevenLabs: OFF';
+        }
     },
 
     getLastCompletedWord() {

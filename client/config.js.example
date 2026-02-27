@@ -1,0 +1,7 @@
+// Client-side configuration template
+// Copy this file to config.js and add your actual API keys
+
+window.CONFIG = {
+    ELEVENLABS_API_KEY: 'your_elevenlabs_api_key_here',
+    ELEVENLABS_VOICE_ID: 'CwhRBWXzGAHq8TQ4Fs17',
+};

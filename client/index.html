@@ -429,6 +429,25 @@
             </div>
 
             <div class="settings-section">
+                <h3>ElevenLabs TTS (Premium)</h3>
+                <div class="setting-row">
+                    <button id="elevenlabs-toggle" class="toggle-btn-setting" aria-label="Toggle ElevenLabs TTS">
+                        <span class="toggle-icon">🎙️</span>
+                        <span class="toggle-text">ElevenLabs: OFF</span>
+                    </button>
+                </div>
+                <div class="setting-row">
+                    <label for="elevenlabs-api-key" class="model-label">API Key:</label>
+                    <input type="password" id="elevenlabs-api-key" class="profile-input" placeholder="Enter your ElevenLabs API key" style="flex: 1;">
+                </div>
+                <div class="setting-row">
+                    <p class="profile-help" style="margin: 0; font-size: 0.85rem;">
+                        Voice: Charles (default). Get your API key at <a href="https://elevenlabs.io" target="_blank" style="color: #4cc9f0;">elevenlabs.io</a>
+                    </p>
+                </div>
+            </div>
+
+            <div class="settings-section">
                 <h3>Size Controls</h3>
                 <div class="setting-row width-control-row">
                     <label>Width:</label>
@@ -457,6 +476,7 @@
         </div>
     </div>
 
+    <script src="/static/config.js?v=20"></script>
     <script src="/static/services/auth.js?v=20"></script>
     <script src="/static/services/websocket.js?v=20"></script>
     <script src="/static/services/api.js?v=20"></script>
