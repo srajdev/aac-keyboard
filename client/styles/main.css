@@ -798,7 +798,7 @@ body {
     font-size: 1.1rem;
     font-weight: 600;
     height: calc(65px * var(--keyboard-height-scale));
-    flex: 1.2;
+    flex: 1.8;  /* 50% wider (was 1.2) */
     border-radius: 6px;
 }
 
@@ -809,7 +809,7 @@ body {
 }
 
 .key-space-wide {
-    flex: 3.5;
+    flex: 2.9;  /* Reduced to compensate for wider DW (was 3.5) */
 }
 
 .key-arrow-swiftkey {
