@@ -201,13 +201,15 @@ const Keyboard = {
     switchToNumbers() {
         console.log('[Keyboard] switchToNumbers called, layout:', this.state.layout);
 
+        // Toggle number row visibility - works for both layouts
+        let numberRow;
         if (this.state.layout === 'swiftkey') {
-            // SwiftKey already has numbers on row 1, no-op
-            return;
+            // SwiftKey has number row as Row 3
+            numberRow = document.querySelector('#keyboard-swiftkey .keyboard-row-new:nth-child(3)');
+        } else {
+            // Traditional has dedicated number-row element
+            numberRow = document.getElementById('number-row');
         }
-
-        // Toggle number row visibility
-        const numberRow = document.getElementById('number-row');
         console.log('[Keyboard] number-row element:', numberRow);
 
         if (numberRow) {
@@ -219,9 +221,12 @@ const Keyboard = {
                 numberRow.style.display = 'flex';
                 this.state.mode = 'numbers';
                 console.log('[Keyboard] Showing number row');
-                // Add active class to show it's "on"
-                if (this.numKey) {
-                    this.numKey.classList.add('active');
+                // Add active class to show it's "on" - find the 123 button
+                const numButton = this.state.layout === 'swiftkey'
+                    ? document.querySelector('#keyboard-swiftkey [data-key="123"]')
+                    : this.numKey;
+                if (numButton) {
+                    numButton.classList.add('active');
                 }
             } else {
                 // Hide number row
@@ -229,8 +234,11 @@ const Keyboard = {
                 this.state.mode = 'letters';
                 console.log('[Keyboard] Hiding number row');
                 // Remove active class to show it's "off"
-                if (this.numKey) {
-                    this.numKey.classList.remove('active');
+                const numButton = this.state.layout === 'swiftkey'
+                    ? document.querySelector('#keyboard-swiftkey [data-key="123"]')
+                    : this.numKey;
+                if (numButton) {
+                    numButton.classList.remove('active');
                 }
             }
         } else {
