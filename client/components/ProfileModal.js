@@ -71,6 +71,13 @@ const ProfileModal = {
 
     save() {
         try {
+            // Add any text currently in the details input before saving
+            const pendingDetail = this.elements.detailsInput.value.trim();
+            if (pendingDetail && !this.currentProfile.details.includes(pendingDetail)) {
+                this.currentProfile.details.push(pendingDetail);
+                this.elements.detailsInput.value = '';
+            }
+
             // Collect form data
             const profile = {
                 name: this.elements.nameInput.value.trim(),
