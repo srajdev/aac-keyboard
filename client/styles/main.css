@@ -489,7 +489,7 @@ body {
     font-size: 0.95rem;
     font-weight: 600;
     height: calc(45px * var(--keyboard-height-scale));
-    flex: 1.3;  /* Wider to match lower row */
+    flex: 1.3 !important;  /* Wider to match lower row - override .key-new */
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.15s;
@@ -502,7 +502,7 @@ body {
     font-size: 0.85rem;
     font-weight: 600;
     height: calc(45px * var(--keyboard-height-scale));
-    flex: 0.45;  /* Much smaller (less wide) */
+    flex: 0.45 !important;  /* Much smaller (less wide) - override .key-new */
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.15s;
