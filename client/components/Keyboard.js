@@ -236,7 +236,6 @@ const Keyboard = {
         } else {
             console.error('[Keyboard] number-row element not found!');
         }
-    }
     },
 
     switchToLetters() {
