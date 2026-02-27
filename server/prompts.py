@@ -70,21 +70,25 @@ Your predictions should be:
 Always return valid JSON with exactly the structure requested.
 
 PREDICTION RULES FOR WORD COMPLETION:
-1. If the input ends with INCOMPLETE LETTERS (partial word), PRIORITIZE completing that word first:
-   - Example: "How much longer wi" → ["will", "with", "winter", "wish", "win"]
-   - Example: "The f" → ["first", "for", "family", "fast", "few"]
-   - Example: "dad" → ["dad's", "daddy", "dads"]
-   - Example: "can" → ["can't", "can", "cannot"]
+1. If the input ends with a LETTER (partial word at cursor), complete that word FIRST:
+   - Example: "How much longer wi" → ["will", "with", "winter", "wish", "win", "wild"]
+   - Example: "The f" → ["first", "for", "family", "fast", "few", "from"]
+   - Example: "dad" → ["dad's", "daddy", "dads", "dad", "dadgum", "dada"]
+   - Example: "can" → ["can't", "can", "cannot", "cane", "candy", "candle"]
+   - All 6 words MUST complete the partial word
 
-2. Include contractions naturally:
+2. If the input ends with a SPACE, predict the NEXT word:
+   - Example: "I want " → ["to", "some", "the", "a", "help", "food"]
+   - Example: "How are " → ["you", "they", "we", "things", "you're", "ya"]
+   - All 6 words should be logical next words
+
+3. Include contractions naturally:
    - Use: can't, won't, don't, didn't, isn't, aren't, I'll, he's, she's, they're, we're, you're
 
-3. Include possessives when relevant:
+4. Include possessives when relevant:
    - Use: dad's, mom's, Viraj's, brother's, sister's, etc.
 
-4. After completing partial words, predict likely NEXT words based on context
-
-5. Focus on high-frequency conversational words (yes, no, please, help, I, want, need)
+5. For empty input or context-only, predict common conversation starters
 
 Consider when making predictions:
 1. Viraj's situation (his environment, what room he's in, what activity is happening)
@@ -158,22 +162,25 @@ def build_word_prompt(partial_input: str, conversation_context: str) -> str:
         prompt += f'Context:\n{conversation_context}\n\n'
 
     if partial_input and partial_input.strip():
-        prompt += f'Viraj has typed so far: "{partial_input}"\n'
+        prompt += f'Viraj has typed so far (text up to cursor): "{partial_input}"\n'
 
-        # Check if input ends with a partial word (letters without space after)
-        if not partial_input.endswith(' '):
+        # Check if input ends with a space or a letter (determines prediction mode)
+        if partial_input.endswith(' '):
+            prompt += 'CURSOR POSITION: Right after a SPACE - predict the NEXT word that should come after the space.\n'
+        else:
+            # Input ends with a character - complete the current word
             last_space = partial_input.rfind(' ')
             partial_word = partial_input[last_space + 1:] if last_space != -1 else partial_input
             if partial_word and partial_word.replace("'", "").isalpha():
-                prompt += f'IMPORTANT: The input ends with the partial word "{partial_word}" - complete this word first in your predictions!\n'
+                prompt += f'CURSOR POSITION: Right after the letters "{partial_word}" - ALL 6 predictions MUST complete this partial word.\n'
         prompt += '\n'
     else:
-        prompt += "Viraj hasn't typed anything yet.\n\n"
+        prompt += "Viraj hasn't typed anything yet - predict common conversation starters.\n\n"
 
     prompt += """Provide word predictions in this exact JSON format:
-["word1", "word2", "word3", "word4", "word5"]
+["word1", "word2", "word3", "word4", "word5", "word6"]
 
-Return ONLY the JSON array of 5 single words, no other text."""
+Return ONLY the JSON array of 6 single words, no other text."""
 
     return prompt
 
@@ -184,14 +191,16 @@ SYSTEM_PROMPT_WORDS_STREAMING = """You help Viraj (non-verbal, types with thumb)
 Task: Return 6 single words he might type, separated by pipes.
 
 CRITICAL RULES:
-1. If input ends with INCOMPLETE LETTERS (partial word), COMPLETE it first:
+1. If input ends with a LETTER (partial word at cursor), complete that word in ALL 6 predictions:
    - "wi" at end → complete to: will|with|winter|wish|win|wild
    - "f" at end → complete to: first|for|family|fast|few|from
-   - "can" at end → complete to: can't|can|cannot|cane
+   - "can" at end → complete to: can't|can|cannot|cane|candy|candle
 
-2. Include contractions: can't, won't, don't, I'll, he's, she's
-3. Include possessives: dad's, mom's, Viraj's (when relevant)
-4. Natural conversational words for context
+2. If input ends with a SPACE, predict the NEXT word in ALL 6 predictions:
+   - "I want " → predict next: to|some|the|a|help|food
+
+3. Include contractions: can't, won't, don't, I'll, he's, she's
+4. Include possessives: dad's, mom's, Viraj's (when relevant)
 
 Format: word1|word2|word3|word4|word5|word6
 
@@ -215,14 +224,17 @@ def build_word_prompt_streaming(partial_input: str, conversation_context: str) -
         prompt += f'Context: {conversation_context}\n\n'
 
     if partial_input and partial_input.strip():
-        prompt += f'Viraj typed: "{partial_input}"\n'
+        prompt += f'Viraj typed (up to cursor): "{partial_input}"\n'
 
-        # Check if input ends with a partial word (letters without space after)
-        if partial_input and not partial_input.endswith(' '):
+        # Check if input ends with a space or a letter
+        if partial_input.endswith(' '):
+            prompt += 'CURSOR: After SPACE - predict NEXT word\n'
+        else:
+            # Input ends with a character - complete the current word
             last_space = partial_input.rfind(' ')
             partial_word = partial_input[last_space + 1:] if last_space != -1 else partial_input
-            if partial_word and partial_word.isalpha():
-                prompt += f'NOTE: Complete the partial word "{partial_word}" first!\n'
+            if partial_word and partial_word.replace("'", "").isalpha():
+                prompt += f'CURSOR: After "{partial_word}" - ALL 6 must complete this word\n'
         prompt += '\n'
 
     prompt += "6 words:"

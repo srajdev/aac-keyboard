@@ -488,7 +488,7 @@ const App = {
             return;
         }
 
-        const partialInput = MessageArea.getMessage();
+        const partialInput = MessageArea.getTextBeforeCursor();
         const context = ListenToggle.getContext();
 
         // Check if we should request phrases

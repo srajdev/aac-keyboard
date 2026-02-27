@@ -234,6 +234,14 @@ const MessageArea = {
         return this.currentMessage;
     },
 
+    getTextBeforeCursor() {
+        // Return only text up to cursor position (for predictions)
+        if (this.cursorPosition === null || this.cursorPosition === this.currentMessage.length) {
+            return this.currentMessage;
+        }
+        return this.currentMessage.slice(0, this.cursorPosition);
+    },
+
     getCurrentWord() {
         // Get the word currently being typed at/before cursor position
         const pos = this.cursorPosition === null ? this.currentMessage.length : this.cursorPosition;
