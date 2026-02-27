@@ -89,6 +89,13 @@ const ListenToggle = {
     stopListening() {
         SpeechService.stopListening();
         this.isListening = false;
+
+        // Clear conversation context when turning off
+        this.conversationContext = '';
+        if (this.contextText) {
+            this.contextText.textContent = 'No conversation captured yet. Tap "Listen" to start.';
+        }
+
         // Update settings button
         if (this.button) {
             this.button.classList.remove('active', 'listening');
@@ -98,6 +105,11 @@ const ListenToggle = {
         if (this.quickButton) {
             this.quickButton.classList.remove('active', 'listening');
             this.quickButton.querySelector('.settings-text').textContent = 'Listen: OFF';
+        }
+
+        // Notify app that context changed (now empty)
+        if (this.onContextUpdate) {
+            this.onContextUpdate('');
         }
     },
 
@@ -131,7 +143,8 @@ const ListenToggle = {
             parts.push(`Viraj's situation: ${this.explicitContext.trim()}`);
         }
 
-        if (this.conversationContext) {
+        // Only include conversation context if listening is currently ON
+        if (this.isListening && this.conversationContext) {
             // Clean the conversation context: remove timestamp [HH:MM] and quotes
             const cleaned = this.cleanContextText(this.conversationContext);
             if (cleaned) {
