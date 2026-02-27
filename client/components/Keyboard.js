@@ -97,6 +97,35 @@ const Keyboard = {
                 });
             }
         });
+
+        // Initialize 123 button state based on number row visibility
+        this.syncNumberRowState();
+    },
+
+    syncNumberRowState() {
+        // Check if number row is visible and sync button state
+        let numberRow;
+        let numButton;
+
+        if (this.state.layout === 'swiftkey') {
+            numberRow = document.querySelector('#keyboard-swiftkey .keyboard-row-new:nth-child(3)');
+            numButton = document.querySelector('#keyboard-swiftkey [data-key="123"]');
+        } else {
+            numberRow = document.getElementById('number-row');
+            numButton = this.numKey;
+        }
+
+        if (numberRow && numButton) {
+            const isVisible = numberRow.style.display === 'flex';
+            if (isVisible) {
+                numButton.classList.add('active');
+                this.state.mode = 'numbers';
+            } else {
+                numButton.classList.remove('active');
+                this.state.mode = 'letters';
+            }
+            console.log('[Keyboard] Synced number row state - visible:', isVisible);
+        }
     },
 
     processKey(keyValue) {
