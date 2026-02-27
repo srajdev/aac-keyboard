@@ -76,18 +76,34 @@ const StorageService = {
                 ttsMode: 'manual', // 'sentence', 'word', or 'manual'
                 voiceName: null, // null = auto-select best male voice
                 elevenLabsEnabled: true, // Auto-enable since we have the key configured
-                elevenLabsApiKey: window.CONFIG?.ELEVENLABS_API_KEY || '',
-                elevenLabsVoiceId: window.CONFIG?.ELEVENLABS_VOICE_ID || 'CwhRBWXzGAHq8TQ4Fs17',
+                elevenLabsApiKey: '',
+                elevenLabsVoiceId: 'CwhRBWXzGAHq8TQ4Fs17',
             };
 
             const saved = localStorage.getItem(this.KEYS.PREFERENCES);
             if (!saved) {
-                return defaults;
+                // No saved prefs - use defaults with config values
+                return {
+                    ...defaults,
+                    elevenLabsApiKey: window.CONFIG?.ELEVENLABS_API_KEY || '',
+                    elevenLabsVoiceId: window.CONFIG?.ELEVENLABS_VOICE_ID || 'CwhRBWXzGAHq8TQ4Fs17',
+                };
             }
 
             // Merge saved preferences with defaults to ensure all fields exist
             const savedPrefs = JSON.parse(saved);
-            return { ...defaults, ...savedPrefs };
+            const merged = { ...defaults, ...savedPrefs };
+
+            // IMPORTANT: Always override with config values if they exist
+            // This ensures config.js takes priority over localStorage
+            if (window.CONFIG?.ELEVENLABS_API_KEY) {
+                merged.elevenLabsApiKey = window.CONFIG.ELEVENLABS_API_KEY;
+            }
+            if (window.CONFIG?.ELEVENLABS_VOICE_ID) {
+                merged.elevenLabsVoiceId = window.CONFIG.ELEVENLABS_VOICE_ID;
+            }
+
+            return merged;
         } catch (e) {
             return {
                 speechRate: 0.9,
