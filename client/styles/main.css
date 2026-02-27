@@ -775,7 +775,7 @@ body {
     transform: scale(0.95);
 }
 
-/* Make letter keys (Q-Z) 20% bigger - exclude number keys */
+/* Make letter keys (Q-Z) and number keys (0-9) 20% bigger for consistency */
 .key-letter-swiftkey[data-key="q"], .key-letter-swiftkey[data-key="w"],
 .key-letter-swiftkey[data-key="e"], .key-letter-swiftkey[data-key="r"],
 .key-letter-swiftkey[data-key="t"], .key-letter-swiftkey[data-key="y"],
@@ -788,7 +788,12 @@ body {
 .key-letter-swiftkey[data-key="l"], .key-letter-swiftkey[data-key="z"],
 .key-letter-swiftkey[data-key="x"], .key-letter-swiftkey[data-key="c"],
 .key-letter-swiftkey[data-key="v"], .key-letter-swiftkey[data-key="b"],
-.key-letter-swiftkey[data-key="n"], .key-letter-swiftkey[data-key="m"] {
+.key-letter-swiftkey[data-key="n"], .key-letter-swiftkey[data-key="m"],
+.key-letter-swiftkey[data-key="0"], .key-letter-swiftkey[data-key="1"],
+.key-letter-swiftkey[data-key="2"], .key-letter-swiftkey[data-key="3"],
+.key-letter-swiftkey[data-key="4"], .key-letter-swiftkey[data-key="5"],
+.key-letter-swiftkey[data-key="6"], .key-letter-swiftkey[data-key="7"],
+.key-letter-swiftkey[data-key="8"], .key-letter-swiftkey[data-key="9"] {
     font-size: 1.56rem;  /* 20% bigger than 1.3rem */
 }
 
