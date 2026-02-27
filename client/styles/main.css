@@ -489,7 +489,7 @@ body {
     font-size: 0.95rem;
     font-weight: 600;
     height: calc(45px * var(--keyboard-height-scale));
-    flex: 1.15;  /* Slightly wider to match lower row */
+    flex: 1.3;  /* Wider to match lower row */
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.15s;
@@ -499,10 +499,10 @@ body {
     background: rgba(30, 40, 60, 0.8);
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: var(--swiftkey-text);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 600;
     height: calc(45px * var(--keyboard-height-scale));
-    flex: 0.7;  /* Smaller (less wide) */
+    flex: 0.45;  /* Much smaller (less wide) */
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.15s;
