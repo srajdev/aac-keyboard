@@ -289,6 +289,9 @@ const ApiService = {
             const userProfile = StorageService.getUserProfile();
             const profileHash = this.cache._hashProfile(userProfile);
 
+            console.log('[API] getPhrases - User profile:', userProfile);
+            console.log('[API] getPhrases - Profile hash:', profileHash);
+
             // Check cache first (using phrase-specific key with profile hash)
             const cacheKey = `phrases|${partialInput}|${conversationContext}`;
             const cached = this.cache.get(cacheKey, '', profileHash);
@@ -431,6 +434,9 @@ const ApiService = {
             // Get user profile
             const userProfile = StorageService.getUserProfile();
             const profileHash = this.cache._hashProfile(userProfile);
+
+            console.log('[API] getWords - User profile:', userProfile);
+            console.log('[API] getWords - Profile hash:', profileHash);
 
             // Check cache first (using word-specific key with profile hash)
             const cacheKey = `words|${partialInput}|${conversationContext}`;

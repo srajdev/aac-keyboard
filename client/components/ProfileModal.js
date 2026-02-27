@@ -94,9 +94,17 @@ const ProfileModal = {
                 topics: this.currentProfile.topics,
             };
 
+            console.log('[ProfileModal] Saving profile:', profile);
+
             // Save to storage
             const savedProfile = StorageService.saveUserProfile(profile);
             this.currentProfile = savedProfile;
+
+            console.log('[ProfileModal] Profile saved to localStorage:', savedProfile);
+
+            // Verify it was saved
+            const verifyProfile = StorageService.getUserProfile();
+            console.log('[ProfileModal] Verification - profile loaded from storage:', verifyProfile);
 
             // Close modal
             this.close();
@@ -105,8 +113,6 @@ const ProfileModal = {
             if (this.onProfileChange) {
                 this.onProfileChange(savedProfile);
             }
-
-            console.log('Profile saved:', savedProfile);
         } catch (e) {
             console.error('Failed to save profile:', e);
             alert('Failed to save profile. Please try again.');

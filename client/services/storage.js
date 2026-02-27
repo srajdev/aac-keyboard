@@ -142,7 +142,7 @@ const StorageService = {
     getUserProfile() {
         try {
             const profile = localStorage.getItem(this.KEYS.USER_PROFILE);
-            return profile
+            const result = profile
                 ? JSON.parse(profile)
                 : {
                       name: '',
@@ -151,6 +151,8 @@ const StorageService = {
                       topics: [],
                       lastUpdated: null,
                   };
+            console.log('[Storage] getUserProfile called, returning:', result);
+            return result;
         } catch (e) {
             console.error('Failed to load user profile:', e);
             return {
@@ -165,6 +167,7 @@ const StorageService = {
 
     saveUserProfile(profile) {
         try {
+            console.log('[Storage] saveUserProfile called with:', profile);
             // Validate profile structure
             const validProfile = {
                 name: (profile.name || '').trim().slice(0, 100),
@@ -177,7 +180,9 @@ const StorageService = {
                     : [],
                 lastUpdated: Date.now(),
             };
+            console.log('[Storage] Validated profile:', validProfile);
             localStorage.setItem(this.KEYS.USER_PROFILE, JSON.stringify(validProfile));
+            console.log('[Storage] Profile saved to localStorage successfully');
             return validProfile;
         } catch (e) {
             console.error('Failed to save user profile:', e);
