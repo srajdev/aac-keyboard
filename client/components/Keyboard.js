@@ -116,7 +116,12 @@ const Keyboard = {
         }
 
         if (numberRow && numButton) {
-            const isVisible = numberRow.style.display === 'flex';
+            // Check computed style, not just inline style
+            const computedDisplay = window.getComputedStyle(numberRow).display;
+            const isVisible = computedDisplay !== 'none';
+
+            console.log('[Keyboard] Synced number row state - display:', computedDisplay, 'visible:', isVisible);
+
             if (isVisible) {
                 numButton.classList.add('active');
                 this.state.mode = 'numbers';
@@ -124,7 +129,6 @@ const Keyboard = {
                 numButton.classList.remove('active');
                 this.state.mode = 'letters';
             }
-            console.log('[Keyboard] Synced number row state - visible:', isVisible);
         }
     },
 
