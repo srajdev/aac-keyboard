@@ -2,6 +2,8 @@ import os
 import time
 import asyncio
 import logging
+import json
+from datetime import datetime
 from pathlib import Path
 from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -27,6 +29,11 @@ from .performance_tracker import get_tracker
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Log file for predictions
+LOG_DIR = Path(__file__).parent.parent / "logs"
+LOG_DIR.mkdir(exist_ok=True)
+PREDICTIONS_LOG_FILE = LOG_DIR / "predictions.jsonl"
 
 app = FastAPI(title="Viraj Keyboard API")
 
@@ -251,6 +258,26 @@ async def handle_prediction_request(websocket: WebSocket, message: dict, active_
                     "Can you please wait a moment",
                     "Thanks for your patience"
                 ]
+
+        # Log the streaming prediction to predictions.jsonl
+        try:
+            log_entry = {
+                "timestamp": datetime.now().isoformat(),
+                "model": f"{model}-haiku-4-5",
+                "type": f"{request_type}-streaming",
+                "input": partial_input,
+                "context": conversation_context,
+                "response": predictions,
+                "timings": {
+                    "total_ms": round(duration_ms),
+                    "streaming": True,
+                },
+                "predictions_count": len(predictions),
+            }
+            with open(PREDICTIONS_LOG_FILE, "a") as f:
+                f.write(json.dumps(log_entry) + "\n")
+        except Exception as log_error:
+            logger.error(f"Failed to log prediction: {log_error}")
 
         # Send completion message
         await websocket.send_json({
