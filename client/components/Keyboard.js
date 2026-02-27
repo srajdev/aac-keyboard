@@ -331,11 +331,12 @@ const Keyboard = {
             }
         }
 
-        // Letter keys always display as uppercase in UI
+        // Letter keys toggle between uppercase and lowercase based on shift state
         this.letterKeys.forEach(key => {
             const keyValue = key.dataset.key;
             if (/^[a-z]$/.test(keyValue)) {
-                key.textContent = keyValue.toUpperCase();
+                // Show uppercase when shift is active, lowercase otherwise
+                key.textContent = this.state.shift ? keyValue.toUpperCase() : keyValue.toLowerCase();
             }
         });
 
@@ -344,7 +345,8 @@ const Keyboard = {
         swiftkeyLetterKeys.forEach(key => {
             const keyValue = key.dataset.key;
             if (/^[a-z]$/.test(keyValue)) {
-                key.textContent = keyValue.toUpperCase();
+                // Show uppercase when shift is active, lowercase otherwise
+                key.textContent = this.state.shift ? keyValue.toUpperCase() : keyValue.toLowerCase();
             }
         });
     },
