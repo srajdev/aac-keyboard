@@ -798,7 +798,7 @@ body {
 }
 
 .key-modifier-swiftkey {
-    background: rgba(0, 212, 255, 0.3);
+    background: transparent;
     border: none;
     color: var(--swiftkey-accent);
     font-size: 1.2rem;
@@ -814,7 +814,7 @@ body {
 }
 
 .key-action-swiftkey {
-    background: rgba(0, 212, 255, 0.3);
+    background: transparent;
     border: none;
     color: var(--swiftkey-accent);
     font-size: 1.1rem;
@@ -822,6 +822,11 @@ body {
     height: calc(65px * var(--keyboard-height-scale));
     flex: 1.8;  /* 50% wider (was 1.2) */
     border-radius: 6px;
+}
+
+/* Keep colored background for DW (DEL WORD) button only */
+.key-action-swiftkey[data-key="delword"] {
+    background: rgba(0, 212, 255, 0.3);
 }
 
 .key-space-swiftkey {
@@ -835,7 +840,7 @@ body {
 }
 
 .key-arrow-swiftkey {
-    background: rgba(0, 212, 255, 0.3);
+    background: transparent;
     border: none;
     color: var(--swiftkey-accent);
     font-size: 1.4rem;
@@ -845,17 +850,17 @@ body {
 }
 
 .key-phrase-swiftkey {
-    background: rgba(0, 150, 255, 0.4);
+    background: transparent;
     border: none;
     color: var(--swiftkey-text);
-    font-size: 0.9rem;
+    font-size: 1.3rem;
     height: calc(65px * var(--keyboard-height-scale));
     flex: 1.5;
     border-radius: 6px;
 }
 
 .key-punct-swiftkey {
-    background: rgba(255, 255, 255, 0.08);
+    background: transparent;
     border: none;
     color: var(--swiftkey-text);
     font-size: 1.2rem;
