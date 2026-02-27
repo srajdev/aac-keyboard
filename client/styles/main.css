@@ -775,6 +775,23 @@ body {
     transform: scale(0.95);
 }
 
+/* Make letter keys (Q-Z) 20% bigger - exclude number keys */
+.key-letter-swiftkey[data-key="q"], .key-letter-swiftkey[data-key="w"],
+.key-letter-swiftkey[data-key="e"], .key-letter-swiftkey[data-key="r"],
+.key-letter-swiftkey[data-key="t"], .key-letter-swiftkey[data-key="y"],
+.key-letter-swiftkey[data-key="u"], .key-letter-swiftkey[data-key="i"],
+.key-letter-swiftkey[data-key="o"], .key-letter-swiftkey[data-key="p"],
+.key-letter-swiftkey[data-key="a"], .key-letter-swiftkey[data-key="s"],
+.key-letter-swiftkey[data-key="d"], .key-letter-swiftkey[data-key="f"],
+.key-letter-swiftkey[data-key="g"], .key-letter-swiftkey[data-key="h"],
+.key-letter-swiftkey[data-key="j"], .key-letter-swiftkey[data-key="k"],
+.key-letter-swiftkey[data-key="l"], .key-letter-swiftkey[data-key="z"],
+.key-letter-swiftkey[data-key="x"], .key-letter-swiftkey[data-key="c"],
+.key-letter-swiftkey[data-key="v"], .key-letter-swiftkey[data-key="b"],
+.key-letter-swiftkey[data-key="n"], .key-letter-swiftkey[data-key="m"] {
+    font-size: 1.56rem;  /* 20% bigger than 1.3rem */
+}
+
 .key-modifier-swiftkey {
     background: rgba(0, 212, 255, 0.3);
     border: none;
