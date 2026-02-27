@@ -291,26 +291,6 @@ const App = {
             });
         }
 
-        // ElevenLabs API Key Input
-        const elevenLabsApiKeyInput = document.getElementById('elevenlabs-api-key');
-        if (elevenLabsApiKeyInput) {
-            // Load saved API key
-            const prefs = StorageService.getPreferences();
-            elevenLabsApiKeyInput.value = prefs.elevenLabsApiKey || '';
-
-            // Save API key on change (debounced)
-            let apiKeyTimeout;
-            elevenLabsApiKeyInput.addEventListener('input', (e) => {
-                clearTimeout(apiKeyTimeout);
-                apiKeyTimeout = setTimeout(() => {
-                    const prefs = StorageService.getPreferences();
-                    prefs.elevenLabsApiKey = e.target.value.trim();
-                    StorageService.savePreferences(prefs);
-                    console.log('ElevenLabs API key saved');
-                }, 500);
-            });
-        }
-
         // Layout selector (in Settings Modal)
         const layoutSelector = document.getElementById('layout-selector');
         if (layoutSelector) {

@@ -37,10 +37,6 @@
                     <span class="settings-text">Listen: OFF</span>
                 </button>
             </div>
-            <div class="connection-status">
-                <span class="connection-label">Connection:</span>
-                <span class="connection-indicator" id="ws-status" title="Connecting...">...</span>
-            </div>
             <input type="text" id="explicit-context-input" class="context-input" placeholder="Add context..." aria-label="Additional context">
         </header>
 
@@ -437,12 +433,8 @@
                     </button>
                 </div>
                 <div class="setting-row">
-                    <label for="elevenlabs-api-key" class="model-label">API Key:</label>
-                    <input type="password" id="elevenlabs-api-key" class="profile-input" placeholder="Enter your ElevenLabs API key" style="flex: 1;">
-                </div>
-                <div class="setting-row">
                     <p class="profile-help" style="margin: 0; font-size: 0.85rem;">
-                        Voice: Charles (default). Get your API key at <a href="https://elevenlabs.io" target="_blank" style="color: #4cc9f0;">elevenlabs.io</a>
+                        High-quality AI voice with natural speech. Fallback to browser TTS if unavailable.
                     </p>
                 </div>
             </div>
