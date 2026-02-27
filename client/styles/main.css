@@ -669,8 +669,10 @@ body {
 }
 
 .key-modifier.active {
-    background: #c48900;
-    box-shadow: 0 0 15px rgba(196, 137, 0, 0.6);
+    background: #ffa500 !important;
+    box-shadow: 0 0 20px rgba(255, 165, 0, 0.8) !important;
+    color: #000000 !important;
+    font-weight: 700;
 }
 
 /* Action keys - Purple/Pink gradient */
@@ -784,6 +786,13 @@ body {
     height: calc(65px * var(--keyboard-height-scale));
     flex: 1.2;
     border-radius: 6px;
+}
+
+.key-modifier-swiftkey.active {
+    background: #ffa500 !important;
+    box-shadow: 0 0 20px rgba(255, 165, 0, 0.8) !important;
+    color: #000000 !important;
+    font-weight: 700;
 }
 
 .key-action-swiftkey {
