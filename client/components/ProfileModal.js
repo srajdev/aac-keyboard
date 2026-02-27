@@ -6,18 +6,15 @@ const ProfileModal = {
     elements: {
         nameInput: null,
         ageInput: null,
-        interestsInput: null,
-        interestsTags: null,
-        topicsInput: null,
-        topicsTags: null,
+        detailsInput: null,
+        detailsTags: null,
         saveBtn: null,
         cancelBtn: null,
     },
     currentProfile: {
         name: '',
         age: '',
-        interests: [],
-        topics: [],
+        details: [],
     },
     onProfileChange: null, // Callback when profile is saved
 
@@ -27,10 +24,8 @@ const ProfileModal = {
         this.overlay = this.modal.querySelector('.modal-overlay');
         this.elements.nameInput = document.getElementById('profile-name');
         this.elements.ageInput = document.getElementById('profile-age');
-        this.elements.interestsInput = document.getElementById('interests-input');
-        this.elements.interestsTags = document.getElementById('interests-tags');
-        this.elements.topicsInput = document.getElementById('topics-input');
-        this.elements.topicsTags = document.getElementById('topics-tags');
+        this.elements.detailsInput = document.getElementById('details-input');
+        this.elements.detailsTags = document.getElementById('details-tags');
         this.elements.saveBtn = document.getElementById('profile-save');
         this.elements.cancelBtn = document.getElementById('profile-cancel');
 
@@ -40,17 +35,10 @@ const ProfileModal = {
         this.elements.saveBtn.addEventListener('click', () => this.save());
 
         // Tag input handlers (Enter to add)
-        this.elements.interestsInput.addEventListener('keypress', (e) => {
+        this.elements.detailsInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                this.addTag('interests');
-            }
-        });
-
-        this.elements.topicsInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                this.addTag('topics');
+                this.addTag('details');
             }
         });
 
@@ -70,11 +58,8 @@ const ProfileModal = {
         this.elements.nameInput.value = this.currentProfile.name || '';
         this.elements.ageInput.value = this.currentProfile.age || '';
 
-        // Render interests tags
-        this.renderTags('interests', this.currentProfile.interests || []);
-
-        // Render topics tags
-        this.renderTags('topics', this.currentProfile.topics || []);
+        // Render details tags
+        this.renderTags('details', this.currentProfile.details || []);
 
         // Show modal
         this.modal.style.display = 'flex';
@@ -90,8 +75,7 @@ const ProfileModal = {
             const profile = {
                 name: this.elements.nameInput.value.trim(),
                 age: this.elements.ageInput.value.trim(),
-                interests: this.currentProfile.interests,
-                topics: this.currentProfile.topics,
+                details: this.currentProfile.details,
             };
 
             console.log('[ProfileModal] Saving profile:', profile);
@@ -120,8 +104,7 @@ const ProfileModal = {
     },
 
     addTag(arrayName) {
-        const input =
-            arrayName === 'interests' ? this.elements.interestsInput : this.elements.topicsInput;
+        const input = this.elements.detailsInput;
         const value = input.value.trim();
 
         if (!value) return;
@@ -133,9 +116,9 @@ const ProfileModal = {
             return;
         }
 
-        // Limit to 20 tags
-        if (currentArray.length >= 20) {
-            alert(`Maximum 20 ${arrayName} allowed`);
+        // Limit to 30 tags
+        if (currentArray.length >= 30) {
+            alert('Maximum 30 profile details allowed');
             input.value = '';
             return;
         }
@@ -160,8 +143,7 @@ const ProfileModal = {
     },
 
     renderTags(arrayName, tags) {
-        const container =
-            arrayName === 'interests' ? this.elements.interestsTags : this.elements.topicsTags;
+        const container = this.elements.detailsTags;
 
         container.innerHTML = '';
 

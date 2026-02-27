@@ -8,10 +8,8 @@ def format_user_profile(profile: dict) -> str:
         sections.append(f"USER NAME: {profile['name']}")
     if profile.get("age"):
         sections.append(f"AGE: {profile['age']}")
-    if profile.get("interests") and len(profile["interests"]) > 0:
-        sections.append(f"INTERESTS: {', '.join(profile['interests'])}")
-    if profile.get("topics") and len(profile["topics"]) > 0:
-        sections.append(f"FREQUENT TOPICS: {', '.join(profile['topics'])}")
+    if profile.get("details") and len(profile["details"]) > 0:
+        sections.append(f"PROFILE DETAILS: {', '.join(profile['details'])}")
 
     if not sections:
         return ""

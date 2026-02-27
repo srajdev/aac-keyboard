@@ -147,8 +147,7 @@ const StorageService = {
                 : {
                       name: '',
                       age: '',
-                      interests: [],
-                      topics: [],
+                      details: [],
                       lastUpdated: null,
                   };
             console.log('[Storage] getUserProfile called, returning:', result);
@@ -158,8 +157,7 @@ const StorageService = {
             return {
                 name: '',
                 age: '',
-                interests: [],
-                topics: [],
+                details: [],
                 lastUpdated: null,
             };
         }
@@ -172,11 +170,8 @@ const StorageService = {
             const validProfile = {
                 name: (profile.name || '').trim().slice(0, 100),
                 age: (profile.age || '').trim().slice(0, 20),
-                interests: Array.isArray(profile.interests)
-                    ? profile.interests.map((i) => i.trim()).filter(Boolean).slice(0, 20)
-                    : [],
-                topics: Array.isArray(profile.topics)
-                    ? profile.topics.map((t) => t.trim()).filter(Boolean).slice(0, 20)
+                details: Array.isArray(profile.details)
+                    ? profile.details.map((d) => d.trim()).filter(Boolean).slice(0, 30)
                     : [],
                 lastUpdated: Date.now(),
             };
