@@ -109,6 +109,7 @@ const Keyboard = {
                 this.toggleShift();
                 break;
             case '123':
+                console.log('[Keyboard] 123 button pressed, toggling number row');
                 this.switchToNumbers();
                 break;
             case 'abc':
@@ -198,6 +199,8 @@ const Keyboard = {
     },
 
     switchToNumbers() {
+        console.log('[Keyboard] switchToNumbers called, layout:', this.state.layout);
+
         if (this.state.layout === 'swiftkey') {
             // SwiftKey already has numbers on row 1, no-op
             return;
@@ -205,13 +208,17 @@ const Keyboard = {
 
         // Toggle number row visibility
         const numberRow = document.getElementById('number-row');
+        console.log('[Keyboard] number-row element:', numberRow);
+
         if (numberRow) {
             const isHidden = numberRow.style.display === 'none' || !numberRow.style.display;
+            console.log('[Keyboard] isHidden:', isHidden, 'current display:', numberRow.style.display);
 
             if (isHidden) {
                 // Show number row
                 numberRow.style.display = 'flex';
                 this.state.mode = 'numbers';
+                console.log('[Keyboard] Showing number row');
                 // Add active class to show it's "on"
                 if (this.numKey) {
                     this.numKey.classList.add('active');
@@ -220,12 +227,16 @@ const Keyboard = {
                 // Hide number row
                 numberRow.style.display = 'none';
                 this.state.mode = 'letters';
+                console.log('[Keyboard] Hiding number row');
                 // Remove active class to show it's "off"
                 if (this.numKey) {
                     this.numKey.classList.remove('active');
                 }
             }
+        } else {
+            console.error('[Keyboard] number-row element not found!');
         }
+    }
     },
 
     switchToLetters() {
