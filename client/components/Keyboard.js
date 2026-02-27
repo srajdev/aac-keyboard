@@ -205,14 +205,34 @@ const Keyboard = {
             return;
         }
 
-        this.letterKeyboard.style.display = 'none';
-        this.numberKeyboard.style.display = 'flex';
+        // Toggle number row visibility
+        const numberRow = document.getElementById('number-row');
+        if (numberRow) {
+            if (numberRow.style.display === 'none') {
+                numberRow.style.display = 'flex';
+                // Update button text to indicate toggle state
+                if (this.numKey) {
+                    this.numKey.textContent = 'ABC';
+                }
+            } else {
+                numberRow.style.display = 'none';
+                if (this.numKey) {
+                    this.numKey.textContent = '123';
+                }
+            }
+        }
     },
 
     switchToLetters() {
+        // This is no longer needed with the toggle, but keep for compatibility
         this.state.mode = 'letters';
-        this.numberKeyboard.style.display = 'none';
-        this.letterKeyboard.style.display = 'flex';
+        const numberRow = document.getElementById('number-row');
+        if (numberRow) {
+            numberRow.style.display = 'none';
+        }
+        if (this.numKey) {
+            this.numKey.textContent = '123';
+        }
     },
 
     showPunctuationModal() {
