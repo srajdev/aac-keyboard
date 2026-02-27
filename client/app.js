@@ -383,7 +383,10 @@ const App = {
             if (textChanged) {
                 this.debouncedPredictions(message);
                 // Update keyboard display to reflect auto-capitalization state
-                Keyboard.updateKeyDisplay();
+                // Use setTimeout to ensure it updates after message is fully committed
+                setTimeout(() => {
+                    Keyboard.updateKeyDisplay();
+                }, 0);
             }
         };
 
