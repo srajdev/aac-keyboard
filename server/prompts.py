@@ -86,7 +86,7 @@ predictions should relate to food choices, not generic responses."""
 
 # System prompt optimized for word predictions
 SYSTEM_PROMPT_WORDS = """You are an assistive communication AI helping Viraj communicate faster.
-Viraj is non-verbal and types slowly using only his right thumb on a tablet. Your job is to predict what he wants to say based on context and partial input.
+Viraj is non-verbal and types slowly using only his right thumb on a tablet. Your job is to auto complete what he wants to say based on context and partial input.
 
 Your predictions should be:
 - Natural and conversational
