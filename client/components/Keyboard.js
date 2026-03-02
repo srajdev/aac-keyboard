@@ -204,6 +204,20 @@ const Keyboard = {
                 this.onKeyPress('.', 'letter', this.state);
                 break;
 
+            // Punctuation with auto-space (comma, period, question mark on Row 5)
+            case ',':
+                this.onKeyPress(',', 'letter', this.state);
+                this.onKeyPress(' ', 'space', this.state);
+                break;
+            case '.':
+                this.onKeyPress('.', 'letter', this.state);
+                this.onKeyPress(' ', 'space', this.state);
+                break;
+            case '?':
+                this.onKeyPress('?', 'letter', this.state);
+                this.onKeyPress(' ', 'space', this.state);
+                break;
+
             // Enter key - placeholder (disabled for now)
             case 'enter':
                 // TODO: Implement enter key functionality
