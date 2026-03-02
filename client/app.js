@@ -182,17 +182,17 @@ const App = {
                 }
 
                 // Add other languages
-                if (otherVoices.length > 0) {
-                    const otherGroup = document.createElement('optgroup');
-                    otherGroup.label = 'Other Languages';
-                    otherVoices.forEach(voice => {
-                        const option = document.createElement('option');
-                        option.value = voice.name;
-                        option.textContent = `${voice.name} (${voice.lang})`;
-                        otherGroup.appendChild(option);
-                    });
-                    voiceSelector.appendChild(otherGroup);
-                }
+                //if (otherVoices.length > 0) {
+                //    const otherGroup = document.createElement('optgroup');
+                //    otherGroup.label = 'Other Languages';
+                //    otherVoices.forEach(voice => {
+                //        const option = document.createElement('option');
+                //        option.value = voice.name;
+                //        option.textContent = `${voice.name} (${voice.lang})`;
+                //        otherGroup.appendChild(option);
+                //    });
+                //    voiceSelector.appendChild(otherGroup);
+                //}
 
                 // Load saved preference
                 const prefs = StorageService.getPreferences();
