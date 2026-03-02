@@ -6,15 +6,15 @@ const ProfileModal = {
     elements: {
         nameInput: null,
         ageInput: null,
-        detailsInput: null,
-        detailsTags: null,
+        detailsTextarea: null,
+        charCount: null,
         saveBtn: null,
         cancelBtn: null,
     },
     currentProfile: {
         name: '',
         age: '',
-        details: [],
+        details: '',
     },
     onProfileChange: null, // Callback when profile is saved
 
@@ -24,8 +24,8 @@ const ProfileModal = {
         this.overlay = this.modal.querySelector('.modal-overlay');
         this.elements.nameInput = document.getElementById('profile-name');
         this.elements.ageInput = document.getElementById('profile-age');
-        this.elements.detailsInput = document.getElementById('details-input');
-        this.elements.detailsTags = document.getElementById('details-tags');
+        this.elements.detailsTextarea = document.getElementById('details-textarea');
+        this.elements.charCount = document.getElementById('details-char-count');
         this.elements.saveBtn = document.getElementById('profile-save');
         this.elements.cancelBtn = document.getElementById('profile-cancel');
 
@@ -34,12 +34,9 @@ const ProfileModal = {
         this.elements.cancelBtn.addEventListener('click', () => this.close());
         this.elements.saveBtn.addEventListener('click', () => this.save());
 
-        // Tag input handlers (Enter to add)
-        this.elements.detailsInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                this.addTag('details');
-            }
+        // Character counter for textarea
+        this.elements.detailsTextarea.addEventListener('input', () => {
+            this.updateCharCount();
         });
 
         // Load profile from storage
@@ -57,9 +54,10 @@ const ProfileModal = {
         // Populate form
         this.elements.nameInput.value = this.currentProfile.name || '';
         this.elements.ageInput.value = this.currentProfile.age || '';
+        this.elements.detailsTextarea.value = this.currentProfile.details || '';
 
-        // Render details tags
-        this.renderTags('details', this.currentProfile.details || []);
+        // Update character count
+        this.updateCharCount();
 
         // Show modal
         this.modal.style.display = 'flex';
@@ -71,18 +69,11 @@ const ProfileModal = {
 
     save() {
         try {
-            // Add any text currently in the details input before saving
-            const pendingDetail = this.elements.detailsInput.value.trim();
-            if (pendingDetail && !this.currentProfile.details.includes(pendingDetail)) {
-                this.currentProfile.details.push(pendingDetail);
-                this.elements.detailsInput.value = '';
-            }
-
             // Collect form data
             const profile = {
                 name: this.elements.nameInput.value.trim(),
                 age: this.elements.ageInput.value.trim(),
-                details: this.currentProfile.details,
+                details: this.elements.detailsTextarea.value.trim(),
             };
 
             console.log('[ProfileModal] Saving profile:', profile);
@@ -110,70 +101,20 @@ const ProfileModal = {
         }
     },
 
-    addTag(arrayName) {
-        const input = this.elements.detailsInput;
-        const value = input.value.trim();
+    updateCharCount() {
+        const currentLength = this.elements.detailsTextarea.value.length;
+        const maxLength = 1000;
 
-        if (!value) return;
+        this.elements.charCount.textContent = currentLength;
 
-        // Avoid duplicates
-        const currentArray = this.currentProfile[arrayName];
-        if (currentArray.includes(value)) {
-            input.value = '';
-            return;
+        // Update styling based on character count
+        const counter = this.elements.charCount.parentElement;
+        counter.classList.remove('warning', 'limit');
+
+        if (currentLength >= maxLength) {
+            counter.classList.add('limit');
+        } else if (currentLength >= maxLength * 0.9) {
+            counter.classList.add('warning');
         }
-
-        // Limit to 30 tags
-        if (currentArray.length >= 30) {
-            alert('Maximum 30 profile details allowed');
-            input.value = '';
-            return;
-        }
-
-        // Add to array
-        currentArray.push(value);
-        input.value = '';
-
-        // Re-render tags
-        this.renderTags(arrayName, currentArray);
-    },
-
-    removeTag(arrayName, value) {
-        const currentArray = this.currentProfile[arrayName];
-        const index = currentArray.indexOf(value);
-        if (index > -1) {
-            currentArray.splice(index, 1);
-        }
-
-        // Re-render tags
-        this.renderTags(arrayName, currentArray);
-    },
-
-    renderTags(arrayName, tags) {
-        const container = this.elements.detailsTags;
-
-        container.innerHTML = '';
-
-        tags.forEach((tag) => {
-            const chip = document.createElement('div');
-            chip.className = 'tag-chip';
-            chip.innerHTML = `
-                <span class="tag-text">${this.escapeHtml(tag)}</span>
-                <button class="tag-remove" aria-label="Remove ${tag}">×</button>
-            `;
-
-            // Wire up remove handler
-            chip.querySelector('.tag-remove').addEventListener('click', () => {
-                this.removeTag(arrayName, tag);
-            });
-
-            container.appendChild(chip);
-        });
-    },
-
-    escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
     },
 };

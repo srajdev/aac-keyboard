@@ -181,7 +181,7 @@ const StorageService = {
                 : {
                       name: '',
                       age: '',
-                      details: [],
+                      details: '',
                       lastUpdated: null,
                   };
             console.log('[Storage] getUserProfile called, returning:', result);
@@ -191,7 +191,7 @@ const StorageService = {
             return {
                 name: '',
                 age: '',
-                details: [],
+                details: '',
                 lastUpdated: null,
             };
         }
@@ -204,9 +204,9 @@ const StorageService = {
             const validProfile = {
                 name: (profile.name || '').trim().slice(0, 100),
                 age: (profile.age || '').trim().slice(0, 20),
-                details: Array.isArray(profile.details)
-                    ? profile.details.map((d) => d.trim()).filter(Boolean).slice(0, 30)
-                    : [],
+                details: typeof profile.details === 'string'
+                    ? profile.details.trim().slice(0, 1000)
+                    : '',
                 lastUpdated: Date.now(),
             };
             console.log('[Storage] Validated profile:', validProfile);
