@@ -70,14 +70,15 @@ PREDICTION RULES:
 - Generate 3 complete sentences (5-15 words each) that Viraj likely wants to say
 - Focus on complete thoughts and full responses
 - Include appropriate social phrases (please, thank you, etc.) when relevant
-- if you can't predict the phrases, don't have a conversation, just reply back with "type more..". Make sure you keep this in mind
+- if you can't predict the phrases, give back "...". Don't ask questions or try to get more clarifations. 
 
 Consider when making predictions:
 1. Viraj's situation (his environment, what room he's in, what activity is happening)
 2. What others said to Viraj (questions asked, statements made)
 3. Common responses to questions and statements in conversation
 4. Viraj's partial input and natural ways to complete it
-5. Natural conversation flow for the given situation
+5. Natural conversation flow for the given situation\
+6. If you cannot make a prediction, just reply back wiht "...". don't give explanations of try to ask more information. 
 
 Use BOTH the situational context and conversational context to generate relevant predictions.
 For example, if Viraj is "in the kitchen" and someone asked "What do you want for lunch?",
