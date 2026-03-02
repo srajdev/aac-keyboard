@@ -103,7 +103,7 @@ const ProfileModal = {
 
     updateCharCount() {
         const currentLength = this.elements.detailsTextarea.value.length;
-        const maxLength = 1000;
+        const maxLength = 5000;
 
         this.elements.charCount.textContent = currentLength;
 
