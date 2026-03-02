@@ -36,6 +36,18 @@ const SpeechService = {
                 // Restart if still supposed to be listening
                 if (this.isListening) {
                     try {
+                        // Re-apply critical settings before restart to ensure they persist
+                        // Some browsers may reset these after the recognition session ends
+                        this.recognition.continuous = true;
+                        this.recognition.interimResults = true;
+                        this.recognition.lang = 'en-US';
+
+                        console.log('[SpeechService] Recognition ended, restarting with settings:', {
+                            continuous: this.recognition.continuous,
+                            interimResults: this.recognition.interimResults,
+                            lang: this.recognition.lang
+                        });
+
                         this.recognition.start();
                     } catch (e) {
                         console.log('Recognition restart failed:', e);

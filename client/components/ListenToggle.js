@@ -113,7 +113,7 @@ const ListenToggle = {
                 this.conversationContext = newEntry;
             }
 
-            // Update UI
+            // Update UI - only update the final conversation context
             if (this.contextText) {
                 this.contextText.textContent = this.conversationContext;
                 // Auto-scroll to bottom to show latest conversation
@@ -128,11 +128,22 @@ const ListenToggle = {
                 this.onContextUpdate(this.conversationContext);
             }
         } else if (!isFinal && this.contextText) {
-            // Show interim results at the end
-            const interimText = this.conversationContext
+            // Show interim results efficiently - only append interim text, don't replace entire history
+            // This prevents performance issues when conversation history gets long
+            const displayText = this.conversationContext
                 ? this.conversationContext + '\n' + transcript + '...'
                 : transcript + '...';
-            this.contextText.textContent = interimText;
+
+            // Only update if text actually changed (reduces DOM updates)
+            if (this.contextText.textContent !== displayText) {
+                this.contextText.textContent = displayText;
+
+                // Auto-scroll to show interim results
+                const contextContent = document.getElementById('context-content');
+                if (contextContent) {
+                    contextContent.scrollTop = contextContent.scrollHeight;
+                }
+            }
         }
     },
 
