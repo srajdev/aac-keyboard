@@ -584,7 +584,7 @@ body {
 .keyboard-row-small .key-new {
     height: calc(45px * var(--keyboard-height-scale));
     min-height: calc(45px * var(--keyboard-height-scale));
-    font-size: 0.85rem;
+    font-size: 1.0rem;
     padding: 4px;
 }
 
