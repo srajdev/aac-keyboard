@@ -889,10 +889,14 @@ body {
     overflow: hidden;
     margin-top: 8px;
     padding: 12px 16px;
+    max-height: 150px;
 }
 
 .context-content {
     padding: 0;
+    max-height: 130px;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 #context-text {
@@ -900,6 +904,8 @@ body {
     font-size: 0.95rem;
     line-height: 1.4;
     font-style: italic;
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
 
 /* Modal Styles */

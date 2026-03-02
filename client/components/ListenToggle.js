@@ -102,13 +102,25 @@ const ListenToggle = {
 
     handleTranscript(transcript, isFinal) {
         if (isFinal && transcript.trim()) {
-            // Add to conversation context
+            // Add to conversation context history
             const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            this.conversationContext = `[${timestamp}] "${transcript}"`;
+            const newEntry = `[${timestamp}] "${transcript}"`;
+
+            // Append to existing conversation context
+            if (this.conversationContext) {
+                this.conversationContext += '\n' + newEntry;
+            } else {
+                this.conversationContext = newEntry;
+            }
 
             // Update UI
             if (this.contextText) {
                 this.contextText.textContent = this.conversationContext;
+                // Auto-scroll to bottom to show latest conversation
+                const contextContent = document.getElementById('context-content');
+                if (contextContent) {
+                    contextContent.scrollTop = contextContent.scrollHeight;
+                }
             }
 
             // Notify app of context update
@@ -116,8 +128,11 @@ const ListenToggle = {
                 this.onContextUpdate(this.conversationContext);
             }
         } else if (!isFinal && this.contextText) {
-            // Show interim results
-            this.contextText.textContent = transcript + '...';
+            // Show interim results at the end
+            const interimText = this.conversationContext
+                ? this.conversationContext + '\n' + transcript + '...'
+                : transcript + '...';
+            this.contextText.textContent = interimText;
         }
     },
 
