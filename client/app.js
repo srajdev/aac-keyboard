@@ -276,6 +276,20 @@ const App = {
             });
         }
 
+        // Feature Request Toggle
+        const featureRequestToggle = document.getElementById('feature-request-toggle');
+        if (featureRequestToggle) {
+            const prefs = StorageService.getPreferences();
+            this.updateFeatureRequestToggleUI(featureRequestToggle, prefs.featureRequestEnabled);
+
+            featureRequestToggle.addEventListener('click', () => {
+                const prefs = StorageService.getPreferences();
+                prefs.featureRequestEnabled = !prefs.featureRequestEnabled;
+                StorageService.savePreferences(prefs);
+                this.updateFeatureRequestToggleUI(featureRequestToggle, prefs.featureRequestEnabled);
+            });
+        }
+
         // ElevenLabs Toggle
         const elevenLabsToggle = document.getElementById('elevenlabs-toggle');
         if (elevenLabsToggle) {
@@ -506,6 +520,21 @@ const App = {
         } else {
             toggleBtn.classList.remove('active');
             toggleBtn.querySelector('.toggle-text').textContent = 'ElevenLabs: OFF';
+        }
+    },
+
+    updateFeatureRequestToggleUI(toggleBtn, enabled) {
+        if (!toggleBtn) return;
+        const btn = document.getElementById('feature-request-btn');
+
+        if (enabled) {
+            toggleBtn.classList.add('active');
+            toggleBtn.querySelector('.toggle-text').textContent = 'Request Changes: ON';
+            if (btn) btn.style.display = '';
+        } else {
+            toggleBtn.classList.remove('active');
+            toggleBtn.querySelector('.toggle-text').textContent = 'Request Changes: OFF';
+            if (btn) btn.style.display = 'none';
         }
     },
 
