@@ -1974,6 +1974,26 @@ body {
     margin-top: 3px;
 }
 
+.fr-history-revert-btn {
+    flex-shrink: 0;
+    padding: 5px 12px;
+    background: transparent;
+    border: 1px solid #4a5568;
+    border-radius: 6px;
+    color: #9ca3af;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    align-self: center;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.fr-history-revert-btn:hover {
+    border-color: #f87171;
+    color: #f87171;
+    background: rgba(248, 113, 113, 0.08);
+}
+
 /* Confirm overlay for New Request */
 .fr-confirm {
     position: absolute;

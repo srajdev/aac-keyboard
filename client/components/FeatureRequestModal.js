@@ -213,6 +213,10 @@ const FeatureRequestModal = {
                 this._renderHistory(data.entries || []);
                 break;
 
+            case 'history_reverted':
+                this._onHistoryEntryReverted(data.entry);
+                break;
+
             case 'error':
                 this._removeThinking();
                 this._appendMessage('error', `Error: ${data.message}`);
@@ -294,6 +298,7 @@ const FeatureRequestModal = {
     _buildHistoryEntry(e) {
         const div = document.createElement('div');
         div.className = `fr-history-entry ${e.status}`;
+        div.dataset.entryId = e.id;
 
         const date = e.timestamp ? new Date(e.timestamp).toLocaleString([], {
             month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
@@ -304,8 +309,37 @@ const FeatureRequestModal = {
             <div class="fr-history-body">
                 <div class="fr-history-title">${this._escape(e.title)}</div>
                 <div class="fr-history-meta">${e.branch ? this._escape(e.branch) + ' · ' : ''}${date}</div>
-            </div>`;
+            </div>
+            ${e.status === 'merged' ? '<button class="fr-history-revert-btn">Revert</button>' : ''}`;
+
+        if (e.status === 'merged') {
+            div.querySelector('.fr-history-revert-btn').addEventListener('click', () => {
+                this._handleHistoryRevert(e.id, div);
+            });
+        }
+
         return div;
+    },
+
+    _handleHistoryRevert(entryId, entryEl) {
+        this._showConfirm(
+            'This will create a new commit that undoes these changes. Continue?',
+            () => {
+                // Show a small loading state on the entry
+                const btn = entryEl?.querySelector('.fr-history-revert-btn');
+                if (btn) { btn.disabled = true; btn.textContent = 'Reverting…'; }
+                this._wsSend({ type: 'revert_history', id: entryId });
+            }
+        );
+    },
+
+    _onHistoryEntryReverted(entry) {
+        if (!this.historyEl) return;
+        const existing = this.historyEl.querySelector(`[data-entry-id="${entry.id}"]`);
+        if (existing) {
+            // Replace the old entry element with the updated one in-place
+            existing.replaceWith(this._buildHistoryEntry(entry));
+        }
     },
 
     // ── Confirm overlay ──────────────────────────────────────────────────────

@@ -45,6 +45,7 @@ class HistoryEntry:
     base_branch: str
     status: str  # "merged" | "reverted" | "cancelled"
     timestamp: str
+    merge_commit: Optional[str] = None  # commit hash of the squash merge commit
 
 
 # ── Session persistence ────────────────────────────────────────────────────────
@@ -84,7 +85,7 @@ def load_history() -> list[dict]:
     return []
 
 
-def append_history(session: FeatureRequestSession, status: str) -> dict:
+def append_history(session: FeatureRequestSession, status: str, merge_commit: Optional[str] = None) -> dict:
     """Append a completed session to the history log. Returns the new entry."""
     entry = HistoryEntry(
         id=str(uuid.uuid4()),
@@ -93,6 +94,7 @@ def append_history(session: FeatureRequestSession, status: str) -> dict:
         base_branch=session.base_branch,
         status=status,
         timestamp=datetime.now().isoformat(timespec="seconds"),
+        merge_commit=merge_commit,
     )
     entries: list = []
     if HISTORY_FILE.exists():
@@ -205,45 +207,70 @@ async def continue_session(session: FeatureRequestSession, message: str) -> tupl
 
 # ── Git operations ─────────────────────────────────────────────────────────────
 
-async def merge_branch(session: FeatureRequestSession) -> None:
-    """Merge feature branch back into the base branch."""
+async def _git(*args: str) -> tuple[int, str, str]:
+    """Run a git command, return (returncode, stdout, stderr)."""
+    proc = await asyncio.create_subprocess_exec(
+        "git", *args,
+        cwd=str(REPO_ROOT),
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+    stdout, stderr = await proc.communicate()
+    return proc.returncode, stdout.decode().strip(), stderr.decode().strip()
+
+
+async def merge_branch(session: FeatureRequestSession) -> str:
+    """Squash-merge feature branch into base branch. Returns the merge commit hash."""
     if not session.branch_name:
         raise ValueError("No branch to merge")
 
-    proc = await asyncio.create_subprocess_exec(
-        "git", "checkout", session.base_branch,
-        cwd=str(REPO_ROOT),
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
-    )
-    await proc.wait()
+    await _git("checkout", session.base_branch)
 
-    proc = await asyncio.create_subprocess_exec(
-        "git", "merge", "--no-ff", session.branch_name,
-        cwd=str(REPO_ROOT),
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
-    )
-    await proc.wait()
+    rc, _, err = await _git("merge", "--squash", session.branch_name)
+    if rc != 0:
+        raise RuntimeError(f"git merge --squash failed: {err}")
+
+    title = (session.initial_request[:72] or session.branch_name)
+    rc, _, err = await _git("commit", "-m", f"feat: {title}")
+    if rc != 0:
+        raise RuntimeError(f"git commit failed: {err}")
+
+    _, commit_hash, _ = await _git("rev-parse", "HEAD")
+    return commit_hash
 
 
 async def discard_branch(session: FeatureRequestSession) -> None:
     """Discard feature branch and return to the base branch."""
-    branch = session.branch_name
+    await _git("checkout", session.base_branch)
+    if session.branch_name:
+        await _git("branch", "-D", session.branch_name)
 
-    proc = await asyncio.create_subprocess_exec(
-        "git", "checkout", session.base_branch,
-        cwd=str(REPO_ROOT),
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
-    )
-    await proc.wait()
 
-    if branch:
-        proc = await asyncio.create_subprocess_exec(
-            "git", "branch", "-D", branch,
-            cwd=str(REPO_ROOT),
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
-        await proc.wait()
+async def revert_history_entry(entry_id: str) -> dict:
+    """
+    Revert a previously merged entry by its history ID.
+    Runs `git revert <commit> --no-edit` and updates the entry status.
+    Returns the updated entry dict.
+    """
+    if not HISTORY_FILE.exists():
+        raise ValueError("No history found")
+
+    entries = json.loads(HISTORY_FILE.read_text())
+    entry = next((e for e in entries if e["id"] == entry_id), None)
+    if not entry:
+        raise ValueError(f"History entry {entry_id!r} not found")
+    if entry["status"] != "merged":
+        raise ValueError("Only merged entries can be reverted")
+    if not entry.get("merge_commit"):
+        raise ValueError("No commit hash stored for this entry — cannot revert")
+
+    # Make sure we're on the right branch
+    await _git("checkout", entry["base_branch"])
+
+    rc, _, err = await _git("revert", entry["merge_commit"], "--no-edit")
+    if rc != 0:
+        raise RuntimeError(f"git revert failed: {err}")
+
+    entry["status"] = "reverted"
+    HISTORY_FILE.write_text(json.dumps(entries, indent=2))
+    return entry

@@ -33,6 +33,7 @@ from .feature_request_service import (
     discard_branch,
     load_history,
     append_history,
+    revert_history_entry,
 )
 from .gemini_service import generate_predictions_gemini
 from .gpt_service import generate_predictions_gpt
@@ -438,8 +439,8 @@ async def websocket_feature_request(websocket: WebSocket):
                 await send({"type": "thinking"})
                 try:
                     session = load_session()
-                    await merge_branch(session)
-                    entry = append_history(session, "merged")
+                    commit_hash = await merge_branch(session)
+                    entry = append_history(session, "merged", merge_commit=commit_hash)
                     clear_session()
                     await send({"type": "merged", "entry": entry})
                 except Exception as e:
@@ -483,6 +484,15 @@ async def websocket_feature_request(websocket: WebSocket):
 
             elif msg_type == "get_history":
                 await send({"type": "history", "entries": load_history()})
+
+            elif msg_type == "revert_history":
+                entry_id = message.get("id", "")
+                try:
+                    updated_entry = await revert_history_entry(entry_id)
+                    await send({"type": "history_reverted", "entry": updated_entry})
+                except Exception as e:
+                    logger.error(f"[FeatureRequest] History revert error: {e}")
+                    await send({"type": "error", "message": f"Revert failed: {e}"})
 
             elif msg_type == "reset":
                 clear_session()
