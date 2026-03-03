@@ -31,6 +31,7 @@ class FeatureRequestSession:
     claude_session_id: Optional[str] = None
     phase: str = "gather"  # gather | plan | implement | review | done
     branch_name: Optional[str] = None
+    base_branch: str = "main"  # branch to merge into / revert to
 
 
 def load_session() -> FeatureRequestSession:
@@ -100,17 +101,31 @@ async def run_claude(args: list[str], cwd: Path = REPO_ROOT) -> dict:
         return {"session_id": "", "text": raw, "raw": raw}
 
 
+async def _current_branch() -> str:
+    """Return the currently checked-out git branch name."""
+    proc = await asyncio.create_subprocess_exec(
+        "git", "rev-parse", "--abbrev-ref", "HEAD",
+        cwd=str(REPO_ROOT),
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+    stdout, _ = await proc.communicate()
+    return stdout.decode().strip() or "main"
+
+
 async def start_session(message: str) -> tuple[FeatureRequestSession, str]:
     """
     Start a new Claude Code session with the initial feature request.
     Returns (session, response_text).
     """
+    base = await _current_branch()
     prompt = INITIAL_PROMPT_TEMPLATE.format(message=message)
     result = await run_claude([prompt])
 
     session = FeatureRequestSession(
         claude_session_id=result["session_id"],
         phase="gather",
+        base_branch=base,
     )
     save_session(session)
     return session, result["text"]
@@ -146,12 +161,12 @@ async def continue_session(session: FeatureRequestSession, message: str) -> tupl
 
 
 async def merge_branch(session: FeatureRequestSession) -> None:
-    """Merge feature branch into main."""
+    """Merge feature branch back into the base branch."""
     if not session.branch_name:
         raise ValueError("No branch to merge")
 
     proc = await asyncio.create_subprocess_exec(
-        "git", "checkout", "main",
+        "git", "checkout", session.base_branch,
         cwd=str(REPO_ROOT),
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
@@ -168,11 +183,11 @@ async def merge_branch(session: FeatureRequestSession) -> None:
 
 
 async def discard_branch(session: FeatureRequestSession) -> None:
-    """Discard feature branch and return to main."""
+    """Discard feature branch and return to the base branch."""
     branch = session.branch_name
 
     proc = await asyncio.create_subprocess_exec(
-        "git", "checkout", "main",
+        "git", "checkout", session.base_branch,
         cwd=str(REPO_ROOT),
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
