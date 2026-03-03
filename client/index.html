@@ -323,13 +323,19 @@
                 <span class="fr-phase-badge" id="fr-phase-badge">GATHERING</span>
                 <button class="fr-close-btn" id="fr-close-btn">✕</button>
             </div>
+            <div class="fr-toolbar">
+                <button class="fr-tab active" id="fr-tab-chat" data-tab="chat">💬 Chat</button>
+                <button class="fr-tab" id="fr-tab-history" data-tab="history">📋 History</button>
+                <button class="fr-new-btn" id="fr-new-btn">↺ New Request</button>
+            </div>
             <div class="fr-messages" id="fr-messages"></div>
+            <div class="fr-history" id="fr-history" style="display:none"></div>
             <div class="fr-status" id="fr-status"></div>
             <div class="fr-actions" id="fr-actions" style="display:none">
                 <button class="fr-approve-btn" id="fr-approve-btn">✅ Looks good — merge it!</button>
                 <button class="fr-reject-btn" id="fr-reject-btn">❌ Revert it</button>
             </div>
-            <div class="fr-input-row">
+            <div class="fr-input-row" id="fr-input-row">
                 <textarea class="fr-input" id="fr-input" placeholder="Describe what you'd like to change..." rows="2"></textarea>
                 <button class="fr-send-btn" id="fr-send-btn">Send</button>
             </div>

@@ -31,6 +31,8 @@ from .feature_request_service import (
     detect_branch_from_output,
     merge_branch,
     discard_branch,
+    load_history,
+    append_history,
 )
 from .gemini_service import generate_predictions_gemini
 from .gpt_service import generate_predictions_gpt
@@ -437,8 +439,9 @@ async def websocket_feature_request(websocket: WebSocket):
                 try:
                     session = load_session()
                     await merge_branch(session)
+                    entry = append_history(session, "merged")
                     clear_session()
-                    await send({"type": "merged"})
+                    await send({"type": "merged", "entry": entry})
                 except Exception as e:
                     logger.error(f"[FeatureRequest] Merge error: {e}")
                     await send({"type": "error", "message": f"Merge failed: {e}"})
@@ -448,14 +451,28 @@ async def websocket_feature_request(websocket: WebSocket):
                 try:
                     session = load_session()
                     await discard_branch(session)
+                    entry = append_history(session, "reverted")
                     clear_session()
-                    await send({"type": "reverted"})
+                    await send({"type": "reverted", "entry": entry})
                 except Exception as e:
                     logger.error(f"[FeatureRequest] Revert error: {e}")
                     await send({"type": "error", "message": f"Revert failed: {e}"})
 
+            elif msg_type == "new_request":
+                # Cancel current session (discard branch if one exists)
+                try:
+                    session = load_session()
+                    if session.branch_name:
+                        await discard_branch(session)
+                    if session.claude_session_id:
+                        append_history(session, "cancelled")
+                    clear_session()
+                    await send({"type": "session_reset"})
+                except Exception as e:
+                    logger.error(f"[FeatureRequest] New request error: {e}")
+                    await send({"type": "error", "message": f"Reset failed: {e}"})
+
             elif msg_type == "get_session":
-                # Client reconnected — send current session state
                 session = load_session()
                 await send({
                     "type": "session_state",
@@ -463,6 +480,9 @@ async def websocket_feature_request(websocket: WebSocket):
                     "branch": session.branch_name,
                     "has_session": session.claude_session_id is not None,
                 })
+
+            elif msg_type == "get_history":
+                await send({"type": "history", "entries": load_history()})
 
             elif msg_type == "reset":
                 clear_session()

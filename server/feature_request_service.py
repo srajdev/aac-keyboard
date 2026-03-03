@@ -3,12 +3,14 @@
 import asyncio
 import json
 import re
-import subprocess
-from dataclasses import asdict, dataclass
+import uuid
+from dataclasses import asdict, dataclass, field
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
 SESSION_FILE = Path(__file__).parent / "feature_request_session.json"
+HISTORY_FILE = Path(__file__).parent / "feature_request_history.json"
 REPO_ROOT = Path(__file__).parent.parent
 
 INITIAL_PROMPT_TEMPLATE = """\
@@ -32,7 +34,20 @@ class FeatureRequestSession:
     phase: str = "gather"  # gather | plan | implement | review | done
     branch_name: Optional[str] = None
     base_branch: str = "main"  # branch to merge into / revert to
+    initial_request: str = ""  # first message from the user (used as history title)
 
+
+@dataclass
+class HistoryEntry:
+    id: str
+    title: str
+    branch: Optional[str]
+    base_branch: str
+    status: str  # "merged" | "reverted" | "cancelled"
+    timestamp: str
+
+
+# ── Session persistence ────────────────────────────────────────────────────────
 
 def load_session() -> FeatureRequestSession:
     """Load session state from disk (survives uvicorn auto-reloads)."""
@@ -55,6 +70,42 @@ def clear_session() -> None:
     if SESSION_FILE.exists():
         SESSION_FILE.unlink()
 
+
+# ── History persistence ────────────────────────────────────────────────────────
+
+def load_history() -> list[dict]:
+    """Load all history entries (newest first)."""
+    if HISTORY_FILE.exists():
+        try:
+            entries = json.loads(HISTORY_FILE.read_text())
+            return list(reversed(entries))
+        except Exception:
+            pass
+    return []
+
+
+def append_history(session: FeatureRequestSession, status: str) -> dict:
+    """Append a completed session to the history log. Returns the new entry."""
+    entry = HistoryEntry(
+        id=str(uuid.uuid4()),
+        title=session.initial_request[:80] or "(no description)",
+        branch=session.branch_name,
+        base_branch=session.base_branch,
+        status=status,
+        timestamp=datetime.now().isoformat(timespec="seconds"),
+    )
+    entries: list = []
+    if HISTORY_FILE.exists():
+        try:
+            entries = json.loads(HISTORY_FILE.read_text())
+        except Exception:
+            pass
+    entries.append(asdict(entry))
+    HISTORY_FILE.write_text(json.dumps(entries, indent=2))
+    return asdict(entry)
+
+
+# ── Helpers ────────────────────────────────────────────────────────────────────
 
 def detect_branch_from_output(text: str) -> Optional[str]:
     """Parse [BRANCH: feature/...] tag from Claude's output."""
@@ -89,15 +140,12 @@ async def run_claude(args: list[str], cwd: Path = REPO_ROOT) -> dict:
         err = stderr.decode("utf-8", errors="replace")
         print(f"[FeatureRequest] claude stderr: {err[:500]}")
 
-    # Parse the JSON envelope
     try:
         data = json.loads(raw)
         session_id = data.get("session_id", "")
-        # The result field contains the text response
         text = data.get("result", "") or data.get("response", "") or str(data)
         return {"session_id": session_id, "text": text, "raw": raw}
     except json.JSONDecodeError:
-        # Fallback: treat entire stdout as text
         return {"session_id": "", "text": raw, "raw": raw}
 
 
@@ -113,11 +161,10 @@ async def _current_branch() -> str:
     return stdout.decode().strip() or "main"
 
 
+# ── Session lifecycle ──────────────────────────────────────────────────────────
+
 async def start_session(message: str) -> tuple[FeatureRequestSession, str]:
-    """
-    Start a new Claude Code session with the initial feature request.
-    Returns (session, response_text).
-    """
+    """Start a new Claude Code session. Returns (session, response_text)."""
     base = await _current_branch()
     prompt = INITIAL_PROMPT_TEMPLATE.format(message=message)
     result = await run_claude([prompt])
@@ -126,16 +173,14 @@ async def start_session(message: str) -> tuple[FeatureRequestSession, str]:
         claude_session_id=result["session_id"],
         phase="gather",
         base_branch=base,
+        initial_request=message,
     )
     save_session(session)
     return session, result["text"]
 
 
 async def continue_session(session: FeatureRequestSession, message: str) -> tuple[FeatureRequestSession, str]:
-    """
-    Continue an existing Claude Code session with a follow-up message.
-    Returns (updated_session, response_text).
-    """
+    """Continue an existing Claude Code session. Returns (updated_session, response_text)."""
     if not session.claude_session_id:
         raise ValueError("No active session to continue")
 
@@ -146,11 +191,9 @@ async def continue_session(session: FeatureRequestSession, message: str) -> tupl
 
     text = result["text"]
 
-    # Update session ID in case it changed (though it shouldn't with --resume)
     if result["session_id"]:
         session.claude_session_id = result["session_id"]
 
-    # Detect phase transitions from Claude's output
     branch = detect_branch_from_output(text)
     if branch:
         session.branch_name = branch
@@ -159,6 +202,8 @@ async def continue_session(session: FeatureRequestSession, message: str) -> tupl
     save_session(session)
     return session, text
 
+
+# ── Git operations ─────────────────────────────────────────────────────────────
 
 async def merge_branch(session: FeatureRequestSession) -> None:
     """Merge feature branch back into the base branch."""
