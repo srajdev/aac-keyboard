@@ -2,8 +2,6 @@
 
 An AI-powered Augmentative and Alternative Communication (AAC) keyboard built for Viraj, a non-verbal user with limited fine motor skills who types with his right thumb on a tablet. The goal is to increase typing speed from ~8 WPM to 30 WPM using real-time AI predictions.
 
-**Live at:** https://vdk.srajdev.com
-
 ---
 
 ## Features
