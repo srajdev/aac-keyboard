@@ -36,6 +36,10 @@
                     <span class="settings-icon"></span>
                     <span class="settings-text">Listen: OFF</span>
                 </button>
+                <button id="feature-request-btn" class="settings-btn feature-request-header-btn" aria-label="Open feature request chat">
+                    <span class="settings-icon">💬</span>
+                    <span class="settings-text">Request</span>
+                </button>
             </div>
             <input type="text" id="explicit-context-input" class="context-input" placeholder="Add context..." aria-label="Additional context">
         </header>
@@ -310,6 +314,28 @@
         </div>
     </div>
 
+    <!-- Feature Request Modal -->
+    <div id="feature-request-modal" class="modal" style="display: none;">
+        <div class="modal-overlay"></div>
+        <div class="modal-content feature-request-panel">
+            <div class="fr-header">
+                Feature Request Chat
+                <span class="fr-phase-badge" id="fr-phase-badge">GATHERING</span>
+                <button class="fr-close-btn" id="fr-close-btn">✕</button>
+            </div>
+            <div class="fr-messages" id="fr-messages"></div>
+            <div class="fr-status" id="fr-status"></div>
+            <div class="fr-actions" id="fr-actions" style="display:none">
+                <button class="fr-approve-btn" id="fr-approve-btn">✅ Looks good — merge it!</button>
+                <button class="fr-reject-btn" id="fr-reject-btn">❌ Revert it</button>
+            </div>
+            <div class="fr-input-row">
+                <textarea class="fr-input" id="fr-input" placeholder="Describe what you'd like to change..." rows="2"></textarea>
+                <button class="fr-send-btn" id="fr-send-btn">Send</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Profile Modal -->
     <div id="profile-modal" class="modal" style="display: none;">
         <div class="modal-overlay"></div>
@@ -485,6 +511,7 @@
     <script src="/static/components/PredictionWidthControl.js?v=20"></script>
     <script src="/static/components/SettingsModal.js?v=20"></script>
     <script src="/static/components/ProfileModal.js?v=20"></script>
+    <script src="/static/components/FeatureRequestModal.js?v=20"></script>
     <script src="/static/app.js?v=20"></script>
 </body>
 </html>

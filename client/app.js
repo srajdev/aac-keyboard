@@ -44,6 +44,7 @@ const App = {
         PredictionWidthControl.init();
         SettingsModal.init();
         ProfileModal.init();
+        FeatureRequestModal.init();
 
         // Get UI elements
         this.predictionsToggleBtn = document.getElementById('predictions-toggle');
@@ -434,6 +435,14 @@ const App = {
         if (profileBtn) {
             profileBtn.addEventListener('click', () => {
                 ProfileModal.open();
+            });
+        }
+
+        // Feature Request button
+        const featureRequestBtn = document.getElementById('feature-request-btn');
+        if (featureRequestBtn) {
+            featureRequestBtn.addEventListener('click', () => {
+                FeatureRequestModal.open();
             });
         }
 

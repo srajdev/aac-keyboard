@@ -22,6 +22,16 @@ from .claude_service import (
     generate_word_predictions_stream,
     generate_phrase_predictions_stream,
 )
+from .feature_request_service import (
+    load_session,
+    save_session,
+    clear_session,
+    start_session,
+    continue_session,
+    detect_branch_from_output,
+    merge_branch,
+    discard_branch,
+)
 from .gemini_service import generate_predictions_gemini
 from .gpt_service import generate_predictions_gpt
 from .performance_tracker import get_tracker
@@ -363,6 +373,105 @@ async def websocket_predictions(websocket: WebSocket):
         for task in active_tasks.values():
             task.cancel()
         logger.info("WebSocket connection closed, cleaned up active tasks")
+
+
+@app.websocket("/ws/feature-request")
+async def websocket_feature_request(websocket: WebSocket):
+    """WebSocket endpoint for the in-app feature request chat."""
+    await websocket.accept()
+    logger.info("[FeatureRequest] WebSocket connection established")
+
+    async def send(data: dict):
+        try:
+            await websocket.send_json(data)
+        except Exception:
+            pass
+
+    try:
+        while True:
+            message = await websocket.receive_json()
+            msg_type = message.get("type")
+
+            if msg_type == "message":
+                text = message.get("text", "").strip()
+                if not text:
+                    continue
+
+                await send({"type": "thinking"})
+
+                try:
+                    session = load_session()
+
+                    if not session.claude_session_id:
+                        # Start a new session
+                        session, response = await start_session(text)
+                    else:
+                        # Continue existing session
+                        session, response = await continue_session(session, text)
+
+                    # Detect branch in response (marks transition to review)
+                    branch = detect_branch_from_output(response)
+                    if branch and session.phase == "review":
+                        await send({
+                            "type": "phase_change",
+                            "phase": "review",
+                            "branch": branch,
+                        })
+                        await send({
+                            "type": "reload_required",
+                            "message": "Changes deployed. Refresh the page to see them.",
+                        })
+
+                    await send({
+                        "type": "response",
+                        "text": response,
+                        "phase": session.phase,
+                    })
+
+                except Exception as e:
+                    logger.error(f"[FeatureRequest] Error: {e}")
+                    await send({"type": "error", "message": str(e)})
+
+            elif msg_type == "approve":
+                await send({"type": "thinking"})
+                try:
+                    session = load_session()
+                    await merge_branch(session)
+                    clear_session()
+                    await send({"type": "merged"})
+                except Exception as e:
+                    logger.error(f"[FeatureRequest] Merge error: {e}")
+                    await send({"type": "error", "message": f"Merge failed: {e}"})
+
+            elif msg_type == "reject":
+                await send({"type": "thinking"})
+                try:
+                    session = load_session()
+                    await discard_branch(session)
+                    clear_session()
+                    await send({"type": "reverted"})
+                except Exception as e:
+                    logger.error(f"[FeatureRequest] Revert error: {e}")
+                    await send({"type": "error", "message": f"Revert failed: {e}"})
+
+            elif msg_type == "get_session":
+                # Client reconnected — send current session state
+                session = load_session()
+                await send({
+                    "type": "session_state",
+                    "phase": session.phase,
+                    "branch": session.branch_name,
+                    "has_session": session.claude_session_id is not None,
+                })
+
+            elif msg_type == "reset":
+                clear_session()
+                await send({"type": "session_state", "phase": "gather", "branch": None, "has_session": False})
+
+    except WebSocketDisconnect:
+        logger.info("[FeatureRequest] WebSocket disconnected")
+    except Exception as e:
+        logger.error(f"[FeatureRequest] WebSocket error: {e}")
 
 
 # Serve static files from client directory
