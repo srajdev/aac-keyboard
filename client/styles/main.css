@@ -1627,6 +1627,77 @@ body {
     border-bottom-left-radius: 3px;
 }
 
+.fr-message.claude.fr-thinking {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Markdown rendering inside Claude bubbles */
+.fr-message.claude.rendered {
+    white-space: normal;
+}
+
+.fr-message.claude.rendered p {
+    margin: 0 0 8px 0;
+}
+
+.fr-message.claude.rendered p:last-child {
+    margin-bottom: 0;
+}
+
+.fr-message.claude.rendered h1,
+.fr-message.claude.rendered h2,
+.fr-message.claude.rendered h3 {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 10px 0 4px 0;
+    color: #ffffff;
+}
+
+.fr-message.claude.rendered ul,
+.fr-message.claude.rendered ol {
+    margin: 4px 0 8px 0;
+    padding-left: 20px;
+}
+
+.fr-message.claude.rendered li {
+    margin-bottom: 3px;
+}
+
+.fr-message.claude.rendered code {
+    background: #0d1b2e;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: monospace;
+    color: #60a5fa;
+}
+
+.fr-message.claude.rendered pre {
+    background: #0d1b2e;
+    border-radius: 8px;
+    padding: 10px 12px;
+    overflow-x: auto;
+    margin: 6px 0;
+}
+
+.fr-message.claude.rendered pre code {
+    background: none;
+    padding: 0;
+    color: #e2e8f0;
+    font-size: 13px;
+}
+
+.fr-message.claude.rendered strong { color: #ffffff; }
+.fr-message.claude.rendered em     { color: #cbd5e1; }
+
+.fr-message.claude.rendered hr {
+    border: none;
+    border-top: 1px solid #2a3650;
+    margin: 8px 0;
+}
+
 .fr-message.system {
     align-self: center;
     background: transparent;
@@ -1663,6 +1734,13 @@ body {
 
 .fr-thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
 .fr-thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+.fr-thinking-label {
+    color: #8b92a8;
+    font-style: italic;
+    font-size: 14px;
+    margin-right: 2px;
+}
 
 @keyframes fr-dot-pulse {
     0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }

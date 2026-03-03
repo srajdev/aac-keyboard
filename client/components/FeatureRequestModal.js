@@ -337,7 +337,12 @@ const FeatureRequestModal = {
     _appendMessage(role, text) {
         const div = document.createElement('div');
         div.className = `fr-message ${role}`;
-        div.textContent = text;
+        if (role === 'claude' && typeof marked !== 'undefined') {
+            div.innerHTML = marked.parse(text);
+            div.classList.add('rendered');
+        } else {
+            div.textContent = text;
+        }
         this.messagesEl.appendChild(div);
         this._scrollToBottom();
         if (role === 'dad' || role === 'claude') {
@@ -349,7 +354,7 @@ const FeatureRequestModal = {
         this._removeThinking();
         const div = document.createElement('div');
         div.className = 'fr-message claude fr-thinking';
-        div.innerHTML = '<div class="fr-thinking-dots"><span></span><span></span><span></span></div>';
+        div.innerHTML = '<span class="fr-thinking-label">Working on your request</span><div class="fr-thinking-dots"><span></span><span></span><span></span></div>';
         this.messagesEl.appendChild(div);
         this._scrollToBottom();
     },
@@ -377,7 +382,12 @@ const FeatureRequestModal = {
             for (const { role, text } of stored) {
                 const div = document.createElement('div');
                 div.className = `fr-message ${role}`;
-                div.textContent = text;
+                if (role === 'claude' && typeof marked !== 'undefined') {
+                    div.innerHTML = marked.parse(text);
+                    div.classList.add('rendered');
+                } else {
+                    div.textContent = text;
+                }
                 this.messagesEl.appendChild(div);
             }
             if (stored.length > 0) this._scrollToBottom();
